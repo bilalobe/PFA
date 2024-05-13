@@ -16,11 +16,17 @@ Including another URLconf
 """
 
 from django.contrib import admin
-from django.urls import path, include
-from cours.views import CoursListView 
+from django.urls import path
+from utilisateur.views import UtilisateurViewSet, UtilisateurDetailViewSet
+from cours.views import CoursViewSet, CoursDetailViewSet
+from module.views import ModuleViewSet, ModuleDetailViewSet
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
-    path('cours/', CoursListView.as_view(), name='cours-list'),
-    path('api/', include('cours.urls')), 
+    path('admin/', admin.site.urls),
+    path('api/utilisateurs/', UtilisateurViewSet.as_view({'get': 'list', 'post': 'create'})),
+    path('api/utilisateurs/<int:pk>/', UtilisateurDetailViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'})),
+    path('api/cours/', CoursViewSet.as_view({'get': 'list', 'post': 'create'})),
+    path('api/cours/<int:pk>/', CoursDetailViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'})),
+    path('api/modules/', ModuleViewSet.as_view({'get': 'list', 'post': 'create'})),
+    path('api/modules/<int:pk>/', ModuleDetailViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'})),
 ]
