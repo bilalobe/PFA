@@ -4,5 +4,9 @@ from .models import Cours
 class CoursSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cours
-        fields = '__all__'  # Ou listez les champs spécifiques que vous souhaitez sérialiser
+        fields = ('id', 'titre', 'description', 'niveau_difficulte', 'formateur', 'date_creation', 'image')
 
+class CoursDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cours
+        fields = ('id', 'titre', 'description', 'niveau_difficulte', 'formateur', 'date_creation', 'image', 'modules')
