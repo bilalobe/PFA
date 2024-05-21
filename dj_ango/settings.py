@@ -14,7 +14,7 @@ from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -48,7 +48,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    BASE_DIR / "frontend" / "build" / "static",  # Using pathlib operator
+    BASE_DIR / "dj_ango" / "re-act" / "build" / "static",  # Using pathlib operator
 ]
 
 STATIC_ROOT = BASE_DIR.joinpath('staticfiles')
