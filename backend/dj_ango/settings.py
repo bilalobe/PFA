@@ -48,7 +48,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    BASE_DIR / "dj_ango" / "re-act" / "build" / "static",  # Using pathlib operator
+    BASE_DIR / "frontend" / "front" / "build" / "static",  # Using pathlib operator
 ]
 
 STATIC_ROOT = BASE_DIR.joinpath('staticfiles')
