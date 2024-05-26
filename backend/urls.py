@@ -7,4 +7,7 @@ urlpatterns = [
     path('api/', include('cours.urls')),
     path('api/', include('module.urls')),
     path('', include('frontend.urls')), 
+    path('api/auth/', include('dj_rest_auth.urls')),
+    path('api/auth/registration/', include('dj_rest_auth.registration.urls')),
 ]
+
