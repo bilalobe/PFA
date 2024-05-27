@@ -1,18 +1,25 @@
 import os
 import dj_database_url
 from pathlib import Path
+from decouple import config
+import sentry_sdk  
+from sentry_sdk.integrations.django import DjangoIntegration  
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Directory for locale files  
+LOCALE_PATHS = [  
+    os.path.join(BASE_DIR, 'locale'),  
+] 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-34t9yj5-_1xwt!!^g(kx_@a!o$zqcp_!n!$h(r*m#h(k#qa0k6')
-
+SECRET_KEY = config('SECRET_KEY')  
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = config('DEBUG', default=False, cast=bool)  
 
 ALLOWED_HOSTS = ['your-deployment-hostname']
 
@@ -44,15 +51,16 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Add whitenoise for static file serving
-    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.security.SecurityMiddleware', 
+    'django.middleware.locale.LocaleMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
+    'corsheaders.middleware.CorsMiddleware',
 ]
 
 ROOT_URLCONF = 'dj_ango.urls'
@@ -76,9 +84,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'dj_ango.wsgi.application'
 
 # Database
-DATABASES = {
-    'default': dj_database_url.config(default='postgres://beb:Sirius6433@db:5432/eplatform')
-}
+DATABASES = {  
+    'default': dj_database_url.config(default=config('DATABASE_URL'))  
+}  
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -100,6 +108,7 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
+USE_L10N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
@@ -119,3 +128,20 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
+sentry_sdk.init(  
+    dsn="https://examplePublicKey@o0.ingest.sentry.io/0",  
+    integrations=[DjangoIntegration()],  
+    traces_sample_rate=1.0,  
+    send_default_pii=True  
+)  
