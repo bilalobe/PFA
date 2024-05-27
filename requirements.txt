@@ -6,3 +6,7 @@ Pillow==9.4.0
 django-cors-headers
 dj-rest-auth
 django-allauth
+psycopg2-binary  
+dj-database-url  
+whitenoise  
+waitress  

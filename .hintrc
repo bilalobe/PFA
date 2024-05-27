@@ -16,6 +16,7 @@
           "meta[name=theme-color]"
         ]
       }
-    ]
+    ],
+    "apple-touch-icons": "off"
   }
 }

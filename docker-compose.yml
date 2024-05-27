@@ -1,0 +1,30 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:16
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=eplatform 
+      - POSTGRES_USER=beb
+      - POSTGRES_PASSWORD=Sirius6433
+
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DEBUG=1
+      - DATABASE_URL=postgres://beb:Sirius6433@db:5432/eplatform
+      - SECRET_KEY= 'django-insecure-34t9yj5-_1xwt!!^g(kx_@a!o$zqcp_!n!$h(r*m#h(k#qa0k6'
+
+volumes:
+  postgres_data:
+

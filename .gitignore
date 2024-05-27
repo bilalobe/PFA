@@ -1,8 +1,21 @@
-*.pyc
-__pycache__/
-node_modules/
-.env
-db.sqlite3
-media/
-static/
-frontend/
+
+# Ignore Python bytecode  
+__pycache__/  
+*.py[cod]  
+*$py.class  
+  
+# Ignore virtual environment  
+venv/  
+  
+# Ignore build directories  
+build/  
+dist/  
+  
+# Ignore database  
+*.sqlite3  
+  
+# Ignore environment variables file  
+.env  
+  
+# Node modules  
+node_modules/  
