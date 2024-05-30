@@ -1,17 +1,25 @@
 from rest_framework import serializers
-from .models import ForumPost, Comment
+from .models import Forum, Thread, Post
 
-class CommentSerializer(serializers.ModelSerializer):
-    author_username = serializers.CharField(source='author.username', read_only=True)
-
-    class Meta:
-        model = Comment
-        fields = ['id', 'post', 'author', 'author_username', 'content', 'created_at', 'updated_at']
-
-class ForumPostSerializer(serializers.ModelSerializer):
-    author_username = serializers.CharField(source='author.username', read_only=True)
-    comments = CommentSerializer(many=True, read_only=True)
+class PostSerializer(serializers.ModelSerializer):
+    author = serializers.CharField(source='author.username', read_only=True)
+    created_at = serializers.DateTimeField(read_only=True)  # Removed the format string
 
     class Meta:
-        model = ForumPost
-        fields = ['id', 'course', 'author', 'author_username', 'title', 'content', 'created_at', 'updated_at', 'comments']
+        model = Post
+        fields = ('id', 'author', 'content', 'created_at')
+
+class ThreadSerializer(serializers.ModelSerializer):
+    created_by = serializers.CharField(source='created_by.username', read_only=True)
+    posts = PostSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Thread
+        fields = ('id', 'title', 'forum', 'created_by', 'created_at', 'posts')
+         
+class ForumSerializer(serializers.ModelSerializer):
+    threads = ThreadSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Forum
+        fields = ('id', 'title', 'course', 'description', 'created_at', 'threads')

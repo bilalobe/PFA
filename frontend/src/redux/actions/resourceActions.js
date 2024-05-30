@@ -1,12 +1,33 @@
+// frontend/src/actions/resourceActions.js
 import axios from 'axios';
-import { FETCH_RESOURCES_REQUEST, FETCH_RESOURCES_SUCCESS, FETCH_RESOURCES_FAILURE } from './types';
 
-export const fetchResources = (moduleId) => async dispatch => {
-  dispatch({ type: FETCH_RESOURCES_REQUEST });
-  try {
-    const response = await axios.get(`/api/modules/${moduleId}/resources/`);
-    dispatch({ type: FETCH_RESOURCES_SUCCESS, payload: response.data });
-  } catch (error) {
-    dispatch({ type: FETCH_RESOURCES_FAILURE, payload: error.message });
-  }
+export const uploadResourceRequest = () => ({
+  type: 'UPLOAD_RESOURCE_REQUEST',
+});
+
+export const uploadResourceSuccess = (resource) => ({
+  type: 'UPLOAD_RESOURCE_SUCCESS',
+  payload: resource,
+});
+
+export const uploadResourceFailure = (error) => ({
+  type: 'UPLOAD_RESOURCE_FAILURE',
+  payload: error,
+});
+
+export const uploadResource = (formData) => {
+  return async (dispatch) => {
+    dispatch(uploadResourceRequest());
+    try {
+      const response = await axios.post(`/api/modules/${moduleId}/resources/`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          // ... authorization headers (if needed)
+        }
+      });
+      dispatch(uploadResourceSuccess(response.data)); 
+    } catch (error) {
+      dispatch(uploadResourceFailure(error.message));
+    }
+  };
 };

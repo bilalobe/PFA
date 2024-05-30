@@ -1,9 +1,12 @@
-from django.urls import path
-from .views import ModuleViewSet, ModuleDetailViewSet
-from . import views  
-  
-urlpatterns = [  
-    path('modules/', views.ModuleListView.as_view(), name='module-list'),
-    path('modules/', ModuleViewSet.as_view({'get': 'list', 'post': 'create'})),
-    path('modules/<int:pk>/', ModuleDetailViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'})),
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import ModuleViewSet, ModuleDetailViewSet, profile  # Import your views
+
+router = DefaultRouter()
+router.register(r'modules', ModuleViewSet)
+router.register(r'module-details', ModuleDetailViewSet, basename='module-detail')  # basename for detail view
+
+urlpatterns = [
+    path('', include(router.urls)),
+    path('profile/', profile, name='profile'),  # Assuming 'profile' is a function-based view
 ]

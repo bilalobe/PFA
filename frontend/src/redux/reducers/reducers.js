@@ -20,4 +20,5 @@ const rootReducer = combineReducers({
   enrollment: enrollmentReducer
 });
 
+
 export default rootReducer;

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Moderation Dashboard</h1>
+    <ul>
+        {% for reported_post in reported_posts %}
+            <li>
+                Post: {{ reported_post.post.content|truncatewords:20 }}
+                <br>
+                Reason: {{ reported_post.reason }}
+                <br>
+                Reported by: {{ reported_post.reported_by.username }}
+                <br>
+                <form method="post" action="{% url 'delete-post' reported_post.post.id %}">
+                    {% csrf_token %}
+                    <button type="submit">Delete Post</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

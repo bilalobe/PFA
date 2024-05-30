@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import AbstractUser
 
 class UserManager(BaseUserManager):
     def create_user(self, username, email, password=None, **extra_fields):
@@ -19,6 +20,15 @@ class UserManager(BaseUserManager):
         return user
 
 class Utilisateur(AbstractBaseUser, models.Model):
+
+    USER_TYPE_CHOICES = (
+    ('student', 'Student'),
+    ('teacher', 'Teacher'),
+    ('supervisor', 'Supervisor'),
+    )
+    user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='student') 
+    bio = models.TextField(blank=True)
+    profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
     username = models.CharField(max_length=32, unique=True)
     email = models.EmailField(max_length=254, unique=True)
     password = models.CharField(max_length=128)
@@ -40,3 +50,4 @@ class Utilisateur(AbstractBaseUser, models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+

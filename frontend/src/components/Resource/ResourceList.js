@@ -1,26 +1,80 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchResources } from '../../actions/resourceActions'; 
-import { Typography, Card, CardContent, CircularProgress, Alert, Grid } from '@mui/material';
+import { fetchResources as fetchResourcesRedux } from '../../actions/resourceActions'; 
+import axios from 'axios';
+import { Typography, Card, CardContent, CircularProgress, Alert, Grid, TextField } from '@mui/material';
 
 function ResourceList({ moduleId }) { 
   const dispatch = useDispatch();
-  const resources = useSelector(state => state.resource.resources);
-  const loading = useSelector(state => state.resource.loading);
-  const error = useSelector(state => state.resource.error);
+  const resourcesRedux = useSelector(state => state.resource.resources);
+  const loadingRedux = useSelector(state => state.resource.loading);
+  const errorRedux = useSelector(state => state.resource.error);
+  const [resources, setResources] = useState(resourcesRedux);
+  const [isLoading, setIsLoading] = useState(loadingRedux);
+  const [error, setError] = useState(errorRedux);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    dispatch(fetchResources(moduleId));
-  }, [dispatch, moduleId]);
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        let url = `/api/resources/`;
+        if (moduleId) {
+          url += `?module=${moduleId}`;
+        }
+        if (searchQuery) {
+          url += moduleId ? `&search=${searchQuery}` : `?search=${searchQuery}`;
+        }
+        const response = await axios.get(url);
+        setResources(response.data);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  if (loading) return <CircularProgress />;
-  if (error) return <Alert severity="error">{error}</Alert>;
+    if (searchQuery) {
+      fetchData();
+    } else {
+      dispatch(fetchResourcesRedux(moduleId));
+    }
+
+  }, [dispatch, moduleId, searchQuery]);
+
+  useEffect(() => {
+    if (!searchQuery) {
+      setResources(resourcesRedux);
+      setIsLoading(loadingRedux);
+      setError(errorRedux);
+    }
+  }, [resourcesRedux, loadingRedux, errorRedux, searchQuery]);
+
+  const handleSearchChange = (event) => {
+    setSearchQuery(event.target.value);
+  };
+
+  if (isLoading) {
+    return <CircularProgress />;
+  }
+
+  if (error) {
+    return <Alert severity="error">{error.message}</Alert>;
+  }
 
   return (
     <div>
       <Typography variant="h4" component="div" gutterBottom>
         Resources
       </Typography>
+      <TextField
+        label="Search"
+        value={searchQuery}
+        onChange={handleSearchChange}
+        variant="outlined"
+        fullWidth
+        margin="normal"
+      />
 
       <Grid container spacing={2}>
         {resources.map(resource => (

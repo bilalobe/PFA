@@ -9,6 +9,16 @@ class QuizViewSet(viewsets.ModelViewSet):
 class QuestionViewSet(viewsets.ModelViewSet):
     queryset = Question.objects.all()
     serializer_class = QuestionSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['text'] 
+    ordering_fields = ['id', 'created_at'] 
+
+    def get_queryset(self):
+        queryset = Question.objects.all()
+        quiz_id = self.request.query_params.get('quiz')
+        if quiz_id is not None:
+            queryset = queryset.filter(quiz_id=quiz_id)
+        return queryset
 
 class AnswerChoiceViewSet(viewsets.ModelViewSet):
     queryset = AnswerChoice.objects.all()

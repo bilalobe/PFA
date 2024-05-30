@@ -1,7 +1,6 @@
-from rest_framework import serializers
-from .models import Resource
-
 class ResourceSerializer(serializers.ModelSerializer):
+    file = serializers.FileField(required=True)
+
     class Meta:
         model = Resource
-        fields = '__all__' 
+        fields = '__all__'

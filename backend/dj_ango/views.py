@@ -1,10 +1,12 @@
-from rest_framework import viewsets, permissions, status, routers, filters
+from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework import routers
 from django.shortcuts import get_object_or_404
-from .models import Cours, Module, Quiz
-from .serializers import CoursSerializer, ModuleSerializer, QuizSerializer
-from .permissions import IsTeacherOrReadOnly
+from .models import Module, Cours, Quiz  # Assuming these models exist in your project's structure
+from .serializers import ModuleSerializer, CoursSerializer, QuizSerializer
+from .permissions import IsTeacher, IsSupervisor, IsTeacherOrReadOnly
+from rest_framework import filters
 
 class CoursViewSet(viewsets.ModelViewSet):
     queryset = Cours.objects.all()
@@ -64,4 +66,3 @@ class ModuleViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Module not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-

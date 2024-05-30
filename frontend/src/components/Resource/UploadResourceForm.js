@@ -1,3 +1,4 @@
+// frontend/src/components/Resource/UploadResourceForm.js
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { uploadResource } from '../../actions/resourceActions'; 
@@ -8,21 +9,25 @@ function UploadResourceForm({ moduleId }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [file, setFile] = useState(null);
-  
+  const [uploadError, setUploadError] = useState(null);  // Error state for upload form
+
   const loading = useSelector(state => state.resource.loading);
-  const error = useSelector(state => state.resource.error);
+  const success = useSelector(state => state.resource.success); // Added for success message
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setUploadError(null); // Clear error message on new upload
+
     const formData = new FormData();
     formData.append('title', title);
     formData.append('description', description);
     formData.append('file', file);
-    formData.append('module', moduleId);
+    formData.append('module', moduleId); // Assuming you send the module id in the formData
+
     dispatch(uploadResource(formData));
   };
 
@@ -32,7 +37,7 @@ function UploadResourceForm({ moduleId }) {
         Upload New Resource
       </Typography>
       {loading && <CircularProgress />}
-      {error && <Alert severity="error">{error}</Alert>}
+      {uploadError && <Alert severity="error">{uploadError}</Alert>} 
       <TextField
         label="Title"
         variant="outlined"
