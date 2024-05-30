@@ -3,9 +3,10 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from frontend import views
+from django.contrib.auth import views as auth_views
 from rest_framework import permissions  
 from drf_yasg.views import get_schema_view  
-from drf_yasg import openapi  
+from drf_yasg import openapi 
 
 schema_view = get_schema_view(  
    openapi.Info(  
@@ -30,7 +31,9 @@ urlpatterns = [
     path('api/resource/', include('resource.urls')),  # Add resource API URL
     path('api/auth/', include('dj_rest_auth.urls')),
     path('api/auth/registration/', include('dj_rest_auth.registration.urls')),
-    path('profile/', views.profile, name='profile'),
+    path('accounts/login/', auth_views.LoginView.as_view(), name='login'),
+    path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('register/', views.register, name='register'), 
     path('', include('frontend.urls')),
 ]
 
