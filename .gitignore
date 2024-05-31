@@ -16,6 +16,8 @@ dist/
   
 # Ignore environment variables file  
 .env  
-  
+keys.env
+
 # Node modules  
 node_modules/  
+*.env

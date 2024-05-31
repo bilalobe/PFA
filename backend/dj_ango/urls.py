@@ -5,7 +5,7 @@ from django.urls import path, include
 from django.conf.urls import url
 
 from backend.forum.views import moderation_dashboard, delete_post, report_post
-from rest_framework_simplejwt.views import TokenRefreshView
+from rest_framework import TokenRefreshView
 from .views import registration_view, protected_view, teacher_only_view, MyTokenObtainPairView, ModerationViewSet 
 from frontend import views as frontend_views
 from django.contrib.auth import views as auth_views

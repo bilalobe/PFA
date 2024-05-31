@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchEnrollments } from '../../actions/enrollmentActions'; 
+import { fetchEnrollments } from '../../actions/enrollmentActions';
 import { Typography, Card, CardContent, CircularProgress, Alert, Grid } from '@mui/material';
 
-function MyCourses() { 
+function MyCourses() {
   const dispatch = useDispatch();
   const enrollments = useSelector(state => state.enrollment.enrollments);
   const loading = useSelector(state => state.enrollment.loading);

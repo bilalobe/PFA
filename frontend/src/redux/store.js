@@ -7,4 +7,5 @@ const store = configureStore({
   middleware: [thunk] 
 });
 
+
 export default store;

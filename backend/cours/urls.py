@@ -1,5 +1,6 @@
 from django.urls import include, path
-from .views import CoursViewSet, QuizViewSet, CoursDetailViewSet
+from .views import CoursViewSet, QuizViewSet, CoursDetailViewSet, ModuleViewSet
+from .views import list_enrollments 
 
 
 router = routers.DefaultRouter()
@@ -17,4 +18,5 @@ urlpatterns = [
             {"get": "retrieve", "put": "update", "delete": "destroy"}
         ),
     ),
+    path('enrollments/', list_enrollments, name='list_enrollments'),  
 ]

@@ -2,9 +2,18 @@ from rest_framework import viewsets, permissions, status, routers, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
-from .models import Cours, Module, Quiz
-from .serializers import CoursSerializer, ModuleSerializer, QuizSerializer
+from .models import Cours, Module, Quiz, Enrollment
+from .serializers import CoursSerializer, ModuleSerializer, QuizSerializer, EnrollmentSerializer
 from .permissions import IsTeacherOrReadOnly
+from rest_framework.decorators import api_view
+
+
+@api_view(['GET'])
+def list_enrollments(request):
+    enrollments = Enrollment.objects.filter(user=request.user)
+    serializer = EnrollmentSerializer(enrollments, many=True)
+    return Response(serializer.data)
+
 
 class CoursViewSet(viewsets.ModelViewSet):
     queryset = Cours.objects.all()
