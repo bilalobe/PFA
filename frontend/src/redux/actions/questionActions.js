@@ -1,17 +1,24 @@
 import axios from 'axios';
-import { 
-  FETCH_QUESTIONS_REQUEST, 
-  FETCH_QUESTIONS_SUCCESS, 
-  FETCH_QUESTIONS_FAILURE 
+import {
+  FETCH_QUESTIONS_REQUEST,
+  FETCH_QUESTIONS_SUCCESS,
+  FETCH_QUESTIONS_FAILURE,
 } from './types';
 
-// Action to fetch questions for a specific quiz
-export const fetchQuestions = (quizId) => async dispatch => {
-  dispatch({ type: FETCH_QUESTIONS_REQUEST });
-  try {
-    const response = await axios.get(`/api/quizzes/${quizId}/questions/`);
-    dispatch({ type: FETCH_QUESTIONS_SUCCESS, payload: response.data });
-  } catch (error) {
-    dispatch({ type: FETCH_QUESTIONS_FAILURE, payload: error.message });
-  }
+// Action Creators
+export const fetchQuestionsRequest = () => ({ type: FETCH_QUESTIONS_REQUEST });
+export const fetchQuestionsSuccess = (questions) => ({ type: FETCH_QUESTIONS_SUCCESS, payload: questions });
+export const fetchQuestionsFailure = (error) => ({ type: FETCH_QUESTIONS_FAILURE, payload: error });
+
+// Fetch Questions Action
+export const fetchQuestions = (quizId) => {
+  return async (dispatch) => {
+    dispatch(fetchQuestionsRequest());
+    try {
+      const response = await axios.get(`/api/quizzes/${quizId}/questions/`); // Replace with your API endpoint
+      dispatch(fetchQuestionsSuccess(response.data));
+    } catch (error) {
+      dispatch(fetchQuestionsFailure(error.message));
+    }
+  };
 };

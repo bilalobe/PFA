@@ -2,7 +2,7 @@ import { combineReducers } from 'redux';
 
 import userReducer from './userReducer';
 import moduleReducer from './moduleReducer';
-import coursReducer from './coursReducer';
+import courseReducer from './courseReducer';
 import resourceReducer from './resourceReducer';
 import questionReducer from './questionReducer';
 import quizReducer from './quizReducer';
@@ -12,7 +12,7 @@ import enrollmentReducer from './enrollmentReducer'
 const rootReducer = combineReducers({
   user: userReducer,
   module: moduleReducer,
-  cours: coursReducer,
+  cours: courseReducer,
   question: questionReducer,
   quiz: quizReducer,
   resouce: resourceReducer,

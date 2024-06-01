@@ -25,3 +25,4 @@ EXPOSE 8000
 
 # Start the application with Waitress
 CMD ["waitress-serve", "--port=8000", "dj_ango.wsgi:application"]
+

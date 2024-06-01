@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, RadioGroup, FormControlLabel, Radio, Alert } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, RadioGroup, FormControlLabel, Radio, Alert, Typography, Avatar, Box, Card, CardContent, IconButton } from '@mui/material';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { formatDistanceToNow } from 'date-fns';
 
 function Post({ post, user }) {
   const [openReportDialog, setOpenReportDialog] = useState(false);
@@ -21,34 +23,93 @@ function Post({ post, user }) {
 
   const handleReportPost = async () => {
     try {
-      const response = await axios.post('/api/report_post/', {
+      const response = await axios.post('/api/moderate/', {
         post: post.id,
         reason: selectedReason,
       });
-
-      // Handle success
       setReportSuccess(true);
       setReportError(null);
+      setSelectedReason('');
+      setOpenReportDialog(false);
+      console.log('Post reported successfully:', response.data);
     } catch (error) {
-      // Handle error
       setReportSuccess(false);
       setReportError(error.response?.data?.detail || 'Failed to submit the report. Please try again.');
+      console.error('Error reporting post:', error);
     }
   };
 
   const handleReasonChange = (event) => {
     setSelectedReason(event.target.value);
-    setReportError(null);  // Clear error message when user selects a reason
+    setReportError(null);
   };
 
-  const isReportButtonDisabled = !selectedReason || user.role === 'instructor' || user.role === 'supervisor';
+  const isReportButtonDisabled = !selectedReason;
+  const isInstructorOrSupervisor = ['instructor', 'supervisor'].includes(user.role);
 
   return (
     <div>
-      <p>{post.content}</p>
+      <Card sx={{ boxShadow: 3, '&:hover': { boxShadow: 6 }, mb: 2 }}>
+        <CardContent>
+          <Typography variant="h6" component="div">
+            {post.title}
+          </Typography>
+          <Typography variant="body2" component="div">
+            {post.content.length > 100 ? `${post.content.slice(0, 100)}...` : post.content}
+          </Typography>
+          {post.content.length > 100 && (
+            <Link to={`/posts/${post.id}`}>
+              <Button size="small">Read More</Button>
+            </Link>
+          )}
+          <Typography variant="caption" color="textSecondary" component="div">
+            by {post.author_username}{' '}
+            <Typography component="span" variant="caption" color="textSecondary">
+              ({formatDistanceToNow(new Date(post.created_at))} ago)
+            </Typography>
+          </Typography>
+          <Box display="flex" justifyContent="space-between" alignItems="center">
+            <Link to={`/posts/${post.id}`} component={Button} variant="text" color="primary">
+              View Comments
+            </Link>
+            <Button
+              onClick={() => { /* Handle like/unlike functionality */ }}
+              variant="text"
+              color="primary"
+            >
+              Like
+            </Button>
+            {!isInstructorOrSupervisor && (
+              <Button
+                onClick={handleClickOpen}
+                variant="outlined"
+                color="error"
+                sx={{
+                  '&:hover': {
+                    backgroundColor: '#ffebee',
+                  },
+                  '&:focus': {
+                    outline: '2px solid #f44336',
+                  },
+                }}
+              >
+                Report
+              </Button>
+            )}
+            {isInstructorOrSupervisor && (
+              <Button
+                onClick={() => { /* Handle delete functionality */ }}
+                variant="text"
+                color="error"
+              >
+                Delete
+              </Button>
+            )}
+          </Box>
+        </CardContent>
+      </Card>
 
-      <Button onClick={handleClickOpen} variant="outlined" color="error">Report</Button>
-
+      {/* Report Dialog */}
       <Dialog open={openReportDialog} onClose={handleClose}>
         <DialogTitle>Report Post</DialogTitle>
         <DialogContent>
@@ -63,7 +124,7 @@ function Post({ post, user }) {
           </RadioGroup>
           {reportSuccess && (
             <Alert severity="success">
-              Report submitted successfully.
+              Report submitted successfully for the post: "{post.content.slice(0, 30)}..." with reason: "{selectedReason}".
             </Alert>
           )}
           {reportError && (
