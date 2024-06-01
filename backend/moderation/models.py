@@ -1,6 +1,6 @@
 from django.db import models
 from .models import Post  # Import the Post model
-from utilisateur.models import Utilisateur  # Import the Utilisateur model
+from user.models import User  # Import the User model
 
 class Moderation(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE)
@@ -10,7 +10,7 @@ class Moderation(models.Model):
         ('irrelevant', 'Irrelevant'),
         ('other', 'Other'),
     ))
-    reported_by = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
+    reported_by = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

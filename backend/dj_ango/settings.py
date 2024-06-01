@@ -3,6 +3,7 @@ import dj_database_url
 from pathlib import Path
 from decouple import config
 from datetime import timedelta
+
 from azure.storage.blob import BlobServiceClient
 import sentry_sdk  
 from sentry_sdk.integrations.django import DjangoIntegration  
@@ -43,6 +44,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_filters',
+    'django_extensions',
     'corsheaders',
     'rest_framework',
     'rest_framework.authtoken',
@@ -55,15 +58,17 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.google', 
     'dj_rest_auth.registration',
     'chatbot', 
-    'utilisateur',
+    'user',
     'cours',
     'module',
     'question',
+    'profile',
     'quiz',
     'enrollment',
     'forum',
-    'moderation'
+    'moderation',
     'resource',
+
 ]
 
 MIDDLEWARE = [
@@ -139,7 +144,7 @@ REST_FRAMEWORK = {
     },
 
     # Exception handling
-    'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler',  # Default exception handler (optional)
+    'EXCEPTION_HANDLER': 'dj_ango.exceptions.custom_exception_handler',   # Default exception handler (optional)
 
     # Renderer and parser classes
     'DEFAULT_RENDERER_CLASSES': (
@@ -238,5 +243,5 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # Longer lifespan for refresh tokens
     'ROTATE_REFRESH_TOKENS': True,             # Rotate refresh tokens on each refresh request
     'BLACKLIST_AFTER_ROTATION': True,         # Blacklist old refresh tokens after rotation
-    # ... other JWT settings as needed 
+    'ALGORITHM': 'HS256',                     # Use HS256 algorithm for token signing
 }

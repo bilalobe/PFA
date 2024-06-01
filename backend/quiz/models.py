@@ -1,15 +1,29 @@
 from django.db import models
-from cours.models import Module # Import the Module model
-from utilisateur.models import Utilisateur 
+from cours.models import Module
+from user.models import User
 
 class Quiz(models.Model):
     title = models.CharField(max_length=255)
     module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='quizzes')
-    # Other fields like description, time_limit, passing_score, etc.
+    description = models.TextField(blank=True, null=True)
+    time_limit = models.IntegerField(default=60)
+    passing_score = models.IntegerField(default=60)
+
+    class Meta:
+        unique_together = ('module', 'title')
+
+    def __str__(self):
+        return self.title
 
 class Question(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
     text = models.TextField()
+
+    class Meta:
+        unique_together = ('quiz', 'text')
+
+    def __str__(self):
+        return self.text
 
 class AnswerChoice(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='choices')
@@ -17,15 +31,34 @@ class AnswerChoice(models.Model):
     is_correct = models.BooleanField(default=False)
 
     class Meta:
-        unique_together = ('question' ,'text',)
+        unique_together = ('question', 'text')
 
-class UserQuizAttempt(models.Model):  
-    user = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)  
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)  
-    score = models.IntegerField(default=0)  
-    start_time = models.DateTimeField(auto_now_add=True)  # Automatically set when attempt starts  
-    end_time = models.DateTimeField(null=True, blank=True)  # Set when attempt is finished  
-    progress = models.IntegerField(default=0)  # Stores the progress percentage  
-  
-    class Meta:  
-        unique_together = ('user', 'quiz',)  
+    def __str__(self):
+        return self.text
+
+class UserQuizAttempt(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+    score = models.IntegerField(default=0)
+    end_time = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('user', 'quiz')
+
+    def calculate_progress(self):
+        total_questions = self.quiz.questions.count()
+        if total_questions == 0:
+            return 0
+        progress = (self.score / total_questions) * 100
+        return min(progress, 100)
+
+    def save(self, *args, **kwargs):
+        # Save progress to user model or other model if needed
+        self.user.progress = self.calculate_progress()
+        self.user.save()
+
+        # Save UserQuizAttempt
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f'{self.user} - {self.quiz}'

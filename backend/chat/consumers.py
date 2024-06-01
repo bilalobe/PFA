@@ -1,4 +1,3 @@
-# consumers.py
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
@@ -10,37 +9,39 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.room_group_name = f'chat_{self.room_name}'
 
-        # Join room group
-        await self.channel_layer.group_add(
-            self.room_group_name,
-            self.channel_name
-        )
+        if self.channel_layer is not None:  # Check if channel_layer is available
+            # Join room group
+            await self.channel_layer.group_add(
+                self.room_group_name,
+                self.channel_name
+            )
 
-        # Add user to online users list
-        await self.add_user_to_online()
-        await self.send_online_users()
+            # Add user to online users list
+            await self.add_user_to_online()
+            await self.send_online_users()
 
-        await self.send_recent_messages()
-
+            await self.send_recent_messages()
+        
         await self.accept()
 
     async def disconnect(self, close_code):
-        # Leave room group
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
-        )
+        if self.channel_layer is not None:  # Check if channel_layer is available
+            # Leave room group
+            await self.channel_layer.group_discard(
+                self.room_group_name,
+                self.channel_name
+            )
 
-        # Remove user from online users list
-        await self.remove_user_from_online()
-        await self.send_online_users()
+            # Remove user from online users list
+            await self.remove_user_from_online()
+            await self.send_online_users()
 
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
-        message = text_data_json['message']
+        message = text_data_json.get('message')
         action = text_data_json.get('action')
 
-        if action == 'typing':
+        if action == 'typing' and self.channel_layer is not None:
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -49,7 +50,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'is_typing': text_data_json.get('is_typing', False),
                 }
             )
-        elif action == 'message':
+        elif action == 'message' and self.channel_layer is not None:
             await self.save_message(message)
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -111,13 +112,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }))
 
     async def send_online_users(self):
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                'type': 'online_users',
-                'users': await self.get_online_users(),
-            }
-        )
+        if self.channel_layer is not None:
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'online_users',
+                    'users': await self.get_online_users(),
+                }
+            )
 
     @database_sync_to_async
     def get_online_users(self):

@@ -1,16 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+from user.views import UserViewSet,  UserProfileViewSet
 from module.views import ModuleViewSet, ModuleDetailViewSet
-from .models import Profile
-from .views import (
-    
-    UtilisateurViewSet, 
-    UtilisateurDetailViewSet, 
-    ModuleViewSet, 
-    ModuleDetailViewSet, # Make sure to include ModuleDetailViewSet
-    UserProfileViewSet, 
-    profile  
-) 
 
 router = DefaultRouter()
 router.register(r'profiles', UserProfileViewSet, basename='profile')
@@ -19,6 +10,6 @@ router.register(r'module-details', ModuleDetailViewSet, basename='module-detail'
 
 urlpatterns = [
     path('api/', include(router.urls)),  # URLs for ViewSets
-    path('profile/', profile, name='profile'),  # Your function-based view
-    # Add other URL patterns for function-based views here 
+    path('api-auth/', include('rest_framework.urls')),  # URLs for authentication
+    path('api/user/', UserViewSet.as_view(), name='user'),
 ]

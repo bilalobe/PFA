@@ -1,9 +1,9 @@
 from django.db import models
-from utilisateur.models import Utilisateur
+from user.models import User
 from cours.models import Cours
 
 class Enrollment(models.Model):
-    student = models.ForeignKey(Utilisateur, on_delete=models.CASCADE, limit_choices_to={'user_type': 'student'})
+    student = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'user_type': 'student'})
     course = models.ForeignKey(Cours, on_delete=models.CASCADE, related_name='enrollments')
     enrolled_at = models.DateTimeField(auto_now_add=True)
     completed = models.BooleanField(default=False)

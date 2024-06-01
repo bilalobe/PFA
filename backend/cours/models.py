@@ -1,5 +1,5 @@
 from django.db import models
-from utilisateur.models import Utilisateur
+from user.models import User
 
 
 class Cours(models.Model):
@@ -14,7 +14,7 @@ class Cours(models.Model):
         ),
     )
     formateur = models.ForeignKey(
-        Utilisateur,
+        User,
         on_delete=models.CASCADE,
         related_name="cours_formateur",
         limit_choices_to={"role": "formateur"},
@@ -24,4 +24,4 @@ class Cours(models.Model):
 
     def __str__(self):
 
-        return f"{self.titre} par {Utilisateur.objects.get(pk=self.formateur_id)}"
+        return f"{self.titre} par {User.objects.get(pk=self.formateur_id)}"

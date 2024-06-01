@@ -1,9 +1,9 @@
 from django.db import models
-from utilisateur.models import Utilisateur
+from user.models import User
 from cours.models import Cours 
 
 class Review(models.Model):
-    user = models.ForeignKey(Utilisateur, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     course = models.ForeignKey(Cours, on_delete=models.CASCADE, related_name='reviews')
     rating = models.PositiveIntegerField(choices=((1, '1 Star'), (2, '2 Stars'), (3, '3 Stars'), (4, '4 Stars'), (5, '5 Stars')))
     comment = models.TextField(blank=True)
