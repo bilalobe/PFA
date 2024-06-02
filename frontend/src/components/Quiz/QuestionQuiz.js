@@ -1,28 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardMedia, Typography, Box, RadioGroup, FormControlLabel, Radio, TextField, Checkbox, Snackbar, Alert } from '@mui/material';
+import { Card, CardContent, CardMedia, Typography, Box, RadioGroup, Snackbar, Alert } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
+import QuizAnswerOption from './QuizAnswerOption'; // Ensure correct path
 
-function Question({ question, currentQuestionIndex, totalQuestions, selectedAnswer, onAnswerSelect }) {
+function QuizQuestion({ question, currentQuestionIndex, totalQuestions, selectedAnswer, onAnswerSelect }) {
   const [isAnswered, setIsAnswered] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState(null);
   const [showSnackbar, setShowSnackbar] = useState(false);
-
-  const handleChoiceChange = (e) => {
-    const value = question.type === 'multiple_choice' || question.type === 'true_false' ? parseInt(e.target.value) : e.target.value;
-    onAnswerSelect(question.id, value);
-    setIsAnswered(true);
-  };
-
-  const handleCheckboxChange = (choiceId) => {
-    const selected = selectedAnswer || [];
-    if (selected.includes(choiceId)) {
-      onAnswerSelect(question.id, selected.filter(id => id !== choiceId));
-    } else {
-      onAnswerSelect(question.id, [...selected, choiceId]);
-    }
-    setIsAnswered(true);
-  };
 
   useEffect(() => {
     if (isAnswered) {
@@ -44,7 +29,15 @@ function Question({ question, currentQuestionIndex, totalQuestions, selectedAnsw
   };
 
   return (
-    <Card sx={{ mb: 2 }}>
+    <Card 
+      sx={{ 
+        mb: 2,
+        maxWidth: { xs: '100%', sm: '80%', md: '60%' },
+        mx: 'auto',
+        boxShadow: 4,
+        borderRadius: 2
+      }}
+    >
       <CardContent>
         <Typography variant="h6" component="div" gutterBottom>
           Question {currentQuestionIndex + 1} of {totalQuestions}
@@ -55,7 +48,7 @@ function Question({ question, currentQuestionIndex, totalQuestions, selectedAnsw
             component="img"
             image={question.media}
             alt="Question media"
-            sx={{ maxHeight: 300, backgroundSize: 'contain', mb: 2}}
+            sx={{ maxHeight: 300, backgroundSize: 'contain', mb: 2 }}
           />
         )}
 
@@ -63,53 +56,48 @@ function Question({ question, currentQuestionIndex, totalQuestions, selectedAnsw
           {question.text}
         </Typography>
 
-        {question.type === 'multiple_choice' && (
-          <RadioGroup value={selectedAnswer} onChange={handleChoiceChange}>
+        {question.type === 'multiple_choice' || question.type === 'true_false' ? (
+          <RadioGroup value={selectedAnswer} onChange={(e) => onAnswerSelect(question.id, e.target.value)}>
             {question.choices.map((choice) => (
-              <FormControlLabel
+              <QuizAnswerOption
                 key={choice.id}
-                value={choice.id.toString()}
-                control={<Radio />}
-                label={choice.text}
-                sx={{ backgroundColor: selectedAnswer === choice.id ? '#f0f0f0' : 'transparent', borderRadius: 1, p: 1, mb: 1 }}
+                type={question.type}
+                choice={choice}
+                selectedAnswer={selectedAnswer}
+                onAnswerSelect={onAnswerSelect}
               />
             ))}
           </RadioGroup>
-        )}
-
-        {question.type === 'true_false' && (
-          <RadioGroup value={selectedAnswer} onChange={handleChoiceChange}>
-            <FormControlLabel value="true" control={<Radio />} label="True" />
-            <FormControlLabel value="false" control={<Radio />} label="False" />
-          </RadioGroup>
-        )}
-
-        {question.type === 'fill_in_the_blank' && (
-          <TextField
-            fullWidth
-            variant="outlined"
-            value={selectedAnswer || ''}
-            onChange={(e) => handleChoiceChange(e)}
-            placeholder="Your answer"
-          />
-        )}
+        ) : null}
 
         {question.type === 'multiple_selection' && (
           <Box>
             {question.choices.map((choice) => (
-              <FormControlLabel
+              <QuizAnswerOption
                 key={choice.id}
-                control={
-                  <Checkbox
-                    checked={selectedAnswer ? selectedAnswer.includes(choice.id) : false}
-                    onChange={() => handleCheckboxChange(choice.id)}
-                  />
-                }
-                label={choice.text}
+                type={question.type}
+                choice={choice}
+                selectedAnswer={selectedAnswer}
+                onAnswerSelect={onAnswerSelect}
               />
             ))}
           </Box>
         )}
+
+        {question.type === 'fill_in_the_blank' && (
+          <Box>
+            {question.choices.map((choice) => (
+              <QuizAnswerOption
+                key={choice.id}
+                type={question.type}
+                choice={choice}
+                selectedAnswer={selectedAnswer}
+                onAnswerSelect={onAnswerSelect}
+              />
+            ))}
+          </Box>
+        )}
+
       </CardContent>
       <Snackbar 
         open={showSnackbar} 
@@ -133,4 +121,4 @@ function Question({ question, currentQuestionIndex, totalQuestions, selectedAnsw
   );
 }
 
-export default Question;
+export default QuizQuestion;

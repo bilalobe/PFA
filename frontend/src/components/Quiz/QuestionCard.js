@@ -3,7 +3,7 @@ import { Card, CardContent, CardMedia, Typography, Box, RadioGroup, FormControlL
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 
-function Question({ question, currentQuestionIndex, totalQuestions, selectedAnswer, onAnswerSelect }) {
+function QuestionCard({ question, currentQuestionIndex, totalQuestions, selectedAnswer, onAnswerSelect }) {
   const [isAnswered, setIsAnswered] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState(null);
   const [showSnackbar, setShowSnackbar] = useState(false);
@@ -133,4 +133,4 @@ function Question({ question, currentQuestionIndex, totalQuestions, selectedAnsw
   );
 }
 
-export default Question;
+export default QuestionCard;

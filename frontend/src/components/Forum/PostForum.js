@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { formatDistanceToNow } from 'date-fns';
 
-function Post({ post, user }) {
+function ForumPost({ post, user }) {
   const [openReportDialog, setOpenReportDialog] = useState(false);
   const [selectedReason, setSelectedReason] = useState('');
   const [reportSuccess, setReportSuccess] = useState(false);
@@ -51,10 +51,18 @@ function Post({ post, user }) {
     <div>
       <Card sx={{ boxShadow: 3, '&:hover': { boxShadow: 6 }, mb: 2 }}>
         <CardContent>
-          <Typography variant="h6" component="div">
-            {post.title}
-          </Typography>
-          <Typography variant="body2" component="div">
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+            <Avatar src={post.authorAvatar || 'path/to/placeholder.jpg'} alt={post.authorName} sx={{ mr: 2 }} />
+            <Box>
+              <Typography variant="h6" component="div">
+                {post.title}
+              </Typography>
+              <Typography variant="caption" color="textSecondary">
+                by {post.authorUsername} {formatDistanceToNow(new Date(post.createdAt))} ago
+              </Typography>
+            </Box>
+          </Box>
+          <Typography variant="body2" component="p">
             {post.content.length > 100 ? `${post.content.slice(0, 100)}...` : post.content}
           </Typography>
           {post.content.length > 100 && (
@@ -62,21 +70,11 @@ function Post({ post, user }) {
               <Button size="small">Read More</Button>
             </Link>
           )}
-          <Typography variant="caption" color="textSecondary" component="div">
-            by {post.author_username}{' '}
-            <Typography component="span" variant="caption" color="textSecondary">
-              ({formatDistanceToNow(new Date(post.created_at))} ago)
-            </Typography>
-          </Typography>
           <Box display="flex" justifyContent="space-between" alignItems="center">
             <Link to={`/posts/${post.id}`} component={Button} variant="text" color="primary">
               View Comments
             </Link>
-            <Button
-              onClick={() => { /* Handle like/unlike functionality */ }}
-              variant="text"
-              color="primary"
-            >
+            <Button onClick={() => { /* Handle like/unlike functionality */ }} variant="text" color="primary">
               Like
             </Button>
             {!isInstructorOrSupervisor && (
@@ -92,16 +90,13 @@ function Post({ post, user }) {
                     outline: '2px solid #f44336',
                   },
                 }}
+                aria-label="Report Post"
               >
                 Report
               </Button>
             )}
             {isInstructorOrSupervisor && (
-              <Button
-                onClick={() => { /* Handle delete functionality */ }}
-                variant="text"
-                color="error"
-              >
+              <Button onClick={() => { /* Handle delete functionality */ }} variant="text" color="error">
                 Delete
               </Button>
             )}
@@ -134,11 +129,11 @@ function Post({ post, user }) {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="primary">
+          <Button onClick={handleClose} color="primary" aria-label={reportSuccess ? 'Close' : 'Cancel'}>
             {reportSuccess ? 'Close' : 'Cancel'}
           </Button>
           {!reportSuccess && (
-            <Button onClick={handleReportPost} variant="contained" color="error" disabled={isReportButtonDisabled}>
+            <Button onClick={handleReportPost} variant="contained" color="error" disabled={isReportButtonDisabled} aria-label="Submit Report">
               Report
             </Button>
           )}
@@ -148,4 +143,4 @@ function Post({ post, user }) {
   );
 }
 
-export default Post;
+export default ForumPost;

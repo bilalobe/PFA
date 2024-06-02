@@ -1,30 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchQuiz, submitQuiz } from '../../actions/quizActions';
-import Question from './Question';
-import {
-  Typography,
-  Button,
-  Box,
-  CircularProgress,
-  Alert,
-  Card,
-  CardContent,
-  LinearProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle
-} from '@mui/material';
-import CustomProgressBar from './CustomProgressBar';
+import QuizQuestion from './QuizQuestion'; // Ensure correct path
+import { Typography, Box, CircularProgress, Alert, Card, CardContent, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle } from '@mui/material';
+import CustomButton from './CustomButton'; // Ensure correct path
+import ProgressBar from './ProgressBar'; // Ensure correct path
 
 function Quiz({ quizId }) {
   const dispatch = useDispatch();
   const quiz = useSelector(state => state.quiz.quiz);
   const loading = useSelector(state => state.quiz.loading);
   const error = useSelector(state => state.quiz.error);
-  const submitError = useSelector(state => state.quiz.submitError);
 
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -101,56 +87,61 @@ function Quiz({ quizId }) {
     handleSubmit();
   };
 
-  if (loading) return <CircularProgress />;
-  if (error) return <Alert severity="error">{error}</Alert>;
+  if (loading) return <CircularProgress aria-label="Loading quiz data" />;
+  if (error) return <Alert severity="error" aria-label="Error loading quiz data">{error}</Alert>;
   if (!quiz) return null;
 
   const currentQuestion = quiz.questions[currentQuestionIndex];
   const selectedChoiceId = selectedAnswers[currentQuestion.id];
-  const isAnswerSelected = selectedChoiceId !== undefined;
   const progress = (currentQuestionIndex / quiz.questions.length) * 100;
 
   return (
-    <Card sx={{ maxWidth: 800, margin: 'auto', mt: 4 }}>
+    <Card sx={{ maxWidth: 800, margin: 'auto', mt: 4, boxShadow: 4, borderRadius: 2 }}>
       <CardContent>
         <Typography variant="h4" component="div" gutterBottom>
           {quiz.title}
         </Typography>
-        <CustomProgressBar value={progress} label={`Progress: ${currentQuestionIndex + 1} / ${quiz.questions.length}`} />
-        <CustomProgressBar value={(timer / (quiz.timeLimit * 60)) * 100} showPercentage={false} label="Time Remaining" />
-        <LinearProgress variant="determinate" value={progress} />
+        <ProgressBar 
+          currentQuestionIndex={currentQuestionIndex}
+          totalQuestions={quiz.questions.length}
+        />
+        <ProgressBar 
+          currentQuestionIndex={timer}
+          totalQuestions={quiz.timeLimit * 60}
+          label="Time Remaining"
+        />
         {!quizCompleted ? (
           <>
-            <Question 
-              question={currentQuestion} 
+            <QuizQuestion
+              question={currentQuestion}
               currentQuestionIndex={currentQuestionIndex}
               totalQuestions={quiz.questions.length}
               selectedAnswer={selectedAnswers[currentQuestion.id]}
               onAnswerSelect={handleAnswerSelection}
             />
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
-              <Button 
+              <CustomButton 
                 variant="contained" 
                 onClick={handlePrevQuestion} 
                 disabled={currentQuestionIndex === 0}
               >
                 Previous
-              </Button>
-              <Button 
+              </CustomButton>
+              <CustomButton 
                 variant="contained" 
                 onClick={handleNextQuestion} 
                 disabled={currentQuestionIndex === quiz.questions.length - 1 || quizCompleted}
               >
                 Next
-              </Button>
-              <Button 
+              </CustomButton>
+              <CustomButton 
                 variant="contained" 
                 color="primary" 
                 onClick={handleSubmit}
                 disabled={currentQuestionIndex !== quiz.questions.length - 1}
               >
                 Submit
-              </Button>
+              </CustomButton>
             </Box>
           </>
         ) : (
@@ -175,9 +166,9 @@ function Quiz({ quizId }) {
             </DialogContentText>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleTimeUpDialogClose} color="primary">
+            <CustomButton onClick={handleTimeUpDialogClose} color="primary">
               OK
-            </Button>
+            </CustomButton>
           </DialogActions>
         </Dialog>
       </CardContent>
