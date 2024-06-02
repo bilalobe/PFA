@@ -3,15 +3,29 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls import url
+from backend.forum.views import moderation_dashboard, delete_post, report_post 
+from rest_framework import TokenRefreshView  # Import TokenRefreshView
 
-from backend.forum.views import moderation_dashboard, delete_post, report_post
-from rest_framework import TokenRefreshView
-from .views import registration_view, protected_view, teacher_only_view, MyTokenObtainPairView, ModerationViewSet 
-from frontend import views as frontend_views
+from .views import (
+    registration_view,
+    protected_view,
+    teacher_only_view,
+    MyTokenObtainPairView,
+)
+
+from frontend import views
 from django.contrib.auth import views as auth_views
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+
+# Spectacular imports
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
+
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -30,7 +44,7 @@ urlpatterns = [
     # Authentication endpoints
     path('api/auth/register/', registration_view, name='register'),
     path('api/auth/login/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'), # Correctly import TokenRefreshView
 
     # Protected endpoints
     path('api/protected/', protected_view, name='protected_view'),
@@ -51,14 +65,19 @@ urlpatterns = [
     path('api/auth/registration/', include('dj_rest_auth.registration.urls')),
 
     # Account login/logout
-    path('accounts/login/', auth_views.LoginView.as_view(), name='login'),
-    path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('accounts/login/', auth_views.LoginView.as_view(), name='login'), 
+    path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'), 
 
     # Frontend endpoints
     path('', include('frontend.urls')),
 
-    # Social Auth
-    url(r'^auth/', include('social_django.urls', namespace='social')), 
+    # Social Auth (Ensure 'social_django' is in INSTALLED_APPS)
+    url(r'^auth/', include('social_django.urls', namespace='social')),
+
+    # Spectacular endpoints 
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
 
 if settings.DEBUG:
