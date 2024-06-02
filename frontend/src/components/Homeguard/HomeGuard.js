@@ -10,6 +10,7 @@ function HomeGuard() {
   const { isAuthenticated, loading } = useAuth();
   const dispatch = useDispatch();
   const userProfile = useSelector((state) => state.user.profile);
+  const userLoading = useSelector((state) => state.user.loading);
 
   // Fetch user profile when authenticated
   useEffect(() => {
@@ -18,7 +19,7 @@ function HomeGuard() {
     }
   }, [isAuthenticated, dispatch]);
 
-  if (loading) {
+  if (loading || userLoading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh">
         <CircularProgress />

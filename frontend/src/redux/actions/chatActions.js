@@ -1,5 +1,4 @@
-// chatReducer.js
-
+import axios from 'axios';
 import {
     JOIN_CHAT_ROOM_REQUEST,
     JOIN_CHAT_ROOM_SUCCESS,
@@ -16,57 +15,43 @@ import {
     FETCH_CHAT_MESSAGES_SUCCESS,
     FETCH_CHAT_MESSAGES_FAILURE,
     SET_ONLINE_USERS,
-} from '../actions/types';
+} from './types';
 
-const initialState = {
-    messages: [],
-    loading: false,
-    error: null,
-    typingUsers: [],
-    currentRoom: null,
-    onlineUsers: [],
+// Actions to handle joining and leaving chat rooms
+export const joinChatRoomRequest = () => ({ type: JOIN_CHAT_ROOM_REQUEST });
+export const joinChatRoomSuccess = (roomName) => ({ type: JOIN_CHAT_ROOM_SUCCESS, payload: roomName });
+export const joinChatRoomFailure = (error) => ({ type: JOIN_CHAT_ROOM_FAILURE, payload: error });
+
+export const leaveChatRoomRequest = () => ({ type: LEAVE_CHAT_ROOM_REQUEST });
+export const leaveChatRoomSuccess = (roomName) => ({ type: LEAVE_CHAT_ROOM_SUCCESS, payload: roomName });
+export const leaveChatRoomFailure = (error) => ({ type: LEAVE_CHAT_ROOM_FAILURE, payload: error });
+
+// Actions to handle sending and receiving messages
+export const sendChatMessageRequest = () => ({ type: SEND_CHAT_MESSAGE_REQUEST });
+export const sendChatMessageSuccess = (message) => ({ type: SEND_CHAT_MESSAGE_SUCCESS, payload: message });
+export const sendChatMessageFailure = (error) => ({ type: SEND_CHAT_MESSAGE_FAILURE, payload: error });
+
+export const receiveChatMessage = (message) => ({ type: RECEIVE_CHAT_MESSAGE, payload: message });
+
+// Actions to handle typing indicators
+export const setTypingIndicator = (user, isTyping) => ({ type: SET_TYPING_INDICATOR, payload: { user, isTyping } });
+
+// Actions to fetch chat messages
+export const fetchChatMessagesRequest = () => ({ type: FETCH_CHAT_MESSAGES_REQUEST });
+export const fetchChatMessagesSuccess = (messages) => ({ type: FETCH_CHAT_MESSAGES_SUCCESS, payload: messages });
+export const fetchChatMessagesFailure = (error) => ({ type: FETCH_CHAT_MESSAGES_FAILURE, payload: error });
+
+export const fetchChatMessages = (roomName) => {
+    return async (dispatch) => {
+        dispatch(fetchChatMessagesRequest());
+        try {
+            const response = await axios.get(`/api/messages/${roomName}/`);
+            dispatch(fetchChatMessagesSuccess(response.data));
+        } catch (error) {
+            dispatch(fetchChatMessagesFailure(error.message));
+        }
+    };
 };
 
-const chatReducer = (state = initialState, action) => {
-    switch (action.type) {
-        case JOIN_CHAT_ROOM_REQUEST:
-            return { ...state, loading: true };
-        case JOIN_CHAT_ROOM_SUCCESS:
-            return { ...state, loading: false, currentRoom: action.payload };
-        case JOIN_CHAT_ROOM_FAILURE:
-            return { ...state, loading: false, error: action.payload };
-        case LEAVE_CHAT_ROOM_REQUEST:
-            return { ...state, loading: true };
-        case LEAVE_CHAT_ROOM_SUCCESS:
-            return { ...state, loading: false, currentRoom: null, messages: [], onlineUsers: [] };
-        case LEAVE_CHAT_ROOM_FAILURE:
-            return { ...state, loading: false, error: action.payload };
-        case SEND_CHAT_MESSAGE_REQUEST:
-            return { ...state, loading: true };
-        case SEND_CHAT_MESSAGE_SUCCESS:
-            return { ...state, loading: false, messages: [...state.messages, action.payload] };
-        case SEND_CHAT_MESSAGE_FAILURE:
-            return { ...state, loading: false, error: action.payload };
-        case RECEIVE_CHAT_MESSAGE:
-            return { ...state, messages: [...state.messages, action.payload] };
-        case SET_TYPING_INDICATOR:
-            const { user, isTyping } = action.payload;
-            if (isTyping) {
-                return { ...state, typingUsers: [...state.typingUsers, user] };
-            } else {
-                return { ...state, typingUsers: state.typingUsers.filter((u) => u !== user) };
-            }
-        case FETCH_CHAT_MESSAGES_REQUEST:
-            return { ...state, loading: true };
-        case FETCH_CHAT_MESSAGES_SUCCESS:
-            return { ...state, loading: false, messages: action.payload };
-        case FETCH_CHAT_MESSAGES_FAILURE:
-            return { ...state, loading: false, error: action.payload };
-        case SET_ONLINE_USERS:
-            return { ...state, onlineUsers: action.payload };
-        default:
-            return state;
-    }
-};
-
-export default chatReducer;
+// Actions to handle online users
+export const setOnlineUsers = (users) => ({ type: SET_ONLINE_USERS, payload: users });
