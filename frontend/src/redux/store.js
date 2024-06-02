@@ -7,8 +7,15 @@ import quizReducer from './reducers/quizReducer';
 import resourceReducer from './reducers/resourceReducer';
 import enrollmentReducer from './reducers/enrollmentReducer';
 import forumReducer from './reducers/forumReducer';
-import authReducer from './reducers/authReducer'; // Add your auth reducer here
+import authReducer from './reducers/authReducer';
+import adaptiveReducer from './reducers/adaptiveReducer';
+import chatReducer from './reducers/chatReducer'; 
 
+const store = configureStore({
+    reducer: rootReducer,
+});
+
+export default store;
 const rootReducer = combineReducers({
   cours: coursReducer,
   user: userReducer,
@@ -19,11 +26,12 @@ const rootReducer = combineReducers({
   enrollment: enrollmentReducer,
   forum: forumReducer,
   auth: authReducer,
+  adaptive: adaptiveReducer,
+  chat: chatReducer, 
 });
 
 const store = configureStore({
-  reducer: rootReducer, // Combined reducer
-  // Middleware is automatically added, including redux-thunk
+  reducer: rootReducer,
 });
 
 export default store;

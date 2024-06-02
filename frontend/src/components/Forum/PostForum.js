@@ -3,12 +3,18 @@ import { Button, Dialog, DialogActions, DialogContent, DialogContentText, Dialog
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { formatDistanceToNow } from 'date-fns';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import Comment from './Comment';
+import CommentList from './CommentList';
+import CustomButton from './CustomButton';  // Assuming it's in the same directory
 
 function ForumPost({ post, user }) {
   const [openReportDialog, setOpenReportDialog] = useState(false);
+  const [openLikeDialog, setOpenLikeDialog] = useState(false);
   const [selectedReason, setSelectedReason] = useState('');
   const [reportSuccess, setReportSuccess] = useState(false);
   const [reportError, setReportError] = useState(null);
+  const [likeStatus, setLikeStatus] = useState(false);
 
   const handleClickOpen = () => {
     setOpenReportDialog(true);
@@ -19,6 +25,10 @@ function ForumPost({ post, user }) {
   const handleClose = () => {
     setOpenReportDialog(false);
     setSelectedReason('');
+  };
+
+  const handleLikeClose = () => {
+    setOpenLikeDialog(false);
   };
 
   const handleReportPost = async () => {
@@ -42,6 +52,11 @@ function ForumPost({ post, user }) {
   const handleReasonChange = (event) => {
     setSelectedReason(event.target.value);
     setReportError(null);
+  };
+
+  const handleLikePost = () => {
+    setLikeStatus(!likeStatus);  // Toggle like status
+    setOpenLikeDialog(true);     // Show feedback dialog
   };
 
   const isReportButtonDisabled = !selectedReason;
@@ -74,11 +89,11 @@ function ForumPost({ post, user }) {
             <Link to={`/posts/${post.id}`} component={Button} variant="text" color="primary">
               View Comments
             </Link>
-            <Button onClick={() => { /* Handle like/unlike functionality */ }} variant="text" color="primary">
-              Like
-            </Button>
+            <CustomButton onClick={handleLikePost} variant="text" color={likeStatus ? "secondary" : "primary"} startIcon={<ThumbUpIcon />}>
+              {likeStatus ? 'Unlike' : 'Like'}
+            </CustomButton>
             {!isInstructorOrSupervisor && (
-              <Button
+              <CustomButton
                 onClick={handleClickOpen}
                 variant="outlined"
                 color="error"
@@ -93,14 +108,16 @@ function ForumPost({ post, user }) {
                 aria-label="Report Post"
               >
                 Report
-              </Button>
+              </CustomButton>
             )}
             {isInstructorOrSupervisor && (
-              <Button onClick={() => { /* Handle delete functionality */ }} variant="text" color="error">
+              <CustomButton onClick={() => { /* Handle delete functionality */ }} variant="text" color="error">
                 Delete
-              </Button>
+              </CustomButton>
             )}
           </Box>
+          <Comment postId={post.id} />
+          <CommentList postId={post.id} />
         </CardContent>
       </Card>
 
@@ -137,6 +154,21 @@ function ForumPost({ post, user }) {
               Report
             </Button>
           )}
+        </DialogActions>
+      </Dialog>
+      
+      {/* Like Feedback Dialog */}
+      <Dialog open={openLikeDialog} onClose={handleLikeClose}>
+        <DialogTitle>{likeStatus ? 'Liked!' : 'Unliked!'}</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            You have {likeStatus ? 'liked' : 'unliked'} this post.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleLikeClose} color="primary" autoFocus>
+            Close
+          </Button>
         </DialogActions>
       </Dialog>
     </div>

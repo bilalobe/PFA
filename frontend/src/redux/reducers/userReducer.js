@@ -18,7 +18,7 @@ const initialState = {
   error: null,
   searchQuery: '',
   currentPage: 1,
-  usersPerPage: 9, 
+  usersPerPage: 9,
   profile: null, // Profile state
 };
 
