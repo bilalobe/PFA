@@ -1,36 +1,56 @@
 import axios from 'axios';
+import {
+  UPLOAD_RESOURCE_REQUEST,
+  UPLOAD_RESOURCE_SUCCESS,
+  UPLOAD_RESOURCE_FAILURE,
+  FETCH_RESOURCES_REQUEST,
+  FETCH_RESOURCES_SUCCESS,
+  FETCH_RESOURCES_FAILURE,
+} from './types';
 
-export const fetchForumPostsRequest = () => ({ type: 'FETCH_FORUM_POSTS_REQUEST' });
-export const fetchForumPostsSuccess = (posts) => ({ type: 'FETCH_FORUM_POSTS_SUCCESS', payload: posts });
-export const fetchForumPostsFailure = (error) => ({ type: 'FETCH_FORUM_POSTS_FAILURE', payload: error });
+// Fetch resources action
+export const fetchResourcesRequest = () => ({ type: FETCH_RESOURCES_REQUEST });
+export const fetchResourcesSuccess = (resources) => ({ type: FETCH_RESOURCES_SUCCESS, payload: resources });
+export const fetchResourcesFailure = (error) => ({ type: FETCH_RESOURCES_FAILURE, payload: error });
 
-export const createForumPostRequest = () => ({ type: 'CREATE_FORUM_POST_REQUEST' });
-export const createForumPostSuccess = (post) => ({ type: 'CREATE_FORUM_POST_SUCCESS', payload: post });
-export const createForumPostFailure = (error) => ({ type: 'CREATE_FORUM_POST_FAILURE', payload: error });
-
-export const fetchForumPosts = (courseId) => {
+export const fetchResources = (moduleId, searchQuery) => {
   return async (dispatch) => {
-    dispatch(fetchForumPostsRequest());
+    dispatch(fetchResourcesRequest());
     try {
-      const response = await axios.get(`/api/courses/${courseId}/forums/`);
-      dispatch(fetchForumPostsSuccess(response.data));
+      let url = '/api/resources/';
+      if (moduleId) {
+        url += `?module=${moduleId}`;
+      }
+      if (searchQuery) {
+        url += moduleId ? `&search=${searchQuery}` : `?search=${searchQuery}`;
+      }
+      const response = await axios.get(url);
+      dispatch(fetchResourcesSuccess(response.data));
     } catch (error) {
-      dispatch(fetchForumPostsFailure(error.message));
+      dispatch(fetchResourcesFailure(error.message));
     }
   };
 };
 
-export const createForumPost = (courseId, title, content) => {
+// Upload resource action
+export const uploadResourceRequest = () => ({ type: UPLOAD_RESOURCE_REQUEST });
+export const uploadResourceSuccess = (resource) => ({ type: UPLOAD_RESOURCE_SUCCESS, payload: resource });
+export const uploadResourceFailure = (error) => ({ type: UPLOAD_RESOURCE_FAILURE, payload: error });
+
+export const uploadResource = (formData, onUploadProgress) => {
   return async (dispatch) => {
-    dispatch(createForumPostRequest());
+    dispatch(uploadResourceRequest());
     try {
-      const response = await axios.post(`/api/courses/${courseId}/forums/threads/`, {
-        title,
-        content,
+      const response = await axios.post('/api/resources/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          // ... authorization headers (if needed)
+        },
+        onUploadProgress,
       });
-      dispatch(createForumPostSuccess(response.data));
+      dispatch(uploadResourceSuccess(response.data));
     } catch (error) {
-      dispatch(createForumPostFailure(error.message));
+      dispatch(uploadResourceFailure(error.message));
     }
   };
 };

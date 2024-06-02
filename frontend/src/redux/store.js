@@ -18,7 +18,7 @@ const rootReducer = combineReducers({
   resource: resourceReducer,
   enrollment: enrollmentReducer,
   forum: forumReducer,
-  auth: authReducer, // Add your auth slice
+  auth: authReducer,
 });
 
 const store = configureStore({

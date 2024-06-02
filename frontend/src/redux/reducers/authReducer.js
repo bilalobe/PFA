@@ -1,28 +1,41 @@
+import { createSlice } from '@reduxjs/toolkit';
+import { loginUser, logoutUser } from '../actions/authActions';
+
 const initialState = {
-    user: null, 
-    token: null, 
-    isAuthenticated: false,
-    loading: false,
-    error: null,
-  };
-  
-  const authReducer = (state = initialState, action) => {
-    switch (action.type) {
-      case 'LOGIN_REQUEST':
-        return { ...state, loading: true };
-      case 'LOGIN_SUCCESS':
-        return { ...state, user: action.payload.user, token: action.payload.token, isAuthenticated: true, loading: false };
-      case 'LOGIN_FAILURE':
-        return { ...state, error: action.payload, loading: false };
-      case 'LOGOUT_REQUEST':
-        return { ...state, loading: true };
-      case 'LOGOUT_SUCCESS':
-        return { ...state, user: null, token: null, isAuthenticated: false, loading: false };
-      case 'LOGOUT_FAILURE':
-        return { ...state, error: action.payload, loading: false };
-      default:
-        return state;
-    }
-  };
-  
-  export default authReducer;
+  user: null,
+  token: null,
+  isAuthenticated: false,
+  loading: false,
+  error: null,
+};
+
+const authSlice = createSlice({
+  name: 'auth',
+  initialState,
+  reducers: {},
+  extraReducers(builder) {
+    builder
+      .addCase(loginUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
+        state.loading = false;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.error = action.payload;
+        state.loading = false;
+      })
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null;
+        state.token = null;
+        state.isAuthenticated = false;
+        state.loading = false;
+      });
+  },
+});
+
+export const { /* ... other reducers ... */ } = authSlice.actions;
+export default authSlice.reducer;

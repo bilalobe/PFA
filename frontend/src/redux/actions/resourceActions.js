@@ -8,7 +8,7 @@ import {
   FETCH_RESOURCES_FAILURE,
 } from './types';
 
-// Fetch resources actions
+// Fetch resources action
 export const fetchResourcesRequest = () => ({ type: FETCH_RESOURCES_REQUEST });
 export const fetchResourcesSuccess = (resources) => ({ type: FETCH_RESOURCES_SUCCESS, payload: resources });
 export const fetchResourcesFailure = (error) => ({ type: FETCH_RESOURCES_FAILURE, payload: error });
@@ -32,7 +32,7 @@ export const fetchResources = (moduleId, searchQuery) => {
   };
 };
 
-// Upload resource actions
+// Upload resource action
 export const uploadResourceRequest = () => ({ type: UPLOAD_RESOURCE_REQUEST });
 export const uploadResourceSuccess = (resource) => ({ type: UPLOAD_RESOURCE_SUCCESS, payload: resource });
 export const uploadResourceFailure = (error) => ({ type: UPLOAD_RESOURCE_FAILURE, payload: error });
@@ -44,6 +44,7 @@ export const uploadResource = (formData, onUploadProgress) => {
       const response = await axios.post('/api/resources/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          // ... authorization headers (if needed)
         },
         onUploadProgress,
       });
