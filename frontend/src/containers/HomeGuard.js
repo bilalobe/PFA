@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useAuth } from '../hooks/useAuth';
@@ -12,7 +13,6 @@ function HomeGuard() {
   const userProfile = useSelector((state) => state.user.profile);
   const userLoading = useSelector((state) => state.user.loading);
 
-  // Fetch user profile when authenticated
   useEffect(() => {
     if (isAuthenticated) {
       dispatch(fetchUserProfile());

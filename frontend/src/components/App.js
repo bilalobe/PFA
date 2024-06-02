@@ -15,8 +15,15 @@ import theme from './theme';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function retryAuthentication() {
-  // Implement retry logic here, if needed
+  
 }
+
+const theme = createTheme({
+  palette: {
+    primary: { main: '#007bff' },
+    secondary: { main: '#6c757d' },
+  },
+});
 
 function App() {
   return (
