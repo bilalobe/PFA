@@ -21,5 +21,19 @@ module.exports = {
     react: {  
       version: 'detect',  
     },  
+    'import/resolver': {  
+      node: {  
+        extensions: ['.js', '.jsx'],  
+      },  
+      alias: {  
+        map: [  
+          ['@', './src'],  
+        ],  
+        extensions: ['.js', '.jsx'],  
+      },  
+      webpack: {  
+        config: './webpack.config.js',  
+      },  
+    },  
   },  
 };  
