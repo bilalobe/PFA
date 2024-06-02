@@ -18,6 +18,11 @@ dist/
 .env  
 keys.env
 
+# Ignore VS Code build
+.vscode/
+
+
 # Node modules  
 node_modules/  
 *.env
+
