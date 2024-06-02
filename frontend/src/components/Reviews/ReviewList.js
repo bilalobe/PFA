@@ -1,34 +1,31 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { List, ListItem, ListItemText, Typography, Rating, CircularProgress, Alert } from '@mui/material';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchReviews } from '../../actions/reviewActions';
+import { List, Box, Typography, CircularProgress, Alert } from '@mui/material';
+import ReviewCard from './ReviewCard';
 
 function ReviewList({ courseId }) {
-  const [reviews, setReviews] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+  const { reviews, isLoading, error } = useSelector((state) => state.reviews);
 
   useEffect(() => {
-    const fetchReviews = async () => {
-      setIsLoading(true);
-      try {
-        const response = await axios.get(`/api/courses/${courseId}/reviews/`);
-        setReviews(response.data);
-      } catch (err) {
-        setError(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchReviews();
-  }, [courseId]);
+    dispatch(fetchReviews(courseId));
+  }, [dispatch, courseId]);
 
   if (isLoading) {
-    return <CircularProgress />;
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="50vh" aria-label="Loading reviews">
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (error) {
-    return <Alert severity="error">{error.message || 'An error occurred while fetching reviews.'}</Alert>;
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="50vh" aria-label="Error loading reviews">
+        <Alert severity="error">{error}</Alert>
+      </Box>
+    );
   }
 
   return (
@@ -39,17 +36,7 @@ function ReviewList({ courseId }) {
       {reviews.length > 0 ? (
         <List>
           {reviews.map((review) => (
-            <ListItem key={review.id} alignItems="flex-start">
-              <ListItemText
-                primary={`${review.user} - ${new Date(review.created_at).toLocaleDateString()}`}
-                secondary={
-                  <>
-                    <Rating value={review.rating} readOnly />
-                    <Typography component="span">{review.comment}</Typography>
-                  </>
-                }
-              />
-            </ListItem>
+            <ReviewCard key={review.id} review={review} />
           ))}
         </List>
       ) : (

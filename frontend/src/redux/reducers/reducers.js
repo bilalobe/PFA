@@ -8,8 +8,15 @@ import questionReducer from './questionReducer';
 import quizReducer from './quizReducer';
 import forumReducer from './forumReducer';
 import enrollmentReducer from './enrollmentReducer'
+import chatReducer from './chatReducer';
+import reviewReducer from './reviewReducer';
+import commentReducer from './commentReducer';
+import authReducer from './authReducer';
+import adaptativeReducer from './adaptativeReducer';
 
 const rootReducer = combineReducers({
+  auth: authReducer,
+  adaptative: adaptativeReducer,
   user: userReducer,
   module: moduleReducer,
   cours: courseReducer,
@@ -17,7 +24,10 @@ const rootReducer = combineReducers({
   quiz: quizReducer,
   resouce: resourceReducer,
   forum: forumReducer,
-  enrollment: enrollmentReducer
+  enrollment: enrollmentReducer,
+  chat: chatReducer,
+  review: reviewReducer,
+  comment: commentReducer,
 });
 
 

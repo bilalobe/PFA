@@ -6,11 +6,12 @@ import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import CustomButton from './CustomButton';
 import { logoutUser } from '../../actions/authActions';
-import logo from '../../assets/logo.png'; // Adjust the path to your logo
+import logo from '../../assets/logo.png';
 
 function Navbar() {
     const dispatch = useDispatch();
     const user = useSelector((state) => state.auth.user);
+    const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
     const [anchorEl, setAnchorEl] = useState(null);
 
     const handleMenuOpen = (event) => {
@@ -26,38 +27,71 @@ function Navbar() {
         handleMenuClose();
     };
 
+    const renderNavLinks = () => {
+        if (isAuthenticated && user) {
+            if (user.role === 'admin') {
+                return (
+                    <>
+                        <CustomButton color="inherit" component={Link} to="/admin/dashboard">
+                            Admin Dashboard
+                        </CustomButton>
+                        <CustomButton color="inherit" component={Link} to="/profile">
+                            Profile
+                        </CustomButton>
+                    </>
+                );
+            } else if (user.role === 'teacher') {
+                return (
+                    <>
+                        <CustomButton color="inherit" component={Link} to="/teacher/dashboard">
+                            Teacher Dashboard
+                        </CustomButton>
+                        <CustomButton color="inherit" component={Link} to="/profile">
+                            Profile
+                        </CustomButton>
+                    </>
+                );
+            } else if (user.role === 'student') {
+                return (
+                    <>
+                        <CustomButton color="inherit" component={Link} to="/student/dashboard">
+                            Student Dashboard
+                        </CustomButton>
+                        <CustomButton color="inherit" component={Link} to="/profile">
+                            Profile
+                        </CustomButton>
+                    </>
+                );
+            }
+        }
+
+        return (
+            <>
+                <CustomButton color="inherit" component={Link} to="/login">
+                    Login
+                </CustomButton>
+                <CustomButton color="inherit" component={Link} to="/register">
+                    Register
+                </CustomButton>
+            </>
+        );
+    };
+
     return (
-        <AppBar position="static" sx={{ bgcolor: 'primary.main' }}>
+        <AppBar position="static" sx={{ bgcolor: 'primary.main', py: 1 }}>
             <Toolbar>
                 <Box component={Link} to="/" sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none', flexGrow: 1 }}>
                     <img src={logo} alt="logo" style={{ width: '40px', marginRight: '10px' }} />
-                    <Typography variant="h6" sx={{ color: 'inherit' }}>
+                    <Typography variant="h6" sx={{ color: 'inherit', fontWeight: 'bold', fontSize: '1.2rem' }}>
                         MyApp
                     </Typography>
                 </Box>
-                <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+                <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
                     <CustomButton color="inherit" component={Link} to="/">
                         Home
                     </CustomButton>
-                    <CustomButton color="inherit" component={Link} to="/modules/1">
-                        Modules
-                    </CustomButton>
-                    <CustomButton color="inherit" component={Link} to="/recommendations">
-                        Recommendations
-                    </CustomButton>
-                    <CustomButton color="inherit" component={Link} to="/edit-profile">
-                        Edit Profile
-                    </CustomButton>
-                    {user ? (
-                        <CustomButton color="inherit" component={Link} to={`/profile/${user.id}`}>
-                            Profile
-                        </CustomButton>
-                    ) : (
-                        <CustomButton color="inherit" component={Link} to="/login">
-                            Login
-                        </CustomButton>
-                    )}
-                    {user && (
+                    {renderNavLinks()}
+                    {isAuthenticated && (
                         <CustomButton
                             color="inherit"
                             onClick={handleLogout}
@@ -70,9 +104,9 @@ function Navbar() {
                 <IconButton
                     edge="start"
                     color="inherit"
-                    aria-label="open menu"
+                    aria-label="open drawer"
                     onClick={handleMenuOpen}
-                    sx={{ display: { xs: 'block', md: 'none' } }}
+                    sx={{ display: { xs: 'flex', md: 'none' } }}
                 >
                     <MenuIcon />
                 </IconButton>
@@ -89,17 +123,53 @@ function Navbar() {
                     }}
                     aria-label="main navigation"
                 >
-                    <MenuItem component={Link} to="/" onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>Home</MenuItem>
-                    <MenuItem component={Link} to="/modules/1" onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>Modules</MenuItem>
-                    <MenuItem component={Link} to="/recommendations" onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>Recommendations</MenuItem>
-                    <MenuItem component={Link} to="/edit-profile" onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>Edit Profile</MenuItem>
-                    {user ? (
+                    <MenuItem component={Link} to="/" onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>
+                        Home
+                    </MenuItem>
+                    {isAuthenticated && user?.role === 'admin' && (
                         <>
-                            <MenuItem component={Link} to={`/profile/${user.id}`} onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>Profile</MenuItem>
-                            <MenuItem onClick={handleLogout} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>Logout</MenuItem>
+                            <MenuItem component={Link} to="/admin/dashboard" onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>
+                                Admin Dashboard
+                            </MenuItem>
+                            <MenuItem component={Link} to="/profile" onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>
+                                Profile
+                            </MenuItem>
                         </>
-                    ) : (
-                        <MenuItem component={Link} to="/login" onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>Login</MenuItem>
+                    )}
+                    {isAuthenticated && user?.role === 'teacher' && (
+                        <>
+                            <MenuItem component={Link} to="/teacher/dashboard" onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>
+                                Teacher Dashboard
+                            </MenuItem>
+                            <MenuItem component={Link} to="/profile" onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>
+                                Profile
+                            </MenuItem>
+                        </>
+                    )}
+                    {isAuthenticated && user?.role === 'student' && (
+                        <>
+                            <MenuItem component={Link} to="/student/dashboard" onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>
+                                Student Dashboard
+                            </MenuItem>
+                            <MenuItem component={Link} to="/profile" onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>
+                                Profile
+                            </MenuItem>
+                        </>
+                    )}
+                    {!isAuthenticated && (
+                        <>
+                            <MenuItem component={Link} to="/login" onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>
+                                Login
+                            </MenuItem>
+                            <MenuItem component={Link} to="/register" onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>
+                                Register
+                            </MenuItem>
+                        </>
+                    )}
+                    {isAuthenticated && (
+                        <MenuItem onClick={handleLogout} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>
+                            Logout
+                        </MenuItem>
                     )}
                 </Menu>
             </Toolbar>

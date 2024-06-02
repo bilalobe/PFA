@@ -1,30 +1,44 @@
+// courseReducer.js
+
 import {
-  FETCH_COURS_REQUEST,
-  FETCH_COURS_SUCCESS,
-  FETCH_COURS_FAILURE,
+  FETCH_COURSES_REQUEST,
+  FETCH_COURSES_SUCCESS,
+  FETCH_COURSES_FAILURE,
+  FETCH_COURSES_REQUEST,
+  FETCH_COURSES_SUCCESS,
+  FETCH_COURSES_FAILURE,
 } from '../actions/types';
 
 const initialState = {
-  cours: [],
+  courses: [],
+  course: null,
   isLoading: false,
   error: null,
 };
 
-const coursReducer = (state = initialState, action) => {
+const courseReducer = (state = initialState, action) => {
   switch (action.type) {
-    case FETCH_COURS_REQUEST:
+    case FETCH_COURSES_REQUEST:
+    case FETCH_COURSES_REQUEST:
       return {
         ...state,
         isLoading: true,
-        error: null, // Reset error on new fetch request
+        error: null,
       };
-    case FETCH_COURS_SUCCESS:
+    case FETCH_COURSES_SUCCESS:
       return {
         ...state,
         isLoading: false,
-        cours: action.payload,
+        courses: action.payload,
       };
-    case FETCH_COURS_FAILURE:
+    case FETCH_COURSES_SUCCESS:
+      return {
+        ...state,
+        isLoading: false,
+        course: action.payload,
+      };
+    case FETCH_COURSES_FAILURE:
+    case FETCH_COURSES_FAILURE:
       return {
         ...state,
         isLoading: false,
@@ -35,4 +49,4 @@ const coursReducer = (state = initialState, action) => {
   }
 };
 
-export default coursReducer;
+export default courseReducer;
