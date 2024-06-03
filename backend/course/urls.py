@@ -3,11 +3,11 @@ from rest_framework import routers
 from rest_framework_nested.routers import NestedSimpleRouter
 
 from backend.enrollment.views import EnrollmentViewSet 
-from .views import CoursViewSet, QuizViewSet, ModuleViewSet, list_enrollments 
+from .views import CourseViewSet, QuizViewSet, ModuleViewSet, list_enrollments 
 
 # Create a router and register our viewsets with it.
 router = routers.DefaultRouter()
-router.register(r'courses', CoursViewSet)
+router.register(r'courses', CourseViewSet)
 
 # Initialize the nested router for modules under `courses` (using 'course' for lookup)
 courses_router = NestedSimpleRouter(router, r'courses', lookup='course') 

@@ -2,31 +2,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
-from django.conf.urls import url
-from backend.forum.views import moderation_dashboard, delete_post, report_post 
-from rest_framework import TokenRefreshView  # Import TokenRefreshView
-
-from .views import (
-    registration_view,
-    protected_view,
-    teacher_only_view,
-    MyTokenObtainPairView,
-)
-
-from frontend import views
-from django.contrib.auth import views as auth_views
-from rest_framework import permissions
+from django.conf.urls import url  # Optional, for regex URL patterns
+from backend.forum.views import moderation_dashboard, delete_post, report_post
+from rest_framework_simplejwt.views import TokenRefreshView
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+from .views import registration_view, protected_view, teacher_only_view, MyTokenObtainPairView
 
-# Spectacular imports
-from drf_spectacular.views import (
-    SpectacularAPIView,
-    SpectacularRedocView,
-    SpectacularSwaggerView,
-)
-
-
+# Schema View Configuration
 schema_view = get_schema_view(
     openapi.Info(
         title="PFA API",
@@ -44,7 +28,7 @@ urlpatterns = [
     # Authentication endpoints
     path('api/auth/register/', registration_view, name='register'),
     path('api/auth/login/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'), # Correctly import TokenRefreshView
+    path('api/auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),  # Token refresh endpoint
 
     # Protected endpoints
     path('api/protected/', protected_view, name='protected_view'),

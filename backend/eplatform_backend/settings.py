@@ -1,41 +1,30 @@
 import os
-import dj_database_url
 from pathlib import Path
-from decouple import config
 from datetime import timedelta
 
-from azure.storage.blob import BlobServiceClient
-import sentry_sdk  
-from sentry_sdk.integrations.django import DjangoIntegration  
+import dj_database_url
+from decouple import config
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Directory for locale files  
-LOCALE_PATHS = [  
-    os.path.join(BASE_DIR, 'locale'),  
-] 
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),
+]
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
+SECRET_KEY = config('SECRET_KEY')
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')  
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=False, cast=bool)  
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost').split(',')
 
-ALLOWED_HOSTS = ['your-deployment-hostname']
-
-AZURE_STORAGE_CONNECTION_STRING = os.environ.get('AZURE_STORAGE_CONNECTION_STRING')
-AZURE_STORAGE_ACCOUNT_NAME = os.environ.get('AZURE_STORAGE_ACCOUNT_NAME')
-AZURE_STORAGE_CONTAINER_NAME = os.environ.get('AZURE_STORAGE_CONTAINER_NAME')
-# ...
+AZURE_STORAGE_CONNECTION_STRING = config('AZURE_STORAGE_CONNECTION_STRING')
+AZURE_STORAGE_ACCOUNT_NAME = config('AZURE_STORAGE_ACCOUNT_NAME')
+AZURE_STORAGE_CONTAINER_NAME = config('AZURE_STORAGE_CONTAINER_NAME')
 
 DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
 STATICFILES_STORAGE = 'storages.backends.azure_storage.AzureStorage'
 STATICFILES_LOCATION = 'static'
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -44,9 +33,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_filters',
-    'django_extensions',
-    'corsheaders',
+    'django_filters',  # Filtering
+    'django_extensions',  # Additional commands
+    'corsheaders',  # Cross-Origin Resource Sharing
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
@@ -55,9 +44,9 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'allauth.socialaccount.providers.google', 
+    'allauth.socialaccount.providers.google',
     'dj_rest_auth.registration',
-    'drf_spectacular',
+    'drf_spectacular',  # API documentation
     'chatbot',
     'user',
     'cours',
@@ -69,7 +58,6 @@ INSTALLED_APPS = [
     'forum',
     'moderation',
     'resource',
-
 ]
 
 MIDDLEWARE = [
@@ -105,62 +93,47 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'dj_ango.wsgi.application'
 
-# Database
-DATABASES = {  
-    'default': dj_database_url.config(default=config('DATABASE_URL'))  
-}  
+DATABASES = {
+    'default': dj_database_url.config(default=config('DATABASE_URL'))
+}
 
 REST_FRAMEWORK = {
-    # Authentication classes
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',  # Enable session authentication
-        'rest_framework.authentication.BasicAuthentication',  # Enable basic authentication for testing
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
     ),
-
-    # Permission classes
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-
-    # Pagination
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
-
-    # Filter backends
     'DEFAULT_FILTER_BACKENDS': (
-        'django_filters.rest_framework.DjangoFilterBackend',  # Enable DjangoFilterBackend for filtering
-        'rest_framework.filters.SearchFilter',  # Enable search filter
-        'rest_framework.filters.OrderingFilter',  # Enable ordering filter
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
     ),
-
-    # Throttling
     'DEFAULT_THROTTLE_CLASSES': (
-        'rest_framework.throttling.AnonRateThrottle',  # Throttle for anonymous users
-        'rest_framework.throttling.UserRateThrottle',  # Throttle for authenticated users
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
     ),
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/day',  # 100 requests per day for anonymous users
-        'user': '1000/day',  # 1000 requests per day for authenticated users
+        'anon': '100/day',
+        'user': '1000/day',
     },
-
-    # Exception handling
-    'EXCEPTION_HANDLER': 'dj_ango.exceptions.custom_exception_handler',   # Default exception handler (optional)
-
-    # Renderer and parser classes
+    'EXCEPTION_HANDLER': 'dj_ango.exceptions.custom_exception_handler',
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',  # Enable browsable API renderer
+        'rest_framework.renderers.BrowsableAPIRenderer',
     ),
     'DEFAULT_PARSER_CLASSES': (
         'rest_framework.parsers.JSONParser',
         'rest_framework.parsers.FormParser',
-        'rest_framework.parsers.MultiPartParser',  # Enable multipart parser for file uploads
+        'rest_framework.parsers.MultiPartParser',
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
-# DRF-Spectacular settings
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Your E-Learning Platform API',
     'DESCRIPTION': 'API documentation for your e-learning platform',
@@ -174,9 +147,6 @@ SPECTACULAR_SETTINGS = {
     'SWAGGER_UI_DIST_PATH': None,
 }
 
-
-
-# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -192,14 +162,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-# Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'frontend' / 'build' / 'static',
@@ -207,14 +175,11 @@ STATICFILES_DIRS = [
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media/'
 
-# CORS Configuration (Allow all origins for development)
 CORS_ORIGIN_ALLOW_ALL = True
 
-# Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CACHES = {
@@ -227,38 +192,38 @@ CACHES = {
     }
 }
 
-sentry_sdk.init(  
-    dsn="https://examplePublicKey@o0.ingest.sentry.io/0",  
-    integrations=[DjangoIntegration()],  
-    traces_sample_rate=1.0,  
-    send_default_pii=True  
-)  
+sentry_sdk.init(
+    dsn=config('SENTRY_DSN', default='https://examplePublicKey@o0.ingest.sentry.io/0'),
+    integrations=[
+        DjangoIntegration(),
+    ],
+    traces_sample_rate=1.0,
+    send_default_pii=True
+)
 
 AUTHENTICATION_BACKENDS = [
-    # ... other authentication backends ...
-    'allauth.account.auth_backends.AuthenticationBackend', 
-    # ...
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-SITE_ID = 1 # Set your site ID
+SITE_ID = 1
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = 'your_google_client_id'  # Replace with your Google client ID
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'your_google_client_secret' # Replace with your Google client secret
-
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = config('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = config('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
 SOCIAL_AUTH_URL_NAMESPACE = 'social'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  # Or your email provider's SMTP server
-EMAIL_PORT = 587  # Or the appropriate port for your provider
-EMAIL_HOST_USER = 'your_email@gmail.com'  # Replace with your email address
-EMAIL_HOST_PASSWORD = 'your_password'  # Replace with your email password
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = config('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = 'Your E-Learning Platform <your_email@gmail.com>'
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5), # Short lifespan for access tokens
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),  # Longer lifespan for refresh tokens
-    'ROTATE_REFRESH_TOKENS': True,             # Rotate refresh tokens on each refresh request
-    'BLACKLIST_AFTER_ROTATION': True,         # Blacklist old refresh tokens after rotation
-    'ALGORITHM': 'HS256',                     # Use HS256 algorithm for token signing
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': 'HS256',
 }

@@ -1,11 +1,11 @@
 from rest_framework import viewsets, permissions, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Course, Module, Quiz, Enrollment
-from .serializers import CoursSerializer, ModuleSerializer, QuizSerializer, EnrollmentSerializer
+from .models import Course, Module, Quiz
+from .serializers import CoursSerializer, ModuleSerializer, QuizSerializer
 from .permissions import IsTeacherOrReadOnly, IsSupervisor
 
-class CoursViewSet(viewsets.ModelViewSet):
+class CourseViewSet(viewsets.ModelViewSet):
     queryset = Course.objects.all()
     serializer_class = CoursSerializer
     permission_classes = [permissions.IsAuthenticated, IsTeacherOrReadOnly | IsSupervisor]
@@ -43,4 +43,3 @@ class ModuleViewSet(viewsets.ModelViewSet):
         quizzes = Quiz.objects.filter(module=module)
         serializer = QuizSerializer(quizzes, many=True)
         return Response(serializer.data)
-
