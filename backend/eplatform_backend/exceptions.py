@@ -1,39 +1,60 @@
-import logging 
+import logging
 from rest_framework.views import exception_handler
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.exceptions import APIException, NotFound, PermissionDenied, AuthenticationFailed
+from rest_framework.exceptions import NotFound, PermissionDenied, AuthenticationFailed, APIException
+from django.http import JsonResponse
 
 logger = logging.getLogger(__name__)
 
 def custom_exception_handler(exc, context):
     """
-    Custom exception handler for the API.
-    Logs exceptions and returns a consistent error response format.
+    Custom exception handler that logs errors and provides consistent error responses.
     """
-
+    # Call REST framework's default exception handler first
     response = exception_handler(exc, context)
 
-    # Log the exception
-    view_name = context.get('view', 'unknown view')
-    logger.error(
-        f"Exception occurred in {view_name}: {exc}",
-        exc_info=True,
-        extra={'request': context['request']}
-    )
-
-    # Customize error responses for specific exceptions
-    if isinstance(exc, NotFound):
-        response = Response({'error': 'Not Found', 'detail': str(exc)}, status=status.HTTP_404_NOT_FOUND)
-    elif isinstance(exc, PermissionDenied):
-        response = Response({'error': 'Permission Denied', 'detail': str(exc)}, status=status.HTTP_403_FORBIDDEN)
-    elif isinstance(exc, AuthenticationFailed):
-        response = Response({'error': 'Authentication Failed', 'detail': str(exc)}, status=status.HTTP_401_UNAUTHORIZED)
-    elif isinstance(exc, APIException):
-        response = Response({'error': exc.default_detail, 'detail': str(exc)}, status=exc.status_code)
-
-    # If the exception is unhandled, log it and return a generic 500 error
-    if response is None:
-        response = Response({'error': 'Internal Server Error', 'detail': 'An unexpected error occurred.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    if response is not None:
+        logger.error(f"Error: {str(exc)}", exc_info=True)
+        custom_response_data = {
+            'error': str(exc),
+            'status_code': response.status_code,
+            'details': response.data,
+        }
+        response.data = custom_response_data
+    else:
+        if isinstance(exc, NotFound):
+            custom_response_data = {
+                'error': 'Not Found',
+                'status_code': 404,
+                'details': str(exc),
+            }
+            return JsonResponse(custom_response_data, status=404)
+        elif isinstance(exc, PermissionDenied):
+            custom_response_data = {
+                'error': 'Permission Denied',
+                'status_code': 403,
+                'details': str(exc),
+            }
+            return JsonResponse(custom_response_data, status=403)
+        elif isinstance(exc, AuthenticationFailed):
+            custom_response_data = {
+                'error': 'Authentication Failed',
+                'status_code': 401,
+                'details': str(exc),
+            }
+            return JsonResponse(custom_response_data, status=401)
+        elif isinstance(exc, APIException):
+            custom_response_data = {
+                'error': 'API Exception',
+                'status_code': 500,
+                'details': str(exc),
+            }
+            return JsonResponse(custom_response_data, status=500)
+        else:
+            custom_response_data = {
+                'error': 'Internal Server Error',
+                'status_code': 500,
+                'details': str(exc),
+            }
+            return JsonResponse(custom_response_data, status=500)
 
     return response

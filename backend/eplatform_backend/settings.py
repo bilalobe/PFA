@@ -16,7 +16,12 @@ LOCALE_PATHS = [
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost').split(',')
+# Ensure ALLOWED_HOSTS is always treated as a string
+allowed_hosts = config('ALLOWED_HOSTS', default='localhost')
+if isinstance(allowed_hosts, str):
+    ALLOWED_HOSTS = allowed_hosts.split(',')
+else:
+    ALLOWED_HOSTS = ['localhost']
 
 AZURE_STORAGE_CONNECTION_STRING = config('AZURE_STORAGE_CONNECTION_STRING')
 AZURE_STORAGE_ACCOUNT_NAME = config('AZURE_STORAGE_ACCOUNT_NAME')
@@ -93,46 +98,50 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'dj_ango.wsgi.application'
 
+# Ensure DATABASE_URL default value is a string
 DATABASES = {
-    'default': dj_database_url.config(default=config('DATABASE_URL'))
+    'default': dj_database_url.config(default=config('DATABASE_URL', default=''))
 }
 
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
-    'DEFAULT_FILTER_BACKENDS': (
-        'django_filters.rest_framework.DjangoFilterBackend',
-        'rest_framework.filters.SearchFilter',
-        'rest_framework.filters.OrderingFilter',
-    ),
-    'DEFAULT_THROTTLE_CLASSES': (
-        'rest_framework.throttling.AnonRateThrottle',
-        'rest_framework.throttling.UserRateThrottle',
-    ),
-    'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/day',
-        'user': '1000/day',
-    },
-    'EXCEPTION_HANDLER': 'dj_ango.exceptions.custom_exception_handler',
-    'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',
-    ),
-    'DEFAULT_PARSER_CLASSES': (
-        'rest_framework.parsers.JSONParser',
-        'rest_framework.parsers.FormParser',
-        'rest_framework.parsers.MultiPartParser',
-    ),
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-}
+REST_FRAMEWORK = {  
+    'DEFAULT_AUTHENTICATION_CLASSES': (  
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  
+        'rest_framework.authentication.SessionAuthentication',  
+        'rest_framework.authentication.BasicAuthentication',  
+    ),  
+    'DEFAULT_PERMISSION_CLASSES': (  
+        'rest_framework.permissions.IsAuthenticated',  
+    ),  
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',  
+    'PAGE_SIZE': 10,  
+    'DEFAULT_FILTER_BACKENDS': (  
+        'django_filters.rest_framework.DjangoFilterBackend',  
+        'rest_framework.filters.SearchFilter',  
+        'rest_framework.filters.OrderingFilter',  
+    ),  
+    'DEFAULT_THROTTLE_CLASSES': (  
+        'rest_framework.throttling.AnonRateThrottle',  
+        'rest_framework.throttling.UserRateThrottle',  
+    ),  
+    'DEFAULT_THROTTLE_RATES': (  
+        'anon': '100/day',  
+        'user': '1000/day',  
+    ),    
+    'DEFAULT_RENDERER_CLASSES': (  
+        'rest_framework.renderers.JSONRenderer',  
+        'rest_framework.renderers.BrowsableAPIRenderer',  
+    ),  
+    'DEFAULT_PARSER_CLASSES': (  
+        'rest_framework.parsers.JSONParser',  
+        'rest_framework.parsers.FormParser',  
+        'rest_framework.parsers.MultiPartParser',  
+    ),  
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',  
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',  
+    'EXCEPTION_HANDLER': 'dj_ango.exceptions.custom_exception_handler',  # Set custom exception handler  
+    'NON_FIELD_ERRORS_KEY': 'error',  
+    'COERCE_DECIMAL_TO_STRING': False,  
+} 
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Your E-Learning Platform API',
@@ -192,33 +201,33 @@ CACHES = {
     }
 }
 
-sentry_sdk.init(
-    dsn=config('SENTRY_DSN', default='https://examplePublicKey@o0.ingest.sentry.io/0'),
-    integrations=[
-        DjangoIntegration(),
-    ],
-    traces_sample_rate=1.0,
-    send_default_pii=True
-)
+# Ensure SENTRY_DSN is a string
+sentry_dsn = config('SENTRY_DSN', default='')
+if isinstance(sentry_dsn, str):
+    sentry_sdk.init(
+        dsn=sentry_dsn,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=1.0,
+        send_default_pii=True
+    )
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'allauth.account.auth_backends.AuthenticationBackend',
+    'allauth.account.auth_backends.AuthenticationBackend', 
 ]
 
-SITE_ID = 1
+SITE_ID = 1 
 
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = config('SOCIAL_AUTH_GOOGLE_OAUTH2_KEY')
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = config('SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET')
-SOCIAL_AUTH_URL_NAMESPACE = 'social'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
+EMAIL_HOST = config('EMAIL_HOST')
+EMAIL_PORT = config('EMAIL_PORT', cast=int)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = 'Your E-Learning Platform <your_email@gmail.com>'
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
+DEFAULT_FROM_EMAIL = 'Your E-Learning Platform <noreply@example.com>'
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),

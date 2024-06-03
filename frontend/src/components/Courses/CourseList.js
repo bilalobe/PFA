@@ -134,7 +134,7 @@ const CourseList = () => {
           <CircularProgress aria-label="Loading courses" />
         </Box>
       ) : error ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt:2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
           <Alert severity="error" aria-label="Error loading courses">
             {error}
           </Alert>

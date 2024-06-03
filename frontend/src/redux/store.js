@@ -1,4 +1,4 @@
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
+import { combineReducers } from '@reduxjs/toolkit';
 import coursReducer from './reducers/coursReducer';
 import userReducer from './reducers/userReducer';
 import moduleReducer from './reducers/moduleReducer';
@@ -10,12 +10,9 @@ import forumReducer from './reducers/forumReducer';
 import authReducer from './reducers/authReducer';
 import adaptiveReducer from './reducers/adaptiveReducer';
 import chatReducer from './reducers/chatReducer'; 
+import { composeWithDevTools } from 'redux-devtools-extension';
 
-const store = configureStore({
-    reducer: rootReducer,
-});
-
-export default store;
+// Combine all reducers into a single object
 const rootReducer = combineReducers({
   cours: coursReducer,
   user: userReducer,
@@ -30,8 +27,17 @@ const rootReducer = combineReducers({
   chat: chatReducer, 
 });
 
-const store = configureStore({
-  reducer: rootReducer,
-});
+const thunk = require('redux-thunk').default;
+
+const initialState = {};
+
+const middleware = [thunk];
+
+const store = createStore(
+  rootReducer,
+  initialState,
+  composeWithDevTools(middleware(...middleware))
+);
+
 
 export default store;
