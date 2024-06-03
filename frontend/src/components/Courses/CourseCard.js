@@ -1,14 +1,25 @@
 import React from 'react';
-import { Grid, Typography, Card, CardContent, CardMedia, Box } from '@mui/material';
+import { Grid, Typography, Card, CardContent, CardMedia, Box, Alert } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { useAuth } from '../../hooks/useAuth';
-import CustomButton from './CustomButton'; // Adjust the import path as needed
+import CustomButton from '../Common/CustomButton'; // Adjust the import path as needed
 
-function CourseCard({ course }) {
-  const { isAuthenticated, loading } = useAuth();
+const CourseCard = ({ course }) => {
   const enrollments = useSelector((state) => state.enrollment.enrollments);
+  const { isAuthenticated, loading } = useSelector((state) => state.auth);
   const isEnrolled = enrollments.some((enrollment) => enrollment.course.id === course.id);
+
+  if (loading) {
+    return <CircularProgress />;
+  }
+
+  if (!course) {
+    return (
+      <Box>
+        <Alert severity="error">Course data could not be loaded.</Alert>
+      </Box>
+    );
+  }
 
   return (
     <Grid item xs={12} sm={6} md={4}>
@@ -95,6 +106,6 @@ function CourseCard({ course }) {
       </Card>
     </Grid>
   );
-}
+};
 
 export default CourseCard;

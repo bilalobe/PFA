@@ -2,7 +2,7 @@ from django.db import models
 from user.models import User
 
 
-class Cours(models.Model):
+class Course(models.Model):
     titre = models.CharField(max_length=255)
     description = models.TextField()
     niveau_difficulte = models.CharField(

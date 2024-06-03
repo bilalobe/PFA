@@ -1,5 +1,5 @@
 from django.db import models
-from cours.models import Module
+from course.models import Module
 from django.contrib.auth.models import User
 from django.utils import timezone
 

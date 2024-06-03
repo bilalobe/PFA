@@ -9,7 +9,7 @@ from .serializers import (
     ModuleUpdateSerializer,
 )
 from .permissions import IsInstructorOrReadOnly
-from cours.models import Cours
+from course.models import Course
 
 class ModuleViewSet(viewsets.ModelViewSet):
     """
@@ -41,7 +41,7 @@ class ModuleViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         course_id = self.kwargs.get('course_pk')
-        course = Cours.objects.get(pk=course_id)
+        course = Course.objects.get(pk=course_id)
         serializer.save(course=course, created_by=self.request.user)
 
     def create(self, request, *args, **kwargs):

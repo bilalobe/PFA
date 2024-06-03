@@ -1,10 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User 
-from cours.models import Cours  # Assuming forums are associated with courses
+from course.models import Course  # Assuming forums are associated with courses
 
 class Forum(models.Model):
      title = models.CharField(max_length=255)
-     course = models.ForeignKey(Cours, on_delete=models.CASCADE, related_name='forums')
+     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='forums')
      description = models.TextField(blank=True) 
      created_at = models.DateTimeField(auto_now_add=True) 
 

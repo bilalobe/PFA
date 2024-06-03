@@ -66,7 +66,7 @@ function ResourceList({ moduleId }) {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" aria-label="Loading resources">
+      <Box display="flex" justifyContent="center" mt={4} aria-label="Loading resources">
         <CircularProgress />
       </Box>
     );

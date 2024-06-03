@@ -1,5 +1,5 @@
 from django.db import models
-from cours.models import Module
+from course.models import Module
 
 class Resource(models.Model):
     file = models.FileField(upload_to='module_resources/') 

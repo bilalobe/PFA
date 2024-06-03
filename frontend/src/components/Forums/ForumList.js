@@ -1,29 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchForumPosts } from '../../actions/forumActions';
-import { Box, Grid, Card, CardContent, CardMedia, Typography, TextField, CircularProgress, Pagination, Button, Avatar } from '@mui/material';
+import {
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Avatar,
+  Typography,
+  TextField,
+  CircularProgress,
+  Pagination,
+  Alert,
+  Button
+} from '@mui/material';
+import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import Fuse from 'fuse.js';
 
 function ForumList({ courseId }) {
   const dispatch = useDispatch();
-  const forumPosts = useSelector(state => state.forum.forumPosts);
-  const loading = useSelector(state => state.forum.loading);
-  const error = useSelector(state => state.forum.error);
+  const { forumPosts, loading, error } = useSelector(state => state.forum);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    dispatch(fetchForumPosts(courseId));
+    dispatch(fetchForumPosts(courseId)).catch(err => {
+      console.error("Failed to fetch forum posts:", err);
+    });
   }, [dispatch, courseId]);
 
   const itemsPerPage = 10;
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const paginatedPosts = forumPosts.slice(startIndex, endIndex);
 
   const fuse = new Fuse(forumPosts, { keys: ['title', 'author.username', 'content'], includeScore: true });
-  const searchResults = searchQuery ? fuse.search(searchQuery).map(result => result.item) : paginatedPosts;
+  const searchResults = searchQuery ? fuse.search(searchQuery).map(result => result.item) : forumPosts;
+  const paginatedPosts = searchQuery ? searchResults.slice(startIndex, endIndex) : forumPosts.slice(startIndex, endIndex);
 
   return (
     <Box sx={{ mt: 4 }}>
@@ -36,14 +49,20 @@ function ForumList({ courseId }) {
         aria-label="Search posts"
         sx={{ mb: 2 }}
       />
-      
+
       {loading ? (
-        <CircularProgress />
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+          <CircularProgress aria-label="Loading forum posts" />
+        </Box>
       ) : error ? (
-        <Typography color="error">{error}</Typography>
+        <Box sx={{ mt: 2 }}>
+          <Alert severity="error" aria-label="Error loading forum posts">
+            {error}
+          </Alert>
+        </Box>
       ) : (
         <Grid container spacing={4}>
-          {searchResults.map((post) => (
+          {paginatedPosts.map((post) => (
             <Grid item xs={12} md={6} lg={4} key={post.id}>
               <Card>
                 {post.author.image && (
@@ -53,7 +72,9 @@ function ForumList({ courseId }) {
                   </Box>
                 )}
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>{post.title}</Typography>
+                  <Typography variant="h6" gutterBottom>
+                    {post.title}
+                  </Typography>
                   <Typography variant="body2" color="text.secondary" gutterBottom>
                     {format(new Date(post.created_at), 'PPP')}
                   </Typography>
@@ -69,9 +90,9 @@ function ForumList({ courseId }) {
           ))}
         </Grid>
       )}
-      
+
       <Pagination
-        count={Math.ceil(forumPosts.length / itemsPerPage)}
+        count={Math.ceil((searchQuery ? searchResults : forumPosts).length / itemsPerPage)}
         page={currentPage}
         onChange={(e, value) => setCurrentPage(value)}
         color="primary"

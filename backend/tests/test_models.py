@@ -1,6 +1,6 @@
 import pytest  
 from django.contrib.auth.models import User  
-from cours.models import Module  
+from course.models import Module  
 
 @pytest.mark.django_db  
 def test_create_module():  

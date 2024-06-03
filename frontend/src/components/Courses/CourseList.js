@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchCours } from '../../actions/coursActions';
+import { fetchCourses } from '../../actions/courseActions';
 import {
   Grid,
   Typography,
@@ -15,14 +15,14 @@ import {
   IconButton,
   Alert,
 } from '@mui/material';
-import CourseListItem from './CourseListItem';
+import CourseCard from './CourseCard';
 import CustomInput from '../Common/CustomInput';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 
 const CourseList = () => {
   const dispatch = useDispatch();
-  const { cours, isLoading, error } = useSelector((state) => state.cours);
+  const { courses, isLoading, error } = useSelector((state) => state.course);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [levelFilter, setLevelFilter] = useState('');
@@ -30,7 +30,7 @@ const CourseList = () => {
   const [coursesPerPage] = useState(9);
 
   useEffect(() => {
-    dispatch(fetchCours());
+    dispatch(fetchCourses());
   }, [dispatch]);
 
   const handleSearchChange = (event) => {
@@ -52,10 +52,10 @@ const CourseList = () => {
     setCurrentPage(value);
   };
 
-  const filteredCourses = cours.filter((course) =>
+  const filteredCourses = courses.filter((course) =>
     course.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
     (categoryFilter === '' || course.category.toLowerCase().includes(categoryFilter.toLowerCase())) &&
-    (levelFilter === '' || course.niveau_difficulte.toLowerCase().includes(levelFilter.toLowerCase()))
+    (levelFilter === '' || course.level.toLowerCase().includes(levelFilter.toLowerCase()))
   );
 
   const indexOfLastCourse = currentPage * coursesPerPage;
@@ -77,12 +77,9 @@ const CourseList = () => {
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
-                  <SearchIcon />
-                  {searchQuery && (
-                    <IconButton onClick={() => setSearchQuery('')} aria-label="Clear search">
-                      <ClearIcon />
-                    </IconButton>
-                  )}
+                  <IconButton onClick={() => setSearchQuery('')} aria-label="Clear search">
+                    <ClearIcon />
+                  </IconButton>
                 </InputAdornment>
               ),
             }}
@@ -137,7 +134,7 @@ const CourseList = () => {
           <CircularProgress aria-label="Loading courses" />
         </Box>
       ) : error ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt:2 }}>
           <Alert severity="error" aria-label="Error loading courses">
             {error}
           </Alert>
@@ -146,9 +143,7 @@ const CourseList = () => {
         <>
           <Grid container spacing={4}>
             {currentCourses.map((course) => (
-              <Grid item key={course.id} xs={12} sm={6} md={4}>
-                <CourseListItem cours={course} />
-              </Grid>
+              <CourseCard key={course.id} course={course} />
             ))}
           </Grid>
           <Box display="flex" justifyContent="center" mt={4}>

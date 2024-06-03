@@ -1,7 +1,7 @@
 from rest_framework import viewsets, permissions, status
 from .models import Enrollment
 from .serializers import EnrollmentSerializer
-from cours.models import Cours
+from .models import Course
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 

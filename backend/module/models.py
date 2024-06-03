@@ -1,12 +1,12 @@
 from django.db import models
-from cours.models import Cours
+from course.models import Course
 from user.models import User 
 
 class Module(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     content = models.TextField(blank=True) 
-    course = models.ForeignKey(Cours, on_delete=models.CASCADE, related_name='modules')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='modules')
     order = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

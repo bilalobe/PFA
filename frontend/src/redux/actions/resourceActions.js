@@ -44,7 +44,7 @@ export const uploadResource = (formData, onUploadProgress) => {
       const response = await axios.post('/api/resources/', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          // ... authorization headers (if needed)
+          // Add authorization headers if needed
         },
         onUploadProgress,
       });

@@ -1,12 +1,10 @@
-// courseReducer.js
-
 import {
   FETCH_COURSES_REQUEST,
   FETCH_COURSES_SUCCESS,
   FETCH_COURSES_FAILURE,
-  FETCH_COURSES_REQUEST,
-  FETCH_COURSES_SUCCESS,
-  FETCH_COURSES_FAILURE,
+  FETCH_COURSE_REQUEST,
+  FETCH_COURSE_SUCCESS,
+  FETCH_COURSE_FAILURE,
 } from '../actions/types';
 
 const initialState = {
@@ -19,7 +17,7 @@ const initialState = {
 const courseReducer = (state = initialState, action) => {
   switch (action.type) {
     case FETCH_COURSES_REQUEST:
-    case FETCH_COURSES_REQUEST:
+    case FETCH_COURSE_REQUEST:
       return {
         ...state,
         isLoading: true,
@@ -31,14 +29,14 @@ const courseReducer = (state = initialState, action) => {
         isLoading: false,
         courses: action.payload,
       };
-    case FETCH_COURSES_SUCCESS:
+    case FETCH_COURSE_SUCCESS:
       return {
         ...state,
         isLoading: false,
         course: action.payload,
       };
     case FETCH_COURSES_FAILURE:
-    case FETCH_COURSES_FAILURE:
+    case FETCH_COURSE_FAILURE:
       return {
         ...state,
         isLoading: false,

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Routes, Route, Navigate, Outlet, Link } from 'react-router-dom';
+import { Navigate, Outlet, Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchUserProfile } from '../actions/userActions';
 import { logoutUser } from '../actions/authActions';
@@ -15,7 +15,8 @@ import {
   Toolbar,
   AppBar,
   Typography,
-  CssBaseline
+  CssBaseline,
+  Alert
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -29,14 +30,17 @@ const drawerWidth = 240;
 
 function HomeGuard() {
   const dispatch = useDispatch();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [error, setError] = useState(null);
   const userProfile = useSelector((state) => state.user.profile);
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
   const loading = useSelector((state) => state.user.loading);
-  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
-      dispatch(fetchUserProfile());
+      dispatch(fetchUserProfile()).catch((err) => {
+        setError('Failed to load user profile.');
+      });
     }
   }, [isAuthenticated, dispatch]);
 
@@ -53,8 +57,20 @@ function HomeGuard() {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh" flexDirection="column">
         <CircularProgress />
+        <Typography variant="h6" mt={2}>Loading profile...</Typography>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh" flexDirection="column">
+        <Alert severity="error">{error}</Alert>
+        <Button variant="contained" color="primary" onClick={() => window.location.reload()}>
+          Retry
+        </Button>
       </Box>
     );
   }

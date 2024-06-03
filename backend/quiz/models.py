@@ -1,5 +1,5 @@
 from django.db import models
-from cours.models import Module
+from course.models import Module
 from user.models import User
 
 class Quiz(models.Model):

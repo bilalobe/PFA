@@ -1,10 +1,11 @@
-// courseActions.js
-
 import axios from 'axios';
 import {
   FETCH_COURSES_REQUEST,
   FETCH_COURSES_SUCCESS,
   FETCH_COURSES_FAILURE,
+  FETCH_COURSE_REQUEST,
+  FETCH_COURSE_SUCCESS,
+  FETCH_COURSE_FAILURE,
 } from './types';
 
 export const fetchCoursesRequest = () => ({
@@ -32,16 +33,16 @@ export const fetchCourses = () => async (dispatch) => {
 };
 
 export const fetchCourseRequest = () => ({
-  type: FETCH_COURSES_REQUEST,
+  type: FETCH_COURSE_REQUEST,
 });
 
 export const fetchCourseSuccess = (course) => ({
-  type: FETCH_COURSES_SUCCESS,
+  type: FETCH_COURSE_SUCCESS,
   payload: course,
 });
 
 export const fetchCourseFailure = (error) => ({
-  type: FETCH_COURSES_FAILURE,
+  type: FETCH_COURSE_FAILURE,
   payload: error,
 });
 

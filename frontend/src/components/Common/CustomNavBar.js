@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { AppBar, Toolbar, IconButton, Typography, Menu, MenuItem, Box } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
-import LogoutIcon from '@mui/icons-material/Logout';
+import { useSelector, useDispatch } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import CustomButton from './CustomButton';
 import { logoutUser } from '../../actions/authActions';
-import logo from '../../assets/logo.png';
+import CustomButton from './CustomButton'; 
+import HomeIcon from '@mui/icons-material/Home';
+import SchoolIcon from '@mui/icons-material/School';
+import ForumIcon from '@mui/icons-material/Forum';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import LogoutIcon from '@mui/icons-material/Logout';
+import logo from '../../assets/logo.png'; // Assuming you have a logo
 
 function Navbar() {
     const dispatch = useDispatch();
@@ -29,50 +33,131 @@ function Navbar() {
 
     const renderNavLinks = () => {
         if (isAuthenticated && user) {
-            if (user.role === 'admin') {
-                return (
-                    <>
-                        <CustomButton color="inherit" component={Link} to="/admin/dashboard">
-                            Admin Dashboard
-                        </CustomButton>
-                        <CustomButton color="inherit" component={Link} to="/profile">
-                            Profile
-                        </CustomButton>
-                    </>
-                );
-            } else if (user.role === 'teacher') {
-                return (
-                    <>
-                        <CustomButton color="inherit" component={Link} to="/teacher/dashboard">
-                            Teacher Dashboard
-                        </CustomButton>
-                        <CustomButton color="inherit" component={Link} to="/profile">
-                            Profile
-                        </CustomButton>
-                    </>
-                );
-            } else if (user.role === 'student') {
-                return (
-                    <>
-                        <CustomButton color="inherit" component={Link} to="/student/dashboard">
-                            Student Dashboard
-                        </CustomButton>
-                        <CustomButton color="inherit" component={Link} to="/profile">
-                            Profile
-                        </CustomButton>
-                    </>
-                );
+            switch (user.role) {
+                case 'admin':
+                    return (
+                        <>
+                            <MenuItem component={Link} to="/admin/dashboard" onClick={handleMenuClose}>
+                                <ListItemIcon>
+                                    <HomeIcon fontSize="small" />
+                                </ListItemIcon>
+                                <Typography variant="inherit">Admin Dashboard</Typography>
+                            </MenuItem>
+                            <MenuItem component={Link} to="/courses" onClick={handleMenuClose}>
+                                <ListItemIcon>
+                                    <SchoolIcon fontSize="small" />
+                                </ListItemIcon>
+                                <Typography variant="inherit">Courses</Typography>
+                            </MenuItem>
+                            <MenuItem component={Link} to="/forum" onClick={handleMenuClose}>
+                                <ListItemIcon>
+                                    <ForumIcon fontSize="small" />
+                                </ListItemIcon>
+                                <Typography variant="inherit">Forum</Typography>
+                            </MenuItem>
+                            <MenuItem component={Link} to="/profile" onClick={handleMenuClose}>
+                                <ListItemIcon>
+                                    <AccountCircleIcon fontSize="small" />
+                                </ListItemIcon>
+                                <Typography variant="inherit">Profile</Typography>
+                            </MenuItem>
+                            <MenuItem onClick={handleLogout}>
+                                <ListItemIcon>
+                                    <LogoutIcon fontSize="small" />
+                                </ListItemIcon>
+                                <Typography variant="inherit">Logout</Typography>
+                            </MenuItem>
+                        </>
+                    );
+                case 'teacher':
+                    return (
+                        <>
+                            <MenuItem component={Link} to="/teacher/dashboard" onClick={handleMenuClose}>
+                                <ListItemIcon>
+                                    <HomeIcon fontSize="small" />
+                                </ListItemIcon>
+                                <Typography variant="inherit">Teacher Dashboard</Typography>
+                            </MenuItem>
+                            <MenuItem component={Link} to="/courses" onClick={handleMenuClose}>
+                                <ListItemIcon>
+                                    <SchoolIcon fontSize="small" />
+                                </ListItemIcon>
+                                <Typography variant="inherit">Courses</Typography>
+                            </MenuItem>
+                            <MenuItem component={Link} to="/forum" onClick={handleMenuClose}>
+                                <ListItemIcon>
+                                    <ForumIcon fontSize="small" />
+                                </ListItemIcon>
+                                <Typography variant="inherit">Forum</Typography>
+                            </MenuItem>
+                            <MenuItem component={Link} to="/profile" onClick={handleMenuClose}>
+                                <ListItemIcon>
+                                    <AccountCircleIcon fontSize="small" />
+                                </ListItemIcon>
+                                <Typography variant="inherit">Profile</Typography>
+                            </MenuItem>
+                            <MenuItem onClick={handleLogout}>
+                                <ListItemIcon>
+                                    <LogoutIcon fontSize="small" />
+                                </ListItemIcon>
+                                <Typography variant="inherit">Logout</Typography>
+                            </MenuItem>
+                        </>
+                    );
+                case 'student':
+                    return (
+                        <>
+                            <MenuItem component={Link} to="/student/dashboard" onClick={handleMenuClose}>
+                                <ListItemIcon>
+                                    <HomeIcon fontSize="small" />
+                                </ListItemIcon>
+                                <Typography variant="inherit">Student Dashboard</Typography>
+                            </MenuItem>
+                            <MenuItem component={Link} to="/courses" onClick={handleMenuClose}>
+                                <ListItemIcon>
+                                    <SchoolIcon fontSize="small" />
+                                </ListItemIcon>
+                                <Typography variant="inherit">Courses</Typography>
+                            </MenuItem>
+                            <MenuItem component={Link} to="/forum" onClick={handleMenuClose}>
+                                <ListItemIcon>
+                                    <ForumIcon fontSize="small" />
+                                </ListItemIcon>
+                                <Typography variant="inherit">Forum</Typography>
+                            </MenuItem>
+                            <MenuItem component={Link} to="/profile" onClick={handleMenuClose}>
+                                <ListItemIcon>
+                                    <AccountCircleIcon fontSize="small" />
+                                </ListItemIcon>
+                                <Typography variant="inherit">Profile</Typography>
+                            </MenuItem>
+                            <MenuItem onClick={handleLogout}>
+                                <ListItemIcon>
+                                    <LogoutIcon fontSize="small" />
+                                </ListItemIcon>
+                                <Typography variant="inherit">Logout</Typography>
+                            </MenuItem>
+                        </>
+                    );
+                default:
+                    return null;
             }
         }
 
         return (
             <>
-                <CustomButton color="inherit" component={Link} to="/login">
-                    Login
-                </CustomButton>
-                <CustomButton color="inherit" component={Link} to="/register">
-                    Register
-                </CustomButton>
+                <MenuItem component={Link} to="/login" onClick={handleMenuClose}>
+                    <ListItemIcon>
+                        <AccountCircleIcon fontSize="small" />
+                    </ListItemIcon>
+                    <Typography variant="inherit">Login</Typography>
+                </MenuItem>
+                <MenuItem component={Link} to="/register" onClick={handleMenuClose}>
+                    <ListItemIcon>
+                        <AccountCircleIcon fontSize="small" />
+                    </ListItemIcon>
+                    <Typography variant="inherit">Register</Typography>
+                </MenuItem>
             </>
         );
     };
@@ -91,15 +176,6 @@ function Navbar() {
                         Home
                     </CustomButton>
                     {renderNavLinks()}
-                    {isAuthenticated && (
-                        <CustomButton
-                            color="inherit"
-                            onClick={handleLogout}
-                            startIcon={<LogoutIcon />}
-                        >
-                            Logout
-                        </CustomButton>
-                    )}
                 </Box>
                 <IconButton
                     edge="start"
@@ -121,56 +197,8 @@ function Navbar() {
                             color: 'white',
                         },
                     }}
-                    aria-label="main navigation"
                 >
-                    <MenuItem component={Link} to="/" onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>
-                        Home
-                    </MenuItem>
-                    {isAuthenticated && user?.role === 'admin' && (
-                        <>
-                            <MenuItem component={Link} to="/admin/dashboard" onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>
-                                Admin Dashboard
-                            </MenuItem>
-                            <MenuItem component={Link} to="/profile" onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>
-                                Profile
-                            </MenuItem>
-                        </>
-                    )}
-                    {isAuthenticated && user?.role === 'teacher' && (
-                        <>
-                            <MenuItem component={Link} to="/teacher/dashboard" onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>
-                                Teacher Dashboard
-                            </MenuItem>
-                            <MenuItem component={Link} to="/profile" onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>
-                                Profile
-                            </MenuItem>
-                        </>
-                    )}
-                    {isAuthenticated && user?.role === 'student' && (
-                        <>
-                            <MenuItem component={Link} to="/student/dashboard" onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>
-                                Student Dashboard
-                            </MenuItem>
-                            <MenuItem component={Link} to="/profile" onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>
-                                Profile
-                            </MenuItem>
-                        </>
-                    )}
-                    {!isAuthenticated && (
-                        <>
-                            <MenuItem component={Link} to="/login" onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>
-                                Login
-                            </MenuItem>
-                            <MenuItem component={Link} to="/register" onClick={handleMenuClose} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>
-                                Register
-                            </MenuItem>
-                        </>
-                    )}
-                    {isAuthenticated && (
-                        <MenuItem onClick={handleLogout} sx={{ '&:hover': { backgroundColor: 'primary.dark' } }}>
-                            Logout
-                        </MenuItem>
-                    )}
+                    {renderNavLinks()}
                 </Menu>
             </Toolbar>
         </AppBar>

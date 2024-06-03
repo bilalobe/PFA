@@ -1,12 +1,12 @@
 from rest_framework import viewsets, permissions, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Cours, Module, Quiz, Enrollment
+from .models import Course, Module, Quiz, Enrollment
 from .serializers import CoursSerializer, ModuleSerializer, QuizSerializer, EnrollmentSerializer
 from .permissions import IsTeacherOrReadOnly, IsSupervisor
 
 class CoursViewSet(viewsets.ModelViewSet):
-    queryset = Cours.objects.all()
+    queryset = Course.objects.all()
     serializer_class = CoursSerializer
     permission_classes = [permissions.IsAuthenticated, IsTeacherOrReadOnly | IsSupervisor]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -14,7 +14,7 @@ class CoursViewSet(viewsets.ModelViewSet):
     ordering_fields = ['title', 'created_at']
 
     def get_queryset(self):
-        queryset = Cours.objects.all()
+        queryset = Course.objects.all()
         if self.request.user.user_type == 'student':
             queryset = queryset.filter(enrollments__student=self.request.user)
         return queryset
