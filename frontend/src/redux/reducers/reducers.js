@@ -19,7 +19,7 @@ const rootReducer = combineReducers({
   adaptative: adaptativeReducer,
   user: userReducer,
   module: moduleReducer,
-  cours: courseReducer,
+  course: courseReducer,
   question: questionReducer,
   quiz: quizReducer,
   resouce: resourceReducer,

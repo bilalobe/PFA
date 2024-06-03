@@ -1,8 +1,22 @@
+"""
+Django settings module for the E-Learning Platform.
+
+This module contains the configuration settings for the E-Learning Platform Django project.
+It includes settings for database, static files, media files, authentication, caching, email, API, and more.
+
+For more information on Django settings, refer to the Django documentation:
+https://docs.djangoproject.com/en/3.2/topics/settings/
+
+For more information on the E-Learning Platform, visit:
+https://example.com/e-learning-platform
+
+Author: bebo
+Date: YYYY-MM-DD
+"""
 import os
 from pathlib import Path
 from datetime import timedelta
 
-import dj_database_url
 from decouple import config
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
@@ -40,6 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_filters',  # Filtering
     'django_extensions',  # Additional commands
+    'django_redis',  # Redis cache
     'corsheaders',  # Cross-Origin Resource Sharing
     'rest_framework',
     'rest_framework.authtoken',
@@ -54,7 +69,7 @@ INSTALLED_APPS = [
     'drf_spectacular',  # API documentation
     'chatbot',
     'user',
-    'cours',
+    'course',
     'module',
     'question',
     'profile',
@@ -99,10 +114,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'dj_ango.wsgi.application'
 
 # Ensure DATABASE_URL default value is a string
-DATABASES = {
-    'default': dj_database_url.config(default=config('DATABASE_URL', default=''))
-}
-
 REST_FRAMEWORK = {  
     'DEFAULT_AUTHENTICATION_CLASSES': (  
         'rest_framework_simplejwt.authentication.JWTAuthentication',  
@@ -123,25 +134,39 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.AnonRateThrottle',  
         'rest_framework.throttling.UserRateThrottle',  
     ),  
-    'DEFAULT_THROTTLE_RATES': (  
+    'DEFAULT_THROTTLE_RATES': {  
         'anon': '100/day',  
         'user': '1000/day',  
-    ),    
-    'DEFAULT_RENDERER_CLASSES': (  
+    },    
+    'DEFAULT_RENDERER_CLASSES': [  
         'rest_framework.renderers.JSONRenderer',  
         'rest_framework.renderers.BrowsableAPIRenderer',  
-    ),  
-    'DEFAULT_PARSER_CLASSES': (  
+    ],  
+    'DEFAULT_PARSER_CLASSES': [  
         'rest_framework.parsers.JSONParser',  
         'rest_framework.parsers.FormParser',  
         'rest_framework.parsers.MultiPartParser',  
-    ),  
+    ],  
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',  
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',  
     'EXCEPTION_HANDLER': 'dj_ango.exceptions.custom_exception_handler',  # Set custom exception handler  
     'NON_FIELD_ERRORS_KEY': 'error',  
     'COERCE_DECIMAL_TO_STRING': False,  
 } 
+
+# CACHES setting
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',  # Replace with your Redis connection string
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        }
+    }
+}
+
+CACHE_MIDDLEWARE_KEY_PREFIX = 'eplatform'
+
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Your E-Learning Platform API',

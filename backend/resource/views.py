@@ -71,7 +71,7 @@ class ResourceViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
-        if instance.module.cours.instructor != request.user:
+        if instance.module.course.instructor != request.user:
             return Response({'detail': 'You are not authorized to update this resource.'}, status=status.HTTP_403_FORBIDDEN)
         
         serializer = self.get_serializer(instance, data=request.data, partial=True)
@@ -81,7 +81,7 @@ class ResourceViewSet(viewsets.ModelViewSet):
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
-        if instance.module.cours.instructor != request.user:
+        if instance.module.course.instructor != request.user:
             return Response({'detail': 'You are not authorized to delete this resource.'}, status=status.HTTP_403_FORBIDDEN)
         
         instance.delete()

@@ -49,6 +49,20 @@ def custom_exception_handler(exc, context):
                 'details': str(exc),
             }
             return JsonResponse(custom_response_data, status=500)
+        elif isinstance(exc, ValueError):
+            custom_response_data = {
+                'error': 'Value Error',
+                'status_code': 400,
+                'details': str(exc),
+            }
+            return JsonResponse(custom_response_data, status=400)
+        elif isinstance(exc, NotImplementedError):
+            custom_response_data = {
+                'error': 'Not Implemented',
+                'status_code': 501,
+                'details': str(exc),
+            }
+            return JsonResponse(custom_response_data, status=501)
         else:
             custom_response_data = {
                 'error': 'Internal Server Error',

@@ -36,7 +36,7 @@ urlpatterns = [
 
     # Include app-specific URLs
     path('api/utilisateur/', include('utilisateur.urls')),
-    path('api/cours/', include('cours.urls')),
+    path('api/course/', include('course.urls')),
     path('api/module/', include('module.urls')),
     path('api/question/', include('question.urls')),
     path('api/quiz/', include('quiz.urls')),

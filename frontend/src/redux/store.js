@@ -14,7 +14,7 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 
 // Combine all reducers into a single object
 const rootReducer = combineReducers({
-  cours: coursReducer,
+  course: coursReducer,
   user: userReducer,
   module: moduleReducer,
   question: questionReducer,

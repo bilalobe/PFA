@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Navigate, Outlet, Link } from 'react-router-dom';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Routes, Route, Navigate, Outlet, Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
+import CustomButton from './CustomButton';
 import { fetchUserProfile } from '../actions/userActions';
-import { logoutUser } from '../actions/authActions';
 import {
   Box,
   CircularProgress,
@@ -25,52 +25,47 @@ import SchoolIcon from '@mui/icons-material/School';
 import ForumIcon from '@mui/icons-material/Forum';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
+import { createSelector } from 'reselect';
+const Dashboard = React.lazy(() => import('./Dashboard'));
 
 const drawerWidth = 240;
+
+const selectUserAndAuthState = createSelector(
+  state => ({ profile: state.user.profile, loading: state.user.loading, isAuthenticated: state.auth.isAuthenticated }),
+  userAndAuth => userAndAuth
+);
 
 function HomeGuard() {
   const dispatch = useDispatch();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [error, setError] = useState(null);
-  const userProfile = useSelector((state) => state.user.profile);
-  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
-  const loading = useSelector((state) => state.user.loading);
+  const { userProfile, isAuthenticated, loading } = useSelector(selectUserAndAuthState);
+
+  const fetchProfile = useCallback(() => {
+    dispatch(fetchUserProfile()).catch((err) => {
+      setError('Failed to load user profile.');
+    });
+  }, [dispatch]);
 
   useEffect(() => {
     if (isAuthenticated) {
-      dispatch(fetchUserProfile()).catch((err) => {
-        setError('Failed to load user profile.');
-      });
+      fetchProfile();
     }
-  }, [isAuthenticated, dispatch]);
-
-  const toggleDrawer = (open) => (event) => {
-    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
-      return;
-    }
-    setDrawerOpen(open);
-  };
-
-  const handleLogout = () => {
-    dispatch(logoutUser()); // Dispatch the logout action
-  };
+  }, [isAuthenticated, fetchProfile]);
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh" flexDirection="column">
+      <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
         <CircularProgress />
-        <Typography variant="h6" mt={2}>Loading profile...</Typography>
       </Box>
     );
   }
 
   if (error) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh" flexDirection="column">
+      <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
         <Alert severity="error">{error}</Alert>
-        <Button variant="contained" color="primary" onClick={() => window.location.reload()}>
-          Retry
-        </Button>
+        <CustomButton onClick={fetchProfile}>Retry</CustomButton>
       </Box>
     );
   }
@@ -82,23 +77,27 @@ function HomeGuard() {
   const drawerContent = (
     <Box>
       <List>
-        <ListItem button component={Link} to="/">
+        <ListItem CustomButton component={Link} to="/">
           <ListItemIcon><HomeIcon /></ListItemIcon>
           <ListItemText primary="Home" />
         </ListItem>
-        <ListItem button component={Link} to="/courses">
+        <ListItem CustomButton component={Link} to="/dashboard">
+          <ListItemIcon><HomeIcon /></ListItemIcon>
+          <ListItemText primary="Dashboard" />
+        </ListItem>
+        <ListItem CustomButton component={Link} to="/courses">
           <ListItemIcon><SchoolIcon /></ListItemIcon>
           <ListItemText primary="Courses" />
         </ListItem>
-        <ListItem button component={Link} to="/forum">
+        <ListItem CustomButton component={Link} to="/forum">
           <ListItemIcon><ForumIcon /></ListItemIcon>
           <ListItemText primary="Forum" />
         </ListItem>
-        <ListItem button component={Link} to="/profile">
+        <ListItem CustomButton component={Link} to="/profile">
           <ListItemIcon><AccountCircleIcon /></ListItemIcon>
           <ListItemText primary="Profile" />
         </ListItem>
-        <ListItem button onClick={handleLogout}>
+        <ListItem CustomButton onClick={handleLogout}>
           <ListItemIcon><LogoutIcon /></ListItemIcon>
           <ListItemText primary="Logout" />
         </ListItem>
@@ -151,10 +150,18 @@ function HomeGuard() {
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
-        <Outlet />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/courses" element={<Courses />} />
+          <Route path="/forum" element={<Forum />} />
+          <Route path="/profile" element={<Profile />} />
+        </Routes>
       </Box>
     </Box>
   );
 }
 
-export default HomeGuard;
+// Rest of the component...
+
+export default React.memo(HomeGuard);

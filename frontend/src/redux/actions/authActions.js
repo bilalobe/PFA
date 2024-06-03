@@ -1,11 +1,4 @@
-import {
-  LOGIN_REQUEST,
-  LOGIN_SUCCESS,
-  LOGIN_FAILURE,
-  LOGOUT_REQUEST,
-  LOGOUT_SUCCESS,
-  LOGOUT_FAILURE,
-} from './types';
+import { createAsyncThunk } from '@reduxjs/toolkit';
 import { authApi } from '../api/api';
 
 // Login action
@@ -27,6 +20,7 @@ export const logoutUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       // ... (Optional: Send a request to your API to invalidate the token)
+      await authApi.logout();
       return null; // Return nothing if logout is successful
     } catch (error) {
       return rejectWithValue(error.message);

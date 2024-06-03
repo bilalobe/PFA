@@ -104,7 +104,6 @@ function EditProfile() {
               onChange={handleChange}
               error={touched.bio && Boolean(errors.bio)}
               helperText={touched.bio && errors.bio}
-              
             />
             <Button
               type="submit"

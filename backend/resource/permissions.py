@@ -8,7 +8,7 @@ class IsEnrolledStudent(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         # Check if the user is enrolled in the course associated with the resource
-        return Enrollment.objects.filter(student=request.user, course=obj.module.cours).exists()
+        return Enrollment.objects.filter(student=request.user, course=obj.module.course).exists()
     
 class IsInstructor(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -17,4 +17,4 @@ class IsInstructor(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
         # Check if the user is the instructor of the course associated with the resource
-        return obj.module.cours.instructor == request.user 
+        return obj.module.course.instructor == request.user 
