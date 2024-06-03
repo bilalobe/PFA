@@ -1,18 +1,38 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useAuth } from '../hooks/useAuth'; // Ensure you have this hook implemented
-import { fetchUserProfile } from '../actions/userActions'; // Ensure you have this action implemented
-import { Navigate, Outlet } from 'react-router-dom';
-import { Box, Container, CircularProgress, Typography, Button } from '@mui/material';
-import Navbar from '../components/Common/Navbar'; // Ensure the path is correct
-import Footer from '../components/Common/Footer'; // Ensure the path is correct
+import React, { useEffect, useState } from 'react';
+import { Routes, Route, Navigate, Outlet, Link } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { fetchUserProfile } from '../actions/userActions';
+import { logoutUser } from '../actions/authActions';
+import {
+  Box,
+  CircularProgress,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemIcon,
+  IconButton,
+  Toolbar,
+  AppBar,
+  Typography,
+  CssBaseline
+} from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import HomeIcon from '@mui/icons-material/Home';
+import SchoolIcon from '@mui/icons-material/School';
+import ForumIcon from '@mui/icons-material/Forum';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import LogoutIcon from '@mui/icons-material/Logout';
+
+const drawerWidth = 240;
 
 function HomeGuard() {
-  const { isAuthenticated, loading: authLoading } = useAuth();
   const dispatch = useDispatch();
   const userProfile = useSelector((state) => state.user.profile);
-  const userLoading = useSelector((state) => state.user.loading);
-  const error = useSelector((state) => state.user.error);
+  const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
+  const loading = useSelector((state) => state.user.loading);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -20,30 +40,21 @@ function HomeGuard() {
     }
   }, [isAuthenticated, dispatch]);
 
-  const retryFetchProfile = () => {
-    dispatch(fetchUserProfile());
+  const toggleDrawer = (open) => (event) => {
+    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+      return;
+    }
+    setDrawerOpen(open);
   };
 
-  if (authLoading || userLoading) {
-    return (
-      <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" minHeight="100vh">
-        <CircularProgress />
-        <Typography variant="body1" mt={2}>
-          Loading authentication status...
-        </Typography>
-      </Box>
-    );
-  }
+  const handleLogout = () => {
+    dispatch(logoutUser()); // Dispatch the logout action
+  };
 
-  if (error) {
+  if (loading) {
     return (
-      <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" minHeight="100vh" bgcolor="#f0f0f0">
-        <Typography variant="h6" color="error" mt={2}>
-          An error occurred: {error}
-        </Typography>
-        <Button variant="contained" color="primary" onClick={retryFetchProfile} sx={{ mt: 2 }}>
-          Retry
-        </Button>
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <CircularProgress />
       </Box>
     );
   }
@@ -52,32 +63,81 @@ function HomeGuard() {
     return <Navigate to="/login" />;
   }
 
-  if (userProfile) {
-    if (userProfile.role === 'teacher') {
-      return <Navigate to="/teacher/dashboard" />;
-    } else if (userProfile.role === 'student') {
-      return <Navigate to="/student/dashboard" />;
-    } else if (userProfile.role !== 'admin') {
-      return (
-        <Container>
-          <Navbar />
-          <Box display="flex" flexDirection="column" justifyContent="center" alignItems="center" minHeight="50vh">
-            <Typography variant="h6" color="error" align="center" mt={5}>
-              You do not have the necessary permissions to view this content.
-            </Typography>
-          </Box>
-          <Footer />
-        </Container>
-      );
-    }
-  }
+  const drawerContent = (
+    <Box>
+      <List>
+        <ListItem button component={Link} to="/">
+          <ListItemIcon><HomeIcon /></ListItemIcon>
+          <ListItemText primary="Home" />
+        </ListItem>
+        <ListItem button component={Link} to="/courses">
+          <ListItemIcon><SchoolIcon /></ListItemIcon>
+          <ListItemText primary="Courses" />
+        </ListItem>
+        <ListItem button component={Link} to="/forum">
+          <ListItemIcon><ForumIcon /></ListItemIcon>
+          <ListItemText primary="Forum" />
+        </ListItem>
+        <ListItem button component={Link} to="/profile">
+          <ListItemIcon><AccountCircleIcon /></ListItemIcon>
+          <ListItemText primary="Profile" />
+        </ListItem>
+        <ListItem button onClick={handleLogout}>
+          <ListItemIcon><LogoutIcon /></ListItemIcon>
+          <ListItemText primary="Logout" />
+        </ListItem>
+      </List>
+    </Box>
+  );
 
   return (
-    <Container>
-      <Navbar />
-      <Outlet />
-      <Footer />
-    </Container>
+    <Box sx={{ display: 'flex' }}>
+      <CssBaseline />
+      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            edge="start"
+            onClick={toggleDrawer(true)}
+            sx={{ mr: 2 }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" noWrap component="div">
+            HomeGuard
+          </Typography>
+        </Toolbar>
+      </AppBar>
+      <Drawer
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+          },
+        }}
+        variant="temporary"
+        anchor="left"
+        open={drawerOpen}
+        onClose={toggleDrawer(false)}
+        ModalProps={{
+          keepMounted: true, // Better open performance on mobile.
+        }}
+      >
+        <Box display="flex" alignItems="center" padding={2}>
+          <IconButton onClick={toggleDrawer(false)}>
+            <ChevronLeftIcon />
+          </IconButton>
+        </Box>
+        {drawerContent}
+      </Drawer>
+      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        <Toolbar />
+        <Outlet />
+      </Box>
+    </Box>
   );
 }
 

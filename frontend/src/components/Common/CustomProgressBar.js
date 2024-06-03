@@ -14,6 +14,7 @@ function CustomProgressBar({ value, label, showPercentage = true }) {
           variant="body1"
           component="div"
           sx={{ fontWeight: 'bold', mb: 1, color: theme.palette.text.primary }}
+          aria-label="progress bar label"
         >
           {label}
         </Typography>
@@ -32,13 +33,14 @@ function CustomProgressBar({ value, label, showPercentage = true }) {
             },
             animation: 'smooth-transition 2s infinite'
           }}
-          aria-label="Progress bar"
+          aria-label={showPercentage ? `Progress: ${progressText}` : "Loading"}
         />
         {showPercentage && (
           <Typography
             variant="body2"
             color="textSecondary"
             sx={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)', fontWeight: 'bold' }}
+            aria-label="progress percentage"
           >
             {progressText}
           </Typography>

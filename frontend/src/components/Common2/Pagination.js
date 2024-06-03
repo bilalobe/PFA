@@ -1,8 +1,9 @@
+import React from 'react';
 import { Box, Button, Typography, TextField } from '@mui/material';
 
 const Pagination = ({ currentPage, totalPages, paginate }) => {
   const [inputValue, setInputValue] = React.useState(currentPage);
-  
+
   const handleInputChange = (event) => {
     setInputValue(event.target.value);
   };
@@ -31,7 +32,7 @@ const Pagination = ({ currentPage, totalPages, paginate }) => {
   }
 
   return (
-    <Box display="flex" justifyContent="center" mt={4}>
+    <Box display="flex" justifyContent="center" mt={4} aria-label="pagination navigation">
       <Button
         onClick={() => paginate(currentPage - 1)}
         disabled={currentPage === 1}
@@ -44,7 +45,7 @@ const Pagination = ({ currentPage, totalPages, paginate }) => {
       </Button>
       {pageNumbers.map((number, index) =>
         number === '...' ? (
-          <Typography key={index} variant="h6" sx={{ mx: 1 }}>
+          <Typography key={index} variant="h6" sx={{ mx: 1 }} aria-hidden="true">
             {number}
           </Typography>
         ) : (
@@ -77,7 +78,12 @@ const Pagination = ({ currentPage, totalPages, paginate }) => {
         margin="normal"
         size="small"
         sx={{ width: 60, mx: 1 }}
-        inputProps={{ 'aria-label': 'jump to page', type: 'number', min: 1, max: totalPages }}
+        inputProps={{ 
+          'aria-label': 'page number input', 
+          type: 'number', 
+          min: 1, 
+          max: totalPages 
+        }}
       />
       <Button
         onClick={handlePageJump}

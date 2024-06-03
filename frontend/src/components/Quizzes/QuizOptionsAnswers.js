@@ -2,12 +2,15 @@ import React from 'react';
 import { FormControlLabel, Radio, Checkbox, TextField } from '@mui/material';
 
 function QuizAnswerOption({ type, choice, selectedAnswer, onAnswerSelect }) {
-  const handleRadioChange = (e) => {
-    onAnswerSelect(choice.id, e.target.value);
+  const handleRadioChange = () => {
+    onAnswerSelect(choice.id);
   };
 
   const handleCheckboxChange = () => {
-    onAnswerSelect(choice.id);
+    const newSelectedAnswer = selectedAnswer.includes(choice.id)
+      ? selectedAnswer.filter((id) => id !== choice.id)
+      : [...selectedAnswer, choice.id];
+    onAnswerSelect(choice.id, newSelectedAnswer);
   };
   
   const handleTextChange = (e) => {
@@ -18,10 +21,14 @@ function QuizAnswerOption({ type, choice, selectedAnswer, onAnswerSelect }) {
     return (
       <FormControlLabel
         value={choice.id.toString()}
-        control={<Radio />}
+        control={
+          <Radio
+            checked={selectedAnswer === choice.id}
+            onChange={handleRadioChange}
+            aria-label={`answer option ${choice.text}`}
+          />
+        }
         label={choice.text}
-        onChange={handleRadioChange}
-        checked={selectedAnswer === choice.id || selectedAnswer === e.target.value}
         sx={{ backgroundColor: selectedAnswer === choice.id ? '#f0f0f0' : 'transparent', borderRadius: 1, p: 1, mb: 1 }}
       />
     );
@@ -30,11 +37,15 @@ function QuizAnswerOption({ type, choice, selectedAnswer, onAnswerSelect }) {
   if (type === 'multiple_selection') {
     return (
       <FormControlLabel
-        control={<Checkbox
-          checked={selectedAnswer ? selectedAnswer.includes(choice.id) : false}
-          onChange={handleCheckboxChange}
-        />}
+        control={
+          <Checkbox
+            checked={selectedAnswer.includes(choice.id)}
+            onChange={handleCheckboxChange}
+            aria-label={`selected option ${choice.text}`}
+          />
+        }
         label={choice.text}
+        sx={{ backgroundColor: selectedAnswer.includes(choice.id) ? '#f0f0f0' : 'transparent', borderRadius: 1, p: 1, mb: 1 }}
       />
     );
   }
@@ -47,6 +58,8 @@ function QuizAnswerOption({ type, choice, selectedAnswer, onAnswerSelect }) {
         value={selectedAnswer[choice.id] || ''}
         onChange={handleTextChange}
         placeholder={choice.placeholder}
+        aria-label={`fill the blank ${choice.placeholder}`}
+        sx={{ mb: 1 }}
       />
     );
   }

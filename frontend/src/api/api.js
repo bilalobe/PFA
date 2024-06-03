@@ -2,6 +2,9 @@ import axios from 'axios';
 
 const apiUrl = 'http://localhost:8000/api/'; // Base URL for your API
 
+// Helper function to get the authorization token
+const getAuthToken = () => localStorage.getItem('token');
+
 // Auth API
 const authApi = {
   register: async (username, email, password, userType) => {
@@ -14,27 +17,18 @@ const authApi = {
       });
       return response.data;
     } catch (error) {
-      if (error.response.status === 400) {
-        // Handle validation errors
-        throw new Error(error.response.data.detail || 'An error occurred during registration. Please try again.');
-      } else {
-        throw error; 
-      }
+      handleApiError(error, 'An error occurred during registration. Please try again.');
     }
   },
   login: async (username, password) => {
     try {
-      const response = await axios.post(`${apiUrl}auth/token/`, { // Token obtain endpoint
+      const response = await axios.post(`${apiUrl}auth/token/`, {
         username,
         password,
       });
       return response.data;
     } catch (error) {
-      if (error.response.status === 401) {
-        throw new Error('Invalid credentials. Please check your username and password.');
-      } else {
-        throw error;
-      }
+      handleApiError(error, 'Invalid credentials. Please check your username and password.');
     }
   },
   refreshToken: async (refreshToken) => {
@@ -61,7 +55,7 @@ const authApi = {
 const userApi = {
   getProfile: async () => {
     try {
-      const token = localStorage.getItem('token'); // Assuming you're storing the token in localStorage 
+      const token = getAuthToken();
       const response = await axios.get(`${apiUrl}users/me/`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -74,7 +68,7 @@ const userApi = {
   },
   updateProfile: async (updatedProfileData) => {
     try {
-      const token = localStorage.getItem('token'); // Assuming you're storing the token in localStorage 
+      const token = getAuthToken();
       const response = await axios.put(`${apiUrl}users/me/`, updatedProfileData, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -133,9 +127,16 @@ const quizApi = {
   },
   submitQuiz: async (quizId, selectedAnswers) => {
     try {
-      const response = await axios.post(`${apiUrl}quizzes/${quizId}/attempts/`, {
-        choices: selectedAnswers
-      });
+      const token = getAuthToken();
+      const response = await axios.post(
+        `${apiUrl}quizzes/${quizId}/attempts/`,
+        { choices: selectedAnswers },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       throw error; 
@@ -149,52 +150,17 @@ const quizApi = {
       throw error; 
     }
   },
-  fetchQuizzes: async (moduleId, difficulty) => {
-    try {
-      let url = `${apiUrl}quizzes/`;
-      if (moduleId) {
-        url += `?module=${moduleId}`;
-      }
-      if (difficulty) {
-        url += moduleId ? `&difficulty=${difficulty}` : `?difficulty=${difficulty}`;
-      }
-      const response = await axios.get(url);
-      return response.data;
-    } catch (error) {
-      throw error; 
-    }
-  },
-  searchQuizzes: async (searchQuery) => {
-    try {
-      const response = await axios.get(`${apiUrl}quizzes/?search=${searchQuery}`);
-      return response.data;
-    } catch (error) {
-      throw error; 
-    }
-  },
-  startQuizAttempt: async (quizId) => {
-    try {
-      const response = await axios.post(`${apiUrl}quizzes/${quizId}/attempts/`);
-      return response.data;
-    } catch (error) {
-      throw error; 
-    }
-  },
-  submitQuizAnswers: async (attemptId, answers) => {
-    try {
-      const response = await axios.post(`${apiUrl}attempts/${attemptId}/submit/`, { answers });
-      return response.data;
-    } catch (error) {
-      throw error; 
-    }
-  },
 };
 
-// Enrollment API
 const enrollmentApi = {
   fetchEnrollments: async () => {
     try {
-      const response = await axios.get(`${apiUrl}enrollments/`);
+      const token = getAuthToken();
+      const response = await axios.get(`${apiUrl}enrollments/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       return response.data;
     } catch (error) {
       throw error; 
@@ -202,7 +168,16 @@ const enrollmentApi = {
   },
   enrollInCourse: async (courseId) => {
     try {
-      const response = await axios.post(`${apiUrl}enrollments/`, { course: courseId });
+      const token = getAuthToken();
+      const response = await axios.post(
+        `${apiUrl}enrollments/`,
+        { course: courseId },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       throw error; 
@@ -210,14 +185,28 @@ const enrollmentApi = {
   },
   fetchUnenroll: async (courseId) => {
     try {
-      await axios.delete(`${apiUrl}enrollments/${courseId}/`);
+      const token = getAuthToken();
+      await axios.delete(`${apiUrl}enrollments/${courseId}/`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
     } catch (error) {
       throw error; 
     }
   },
   updateProgress: async (enrollmentId, progress) => {
     try {
-      const response = await axios.put(`${apiUrl}enrollments/${enrollmentId}/`, { progress });
+      const token = getAuthToken();
+      const response = await axios.put(
+        `${apiUrl}enrollments/${enrollmentId}/`,
+        { progress },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       throw error; 
@@ -237,10 +226,19 @@ const forumApi = {
   },
   createForumPost: async (courseId, title, content) => {
     try {
-      const response = await axios.post(`${apiUrl}courses/${courseId}/forums/threads/`, {
-        title,
-        content
-      });
+      const token = getAuthToken();
+      const response = await axios.post(
+        `${apiUrl}courses/${courseId}/forums/threads/`,
+        {
+          title,
+          content,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       throw error; 
@@ -267,18 +265,31 @@ const resourceApi = {
   },
   uploadResource: async (formData, onUploadProgress) => {
     try {
+      const token = getAuthToken();
       const response = await axios.post(`${apiUrl}resources/`, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data'
-          // ... authorization headers (if needed)
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
         },
-        onUploadProgress
+        onUploadProgress,
       });
       return response.data;
     } catch (error) {
       throw error; 
     }
   },
+};
+
+const handleApiError = (error, defaultMessage) => {
+  if (error.response) {
+    if (error.response.status === 400) {
+      throw new Error(error.response.data.detail || defaultMessage);
+    }
+    if (error.response.status === 401) {
+      throw new Error('Unauthorized. Please log in again.');
+    }
+  }
+  throw error;
 };
 
 export { authApi, userApi, courseApi, moduleApi, quizApi, enrollmentApi, forumApi, resourceApi };

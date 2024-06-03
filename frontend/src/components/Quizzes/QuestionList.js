@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchQuestions } from '../../actions/questionActions';
-import QuizQuestion from './QuizQuestion'; // Adjust the import path as needed
-import ProgressBar from './ProgressBar'; // Import ProgressBar component
-import { CircularProgress, Alert, Typography, Box, Pagination, Card, CardContent } from '@mui/material';
+import { fetchQuestions, submitQuiz } from '../../actions/questionActions'; // Adjust to include submitQuiz
+import QuizQuestion from './QuizQuestion';
+import ProgressBar from './ProgressBar';
+import { CircularProgress, Alert, Typography, Box, Pagination, Card, CardContent, Button } from '@mui/material';
+import { useHistory } from 'react-router-dom'; // Import useHistory
 
 function QuestionList({ quizId }) {
   const dispatch = useDispatch();
+  const history = useHistory();
   const questions = useSelector(state => state.question.questions);
   const loading = useSelector(state => state.question.loading);
   const error = useSelector(state => state.question.error);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
@@ -26,6 +27,11 @@ function QuestionList({ quizId }) {
   useEffect(() => {
     dispatch(fetchQuestions(quizId));
   }, [dispatch, quizId]);
+
+  const handleSubmit = async () => {
+    await dispatch(submitQuiz(quizId, selectedAnswers));
+    history.push('/quiz/results');
+  };
 
   if (loading) return <CircularProgress aria-label="Loading questions" />;
   if (error) return <Alert severity="error" aria-label="Error loading questions">{error}</Alert>;
@@ -68,6 +74,16 @@ function QuestionList({ quizId }) {
           color="primary"
           sx={{ mt: 4 }}
         />
+
+        <Button
+          variant="contained"
+          color="primary"
+          sx={{ mt: 2 }}
+          onClick={handleSubmit}
+          aria-label="Submit quiz"
+        >
+          Submit
+        </Button>
       </CardContent>
     </Card>
   );
