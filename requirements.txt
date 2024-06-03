@@ -1,12 +1,42 @@
+# Django and related packages
 Django==5.0.6
 djangorestframework==3.15.1
+django-filter==23.0  # Django Filter
+django-cors-headers==3.13.0  # CORS Headers
+
+# Authentication and User Management
+dj-rest-auth==2.1.12
+django-allauth==0.54.0
+djangorestframework-simplejwt
+python-decouple==3.6
+
+# Database
 psycopg2==2.9.9
+psycopg2-binary==2.9.9
+dj-database-url==0.5.0
+
+# Storage and File Handling
+boto3==1.28.12  # AWS S3, if needed
+django-storages==1.13.2  # Storage backends for AWS S3, Azure, etc.
+azure-storage-blob==12.8.1  # Azure Blob Storage
+
+# Utilities
 requests==2.31.0
-Pillow==9.4.0
-django-cors-headers
-dj-rest-auth
-django-allauth
-psycopg2-binary  
-dj-database-url  
-whitenoise  
-waitress  
+Pillow==9.4.0  # Image processing
+django-extensions==3.2.6  # Extensions for Django
+whitenoise==6.4.0  # Static files handling
+django-redis==5.2.1  # Redis cache backend
+
+
+# Deployment and Server
+waitress==2.1.2  # Production WSGI server
+
+# Monitoring and Error Tracking
+sentry-sdk==1.24.0  # Sentry SDK for error tracking
+django-sentry==0.6.3  # Django integration for Sentry
+
+# Django Packages for OpenAPI and API Schema
+drf-spectacular==0.25.1
+
+# Other dependencies required for the project
+django-storages==1.13.1  # Required for Azure Storage backend
