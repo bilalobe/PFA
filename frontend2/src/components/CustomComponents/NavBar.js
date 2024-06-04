@@ -44,6 +44,7 @@ MenuItems.propTypes = {
 };
 
 function CustomNavbar() {
+  
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
