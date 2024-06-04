@@ -1,24 +1,28 @@
 import React from 'react';
-import { Card, CardContent, Typography } from '@mui/material';
+import PropTypes from 'prop-types';
+import { Card, CardContent, Typography, styled } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+
+const StyledCard = styled(Card)(({ theme }) => ({
+  boxShadow: 3,
+  borderRadius: 2,
+  backgroundColor: theme.palette.background.paper,
+  '&:hover': {
+    boxShadow: 6,
+    backgroundColor: '#f0f0f0',
+  },
+  outline: 'none',
+  '&:focus-within': {
+    outline: `3px solid ${theme.palette.primary.main}`,
+    boxShadow: `0 0 5px ${theme.palette.primary.main}`,
+  },
+}));
 
 function CustomCard({ title, content, sx, ...props }) {
   const theme = useTheme();
   return (
-    <Card
+    <StyledCard
       sx={{
-        boxShadow: 3,
-        borderRadius: 2,
-        backgroundColor: theme.palette.background.paper,
-        '&:hover': {
-          boxShadow: 6,
-          backgroundColor: '#f0f0f0',
-        },
-        outline: 'none',
-        '&:focus-within': {
-          outline: `3px solid ${theme.palette.primary.main}`,
-          boxShadow: `0 0 5px ${theme.palette.primary.main}`,
-        },
         ...sx, // allow overriding styles through props
       }}
       {...props}
@@ -31,8 +35,14 @@ function CustomCard({ title, content, sx, ...props }) {
           {content}
         </Typography>
       </CardContent>
-    </Card>
+    </StyledCard>
   );
 }
+
+CustomCard.propTypes = {
+  title: PropTypes.string.isRequired,
+  content: PropTypes.string.isRequired,
+  sx: PropTypes.object,
+};
 
 export default CustomCard;

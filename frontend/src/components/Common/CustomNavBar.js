@@ -197,7 +197,7 @@ function Navbar() {
                     anchorEl={anchorEl}
                     open={Boolean(anchorEl)}
                     onClose={handleMenuClose}
-                    PaperProps={{
+                    slotProps={{
                         sx: {
                             backgroundColor: 'primary.main',
                             color: 'white',
