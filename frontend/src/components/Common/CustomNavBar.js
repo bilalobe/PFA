@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { AppBar, Toolbar, IconButton, Typography, Menu, MenuItem, Box } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useSelector, useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { logoutUser } from '../../actions/authActions';
 import CustomButton from './CustomButton'; 
 import HomeIcon from '@mui/icons-material/Home';
@@ -10,7 +10,7 @@ import SchoolIcon from '@mui/icons-material/School';
 import ForumIcon from '@mui/icons-material/Forum';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
-import logo from '../../assets/logo.png'; // Assuming you have a logo
+import logo from '../../assets/logo.png';
 
 function Navbar() {
     const dispatch = useDispatch();
@@ -165,15 +165,21 @@ function Navbar() {
     return (
         <AppBar position="static" sx={{ bgcolor: 'primary.main', py: 1 }}>
             <Toolbar>
-                <Box component={Link} to="/" sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none', flexGrow: 1 }}>
-                    <img src={logo} alt="logo" style={{ width: '40px', marginRight: '10px' }} />
-                    <Typography variant="h6" sx={{ color: 'inherit', fontWeight: 'bold', fontSize: '1.2rem' }}>
-                        MyApp
-                    </Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none', flexGrow: 1 }}>
+                    <Link href="/">
+                        <a>
+                            <img src={logo} alt="logo" style={{ width: '40px', marginRight: '10px' }} />
+                            <Typography variant="h6" sx={{ color: 'inherit', fontWeight: 'bold', fontSize: '1.2rem' }}>
+                                MyApp
+                            </Typography>
+                        </a>
+                    </Link>
                 </Box>
                 <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-                    <CustomButton color="inherit" component={Link} to="/">
-                        Home
+                    <CustomButton color="inherit">
+                        <Link href="/">
+                            <a>Home</a>
+                        </Link>
                     </CustomButton>
                     {renderNavLinks()}
                 </Box>

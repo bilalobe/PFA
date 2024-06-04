@@ -1,24 +1,20 @@
-from rest_framework.decorators import api_view
+import requests
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
-from botbuilder.core import TurnContext, BotFrameworkAdapter, BotFrameworkAdapterSettings
-from botbuilder.schema import Activity
-from .bot import MyBot
-import asyncio
-
-adapter_settings = BotFrameworkAdapterSettings("MicrosoftAppId", "MicrosoftAppPassword")
-adapter = BotFrameworkAdapter(adapter_settings)
-bot = MyBot()
+from rest_framework import permissions, status
 
 @api_view(['POST'])
-def messages(request):
-    activity = Activity.deserialize(request.data)
-    auth_header = request.META.get("HTTP_AUTHORIZATION", "")
-
-    async def call_bot(turn_context):
-        await bot.on_turn(turn_context)
-
-    loop = asyncio.get_event_loop()
-    task = loop.create_task(adapter.process_activity(activity, auth_header, call_bot))
-    loop.run_until_complete(task)
-    
-    return Response(status=201)
+@permission_classes([permissions.AllowAny])
+def chat(request):
+    user_message = request.data.get('message')
+    if user_message:
+        response = requests.post(
+            'http://localhost:5005/webhooks/rest/webhook',  # Rasa server URL
+            json={'message': user_message}
+        )
+        if response.status_code == 200:
+            return Response(response.json())
+        else:
+            return Response({'error': 'Error contacting chatbot'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    else:
+        return Response({'error': 'No message provided'}, status=status.HTTP_400_BAD_REQUEST)

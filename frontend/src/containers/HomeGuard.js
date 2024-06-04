@@ -1,14 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Routes, Route, Navigate, Outlet, Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import CustomButton from './CustomButton';
 import { fetchUserProfile } from '../actions/userActions';
 import {
   Box,
   CircularProgress,
   Drawer,
   List,
-  ListItem,
   ListItemText,
   ListItemIcon,
   IconButton,
@@ -16,7 +13,8 @@ import {
   AppBar,
   Typography,
   CssBaseline,
-  Alert
+  Alert,
+  ListItemButton
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -43,7 +41,7 @@ function HomeGuard() {
 
   const fetchProfile = useCallback(() => {
     dispatch(fetchUserProfile()).catch((err) => {
-      setError('Failed to load user profile.');
+      setError('Failed to load user profile. Please check your internet connection and try again.');
     });
   }, [dispatch]);
 
@@ -53,115 +51,88 @@ function HomeGuard() {
     }
   }, [isAuthenticated, fetchProfile]);
 
+  const handleDrawerOpen = () => {
+    setDrawerOpen(true);
+  };
+
+  const handleDrawerClose = () => {
+    setDrawerOpen(false);
+  };
+
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <CircularProgress />
+        <Typography variant="h6" component="div" sx={{ ml: 2 }}>
+          Loading user profile...
+        </Typography>
       </Box>
     );
   }
 
   if (error) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
-        <Alert severity="error">{error}</Alert>
-        <CustomButton onClick={fetchProfile}>Retry</CustomButton>
-      </Box>
+      <Alert severity="error">{error}</Alert>
     );
   }
-
-  if (!isAuthenticated) {
-    return <Navigate to="/login" />;
-  }
-
-  const drawerContent = (
-    <Box>
-      <List>
-        <ListItem CustomButton component={Link} to="/">
-          <ListItemIcon><HomeIcon /></ListItemIcon>
-          <ListItemText primary="Home" />
-        </ListItem>
-        <ListItem CustomButton component={Link} to="/dashboard">
-          <ListItemIcon><HomeIcon /></ListItemIcon>
-          <ListItemText primary="Dashboard" />
-        </ListItem>
-        <ListItem CustomButton component={Link} to="/courses">
-          <ListItemIcon><SchoolIcon /></ListItemIcon>
-          <ListItemText primary="Courses" />
-        </ListItem>
-        <ListItem CustomButton component={Link} to="/forum">
-          <ListItemIcon><ForumIcon /></ListItemIcon>
-          <ListItemText primary="Forum" />
-        </ListItem>
-        <ListItem CustomButton component={Link} to="/profile">
-          <ListItemIcon><AccountCircleIcon /></ListItemIcon>
-          <ListItemText primary="Profile" />
-        </ListItem>
-        <ListItem CustomButton onClick={handleLogout}>
-          <ListItemIcon><LogoutIcon /></ListItemIcon>
-          <ListItemText primary="Logout" />
-        </ListItem>
-      </List>
-    </Box>
-  );
 
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
-      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+      <AppBar position="fixed" open={drawerOpen}>
         <Toolbar>
           <IconButton
             color="inherit"
             aria-label="open drawer"
+            onClick={handleDrawerOpen}
             edge="start"
-            onClick={toggleDrawer(true)}
-            sx={{ mr: 2 }}
+            sx={{ mr: 2, ...(drawerOpen && { display: 'none' }) }}
           >
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            HomeGuard
+            Dashboard
           </Typography>
         </Toolbar>
       </AppBar>
       <Drawer
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          '& .MuiDrawer-paper': {
-            width: drawerWidth,
-            boxSizing: 'border-box',
-          },
-        }}
-        variant="temporary"
-        anchor="left"
+        variant="permanent"
         open={drawerOpen}
-        onClose={toggleDrawer(false)}
-        ModalProps={{
-          keepMounted: true, // Better open performance on mobile.
-        }}
       >
-        <Box display="flex" alignItems="center" padding={2}>
-          <IconButton onClick={toggleDrawer(false)}>
+        <Toolbar>
+          <IconButton onClick={handleDrawerClose}>
             <ChevronLeftIcon />
           </IconButton>
-        </Box>
-        {drawerContent}
+        </Toolbar>
+        <List>
+          <ListItemButton key="Home">
+            <ListItemIcon><HomeIcon /></ListItemIcon>
+            <ListItemText primary="Home" />
+          </ListItemButton>
+          <ListItemButton key="Courses">
+            <ListItemIcon><SchoolIcon /></ListItemIcon>
+            <ListItemText primary="Courses" />
+          </ListItemButton>
+          <ListItemButton key="Forum">
+            <ListItemIcon><ForumIcon /></ListItemIcon>
+            <ListItemText primary="Forum" />
+          </ListItemButton>
+          <ListItemButton key="Profile">
+            <ListItemIcon><AccountCircleIcon /></ListItemIcon>
+            <ListItemText primary="Profile" />
+          </ListItemButton>
+          <ListItemButton key="Logout">
+            <ListItemIcon><LogoutIcon /></ListItemIcon>
+            <ListItemText primary="Logout" />
+          </ListItemButton>
+        </List>
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/courses" element={<Courses />} />
-          <Route path="/forum" element={<Forum />} />
-          <Route path="/profile" element={<Profile />} />
-        </Routes>
+        <Dashboard />
       </Box>
     </Box>
   );
 }
 
-// Rest of the component...
-
-export default React.memo(HomeGuard);
+export default HomeGuard;

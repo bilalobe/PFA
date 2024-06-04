@@ -1,10 +1,18 @@
-/* src/styles/styles.scss */
+// frontend/src/styles/styles.scss 
 
-/* Add your custom styles here */
+// Import base styles
+@import 'base/reset'; 
+@import 'base/typography';
+@import 'base/variables';
+
+// Import component styles
+@import 'components/Navbar';
+@import 'components/CourseList'; 
+@import 'components/Quiz'; 
+@import 'components/Forum'; 
+
+
+// Add global styles if needed 
 body {
-    font-family: 'Helvetica', 'Arial', sans-serif;
-}
-
-.container {
-    max-width: 800px;
+  background-color: $light-gray; // Use a variable 
 }

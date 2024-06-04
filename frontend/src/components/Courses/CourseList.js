@@ -19,8 +19,26 @@ import CourseCard from './CourseCard';
 import CustomInput from '../Common/CustomInput';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
+import { makeStyles } from '@mui/styles';
+import './CourseList.scss';
 
+const useStyles = makeStyles((theme) => ({
+  courseCard: {
+    backgroundColor: '#f5f5f5', 
+    marginBottom: theme.spacing(2),
+    '&:hover': {
+      boxShadow: '0px 4px 8px rgba(0,0,0,0.1)',
+    },
+  },
+  courseTitle: {
+    fontWeight: 'bold',
+    color: theme.palette.primary.main, 
+  },
+
+  // ... other styles
+}));
 const CourseList = () => {
+  const classes = useStyles();
   const dispatch = useDispatch();
   const { courses, isLoading, error } = useSelector((state) => state.course);
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,9 +47,37 @@ const CourseList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [coursesPerPage] = useState(9);
 
-  useEffect(() => {
-    dispatch(fetchCourses());
-  }, [dispatch]);
+  const CourseCard = ({ course }) => {
+    const { title, description, image, category, level } = course;
+    return (
+      <Grid item xs={12} sm={6} md={4}>
+        <Card className={classes.courseCard}> // Replace 'classes' with 'courseCard'
+          <CardMedia
+            component="img"
+            height="140"
+            image={image}
+            alt={title}
+          />
+          <CardContent>
+            <Typography variant="h6" className={classes.courseTitle}> // Replace 'classes' with 'courseTitle'
+              {title}
+            </Typography>
+            <Typography variant="body2" color="textSecondary">
+              {description}
+            </Typography>
+            <Box mt={2}>
+              <Typography variant="body2" color="textSecondary">
+                Category: {category}
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                Level: {level}
+              </Typography>
+            </Box>
+          </CardContent>
+        </Card>
+      </Grid>
+    );
+  };
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
