@@ -1,29 +1,35 @@
 import React, { useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchUserProfile } from '../../actions/userActions';
-import { Typography, Avatar, Card, CardContent, Box, CircularProgress, Alert, Button } from '@mui/material';
-import { Link } from 'react-router-dom';
 import { createSelector } from 'reselect';
+import { Box, CircularProgress, Alert, Button, Typography } from '@mui/material';
+import { useParams, Link } from 'react-router-dom';
 
+// Create a selector to efficiently get the user state
 const selectUserState = createSelector(
-  state => state.user,
-  user => ({ profile: user.profile, loading: user.loading, error: user.error })
+  (state) => state.user,
+  (user) => ({ 
+    profile: user.profile, 
+    loading: user.loading, 
+    error: user.error
+  })
 );
 
 function UserProfile() {
   const dispatch = useDispatch();
   const { profile, loading, error } = useSelector(selectUserState);
+  const { userId } = useParams(); // Get userId from route parameters
 
   const fetchProfile = useCallback(() => {
-    dispatch(fetchUserProfile());
-  }, [dispatch]);
+    dispatch(fetchUserProfile(userId));
+  }, [dispatch, userId]);
 
   useEffect(() => {
     fetchProfile();
   }, [fetchProfile]);
 
   const retryFetchProfile = () => {
-    dispatch(fetchUserProfile());
+    fetchProfile(); 
   };
 
   if (loading) {
@@ -55,10 +61,15 @@ function UserProfile() {
     <Box display="flex" justifyContent="center" alignItems="center" height="50vh" aria-label="User profile">
       <Card>
         <CardContent>
-          <Avatar src={profile.avatar} />
-          <Typography variant="h5">{profile.name}</Typography>
-          <Typography variant="body1">{profile.email}</Typography>
-          <Button component={Link} to="/edit-profile">Edit Profile</Button>
+          <Box display="flex" flexDirection="column" alignItems="center">
+            <Avatar src={profile.profile_picture} alt="Profile Picture" sx={{ width: 64, height: 64, mb: 2 }} />
+            <Typography variant="h5">User: {profile.user}</Typography>
+            <Typography variant="body1">User Type: {profile.user_type}</Typography>
+            <Typography variant="body1">Bio: {profile.bio}</Typography>
+            <Button component={Link} to={`/edit-profile/${profile.id}`} sx={{ mt: 2 }} variant="contained" color="primary">
+              Edit Profile
+            </Button>
+          </Box>
         </CardContent>
       </Card>
     </Box>

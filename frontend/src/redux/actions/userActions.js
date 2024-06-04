@@ -1,3 +1,4 @@
+import axios from 'axios';
 import {
   FETCH_USER_PROFILE_REQUEST,
   FETCH_USER_PROFILE_SUCCESS,
@@ -6,30 +7,33 @@ import {
   UPDATE_USER_PROFILE_SUCCESS,
   UPDATE_USER_PROFILE_FAILURE,
 } from './types';
-import { userApi } from '../api/api';
 
-// Fetch user profile action
-export const fetchUserProfile = createAsyncThunk(
-  'user/fetchUserProfile',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await userApi.fetchUserProfile(); 
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
+const apiUrl = 'http://localhost:8000/api'; 
 
-// Update user profile action
-export const updateUserProfile = createAsyncThunk(
-  'user/updateUserProfile',
-  async (profileData, { rejectWithValue }) => {
-    try {
-      const response = await userApi.updateUserProfile(profileData);
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error.message);
-    }
+// Fetch User Profile
+export const fetchUserProfile = (userId) => async (dispatch) => {
+  dispatch({ type: FETCH_USER_PROFILE_REQUEST });
+  try {
+    const response = await axios.get(`${apiUrl}/profile/${userId}/`);
+    dispatch({ type: FETCH_USER_PROFILE_SUCCESS, payload: response.data });
+  } catch (error) {
+    dispatch({
+      type: FETCH_USER_PROFILE_FAILURE,
+      payload: error.message, 
+    });
   }
-);
+};
+
+// Update User Profile
+export const updateUserProfile = (userId, updatedProfileData) => async (dispatch) => {
+  dispatch({ type: UPDATE_USER_PROFILE_REQUEST });
+  try {
+    const response = await axios.put(`${apiUrl}/profile/${userId}/update/`, updatedProfileData);
+    dispatch({ type: UPDATE_USER_PROFILE_SUCCESS, payload: response.data });
+  } catch (error) {
+    dispatch({
+      type: UPDATE_USER_PROFILE_FAILURE,
+      payload: error.message,
+    });
+  }
+};

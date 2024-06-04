@@ -43,6 +43,9 @@ urlpatterns = [
     path('api/enrollment/', include('enrollment.urls')),
     path('api/forum/', include('forum.urls')),
     path('api/resource/', include('resource.urls')),
+    path('api/ai/', include('ai.urls')), # Add your AI app URLs 
+    path('api/chatbot/', include('chatbot.urls')), # Add your chatbot app URLs
+
 
     # dj-rest-auth for authentication
     path('api/auth/', include('dj_rest_auth.urls')),
@@ -54,6 +57,9 @@ urlpatterns = [
 
     # Frontend endpoints
     path('', include('frontend.urls')),
+
+    # Chatbot
+    path('api/messages', views.messages),  # Chatbot messages endpoint
 
     # Social Auth (Ensure 'social_django' is in INSTALLED_APPS)
     url(r'^auth/', include('social_django.urls', namespace='social')),

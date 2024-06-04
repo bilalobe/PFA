@@ -1,33 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { updateUserProfile, fetchUserProfile } from '../../actions/userActions'; 
-import { Button, TextField, Box, Typography, Alert, CircularProgress, Snackbar } from '@mui/material';
+import { updateUserProfile, fetchUserProfile } from '../../actions/userActions';
+import { Box, Typography, TextField, Button, CircularProgress, Alert, Snackbar } from '@mui/material';
 import { Formik, Form, Field } from 'formik';
+import { useParams } from 'react-router-dom';
 import * as Yup from 'yup';
 
 const validationSchema = Yup.object().shape({
-  bio: Yup.string().max(500, 'Bio cannot exceed 500 characters'), 
-  firstName: Yup.string().required('First name is required'),
-  lastName: Yup.string().required('Last name is required'),
+  bio: Yup.string().max(500, 'Bio cannot exceed 500 characters'),
+  firstName: Yup.string().required('First Name is required'),
+  lastName: Yup.string().required('Last Name is required'),
 });
 
 function EditProfile() {
   const dispatch = useDispatch();
-  const profile = useSelector(state => state.user.profile);
-  const loading = useSelector(state => state.user.loading);
-  const error = useSelector(state => state.user.error);
+  const { profile, loading, error } = useSelector((state) => state.user);
+  const { userId } = useParams();
 
   const [success, setSuccess] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchUserProfile());
-  }, [dispatch]);
+    dispatch(fetchUserProfile(userId));
+  }, [dispatch, userId]);
 
   const handleSubmit = async (values, { setSubmitting }) => {
     setSubmitting(true);
     try {
-      await dispatch(updateUserProfile(values));
+      await dispatch(updateUserProfile(userId, values));
       setSuccess(true);
       setOpenSnackbar(true);
     } catch (error) {
@@ -60,7 +60,7 @@ function EditProfile() {
           Profile updated successfully!
         </Alert>
       </Snackbar>
-      <Formik 
+      <Formik
         initialValues={{
           bio: profile?.bio || '',
           firstName: profile?.firstName || '',
