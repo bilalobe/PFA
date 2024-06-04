@@ -10,6 +10,9 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
 import logo from '../../assets/logo.png';
 
+import MenuIcon from '@mui/icons-material/Menu';
+import Link from 'next/link'; // Import from 'next/link' 
+
 const MenuItems = ({ user, handleMenuClose, handleLogout }) => {
   if (user && user.role === 'admin') {
     return (
