@@ -1,27 +1,37 @@
 from django.db import models
-from user.models import User
-
+from django.contrib.auth.models import User
+from .models import User  
 
 class Course(models.Model):
-    titre = models.CharField(max_length=255)
-    description = models.TextField()
-    niveau_difficulte = models.CharField(
-        max_length=50,
-        choices=(
-            ("debutant", "Débutant"),
-            ("intermediaire", "Intermédiaire"),
-            ("avance", "Avancé"),
-        ),
-    )
-    formateur = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="cours_formateur",
-        limit_choices_to={"role": "formateur"},
-    )
-    date_creation = models.DateTimeField(auto_now_add=True)
-    image = models.ImageField(upload_to="cours_images/", blank=True, null=True)
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    instructor = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'user_type': 'teacher'})
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
+        return self.title
 
-        return f"{self.titre} par {User.objects.get(pk=self.formateur_id)}"
+class Module(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='modules')
+    title = models.CharField(max_length=255)
+    content = models.TextField(blank=True)
+    order = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='modules_created')
+
+    class Meta:
+        unique_together = ('course', 'order')
+
+    def __str__(self):
+        return self.title
+
+class Review(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='reviews')
+    rating = models.PositiveIntegerField(choices=((1, '1 Star'), (2, '2 Stars'), (3, '3 Stars'), (4, '4 Stars'), (5, '5 Stars')))
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} reviewed {self.course.title}"

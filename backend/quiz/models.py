@@ -1,64 +1,97 @@
 from django.db import models
-from course.models import Module
-from user.models import User
+from django.contrib.auth.models import User
+from .models import User  
 
-class Quiz(models.Model):
+class Course(models.Model):
     title = models.CharField(max_length=255)
-    module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='quizzes')
-    description = models.TextField(blank=True, null=True)
-    time_limit = models.IntegerField(default=60)
-    passing_score = models.IntegerField(default=60)
-
-    class Meta:
-        unique_together = ('module', 'title')
+    description = models.TextField(blank=True)
+    instructor = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'user_type': 'teacher'})
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.title
 
-class Question(models.Model):
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
-    text = models.TextField()
+class Module(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='modules')
+    title = models.CharField(max_length=255)
+    content = models.TextField(blank=True)
+    order = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='modules_created')
 
     class Meta:
-        unique_together = ('quiz', 'text')
+        unique_together = ('course', 'order')
 
     def __str__(self):
-        return self.text
+        return self.title
 
-class AnswerChoice(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='choices')
+class Quiz(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='quizzes')
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+class QuizQuestion(models.Model):
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
+    text = models.TextField() 
+    question_type = models.CharField(max_length=20, choices=(
+        ('multiple_choice', 'Multiple Choice'),
+        ('true_false', 'True/False'),
+        # ... other question types
+    ), default='multiple_choice')
+    order = models.PositiveIntegerField() 
+    created_at = models.DateTimeField(auto_now_add=True)
+    # ... other question fields
+
+class QuizAnswerChoice(models.Model):
+    question = models.ForeignKey(QuizQuestion, on_delete=models.CASCADE, related_name='choices')
     text = models.CharField(max_length=255)
     is_correct = models.BooleanField(default=False)
+    order = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        unique_together = ('question', 'text')
-
-    def __str__(self):
-        return self.text
-
-class UserQuizAttempt(models.Model):
+class Review(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
-    score = models.IntegerField(default=0)
-    end_time = models.DateTimeField(null=True, blank=True)
-
-    class Meta:
-        unique_together = ('user', 'quiz')
-
-    def calculate_progress(self):
-        total_questions = self.quiz.questions.count()
-        if total_questions == 0:
-            return 0
-        progress = (self.score / total_questions) * 100
-        return min(progress, 100)
-
-    def save(self, *args, **kwargs):
-        # Save progress to user model or other model if needed
-        self.user.progress = self.calculate_progress()
-        self.user.save()
-
-        # Save UserQuizAttempt
-        super().save(*args, **kwargs)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='reviews')
+    rating = models.PositiveIntegerField(choices=((1, '1 Star'), (2, '2 Stars'), (3, '3 Stars'), (4, '4 Stars'), (5, '5 Stars')))
+    comment = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.user} - {self.quiz}'
+        return f"{self.user.username} reviewed {self.course.title}"
+
+class Comment(models.Model):
+    post = models.ForeignKey('forum.Post', on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.author} commented on {self.post}"
+
+class Moderation(models.Model):
+    post = models.ForeignKey('forum.Post', on_delete=models.CASCADE)
+    reason = models.CharField(max_length=255, choices=(
+        ('spam', 'Spam'),
+        ('offensive', 'Offensive Content'),
+        ('irrelevant', 'Irrelevant'),
+        ('other', 'Other'),
+    ))
+    reported_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    moderator = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='moderated_posts')
+    action_taken = models.CharField(max_length=20, choices=(
+        ('delete', 'Delete'),
+        ('warn', 'Warn User'),
+        ('ban', 'Ban User'),
+        ('none', 'No Action'),
+    ), default='none', blank=True)
+    action_description = models.CharField(max_length=255, blank=True)
+
+    def __str__(self):
+        return f"Moderation Report: {self.reason} on post {self.post.id} by {self.reported_by.username}"

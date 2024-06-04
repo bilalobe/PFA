@@ -23,3 +23,5 @@ class IsEnrolledStudentOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
         return obj.forum.course.enrollments.filter(student=request.user).exists() # Only enrolled students can create posts
+    
+    
