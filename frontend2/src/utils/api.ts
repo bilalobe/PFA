@@ -1,8 +1,5 @@
-// frontend-nextjs/utils/api.ts
-
 import axios from 'axios';
-import { addNotification } from '../../store/notificationSlice';
-
+import { send } from 'process';
 
 // Replace with your actual Django backend URL (use environment variables in production)
 const apiUrl = 'http://localhost:8000/api';
@@ -13,14 +10,43 @@ const getAuthToken = () => {
   return localStorage.getItem('token');
 };
 
-// --- Authentication API ---
+// --- Error Handling ---
+const handleApiError = (error: any, defaultMessage?: string) => {
+  if (error.response) {
+    const { status, data } = error.response;
+
+    // Customized error messages for different status codes
+    switch (status) {
+      case 400:
+        throw new Error(data.detail || 'Bad Request. Please check your input.');
+      case 401:
+        throw new Error('Unauthorized. Please log in again.');
+      case 403:
+        throw new Error('Forbidden. You do not have permission to access this resource.');
+      case 404:
+        throw new Error('Not Found. The requested resource was not found.');
+      case 500:
+        throw new Error('Internal Server Error. Please try again later.');
+      default:
+        throw new Error(data.detail || defaultMessage || 'An unexpected error occurred.');
+    }
+  } else if (error.request) {
+    throw new Error('No response received from the server.');
+  } else {
+    throw new Error(defaultMessage || 'An unknown error occurred.');
+  }
+};
+
+// --- API Function Structure ---
+
+// Auth API
 export const authApi = {
   register: async (userData: any) => {
     try {
       const response = await axios.post(`${apiUrl}/auth/register/`, userData);
       return response.data;
     } catch (error) {
-      throw new Error('Registration failed.');
+      handleApiError(error, 'Registration failed.');
     }
   },
   login: async (credentials: any) => {
@@ -28,81 +54,71 @@ export const authApi = {
       const response = await axios.post(`${apiUrl}/auth/token/`, credentials);
       return response.data;
     } catch (error) {
-      throw new Error('Invalid credentials.');
+      handleApiError(error, 'Invalid credentials.');
     }
   },
   refreshToken: async (refreshToken: any) => {
     try {
-      const response = await axios.post(`${apiUrl}/auth/token/refresh/`, {
-        refresh: refreshToken,
-      });
+      const response = await axios.post(`${apiUrl}/auth/token/refresh/`, { refresh: refreshToken });
       return response.data;
     } catch (error) {
-      throw new Error('Failed to refresh token.');
+      handleApiError(error, 'Failed to refresh token.');
     }
   },
   logout: async () => {
     try {
-      const response = await axios.post(`${apiUrl}/auth/logout/`);
-      return response.data;
+      await axios.post(`${apiUrl}/auth/logout/`);
     } catch (error) {
-      throw new Error('Logout failed.');
+      handleApiError(error, 'Logout failed.');
     }
   },
 };
 
-// --- User API ---
+// User API
 export const userApi = {
   getProfile: async () => {
     try {
       const token = getAuthToken();
       const response = await axios.get(`${apiUrl}/users/me/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       return response.data;
     } catch (error) {
-      throw new Error('Failed to fetch user profile.');
+      handleApiError(error, 'Failed to fetch user profile.');
     }
   },
   updateProfile: async (updatedProfileData: any) => {
     try {
       const token = getAuthToken();
       const response = await axios.put(`${apiUrl}/users/me/`, updatedProfileData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       return response.data;
     } catch (error) {
-      throw new Error('Failed to update profile.');
+      handleApiError(error, 'Failed to update profile.');
     }
   },
   setupAgenda: async (agendaData: any) => {
     try {
       const token = getAuthToken();
       const response = await axios.post(`${apiUrl}/users/me/agenda/`, agendaData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-      return response.data;  // return the response data
+      return response.data;
     } catch (error) {
-      throw new Error('Failed to update agenda.');
+      handleApiError(error, 'Failed to update agenda.');
     }
   },
 };
-// --- Course API ---
-export const courseApi = {
-  // ... (other course API functions)
 
+// Course API
+export const courseApi = {
   fetchCourses: async () => {
     try {
       const response = await axios.get(`${apiUrl}/courses/`);
       return response.data;
     } catch (error) {
-      throw new Error('Failed to fetch courses.');
+      handleApiError(error, 'Failed to fetch courses.');
     }
   },
   fetchCourseDetails: async (courseId: any) => {
@@ -110,33 +126,33 @@ export const courseApi = {
       const response = await axios.get(`${apiUrl}/courses/${courseId}/`);
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to fetch details for course ${courseId}.`);
+      handleApiError(error, `Failed to fetch details for course ${courseId}.`);
     }
   },
-  // ... (other course API functions)
+  // Other course API functions can be added here
 };
 
-// --- Module API ---
+// Module API
 export const moduleApi = {
   fetchModules: async (courseId: any) => {
     try {
       const response = await axios.get(`${apiUrl}/courses/${courseId}/modules/`);
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to fetch modules for course ${courseId}.`);
+      handleApiError(error, `Failed to fetch modules for course ${courseId}.`);
     }
   },
-  // ... (other module API functions)
+  // Other module API functions can be added here
 };
 
-// --- Quiz API ---
+// Quiz API
 export const quizApi = {
   fetchQuiz: async (quizId: any) => {
     try {
       const response = await axios.get(`${apiUrl}/quizzes/${quizId}/`);
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to fetch quiz ${quizId}.`);
+      handleApiError(error, `Failed to fetch quiz ${quizId}.`);
     }
   },
   fetchQuizQuestions: async (quizId: any) => {
@@ -144,7 +160,7 @@ export const quizApi = {
       const response = await axios.get(`${apiUrl}/quizzes/${quizId}/questions/`);
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to fetch questions for quiz ${quizId}.`);
+      handleApiError(error, `Failed to fetch questions for quiz ${quizId}.`);
     }
   },
   submitQuiz: async (quizId: any, selectedAnswers: any) => {
@@ -161,7 +177,7 @@ export const quizApi = {
       );
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to submit quiz ${quizId}.`);
+      handleApiError(error, `Failed to submit quiz ${quizId}.`);
     }
   },
   submitAnswer: async (questionId: any, answer: any) => {
@@ -178,24 +194,22 @@ export const quizApi = {
       );
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to submit answer for question ${questionId}.`);
+      handleApiError(error, `Failed to submit answer for question ${questionId}.`);
     }
   }
 };
 
-// --- Enrollment API ---
+// Enrollment API
 export const enrollmentApi = {
   fetchEnrollments: async () => {
     try {
       const token = getAuthToken();
       const response = await axios.get(`${apiUrl}/enrollments/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       return response.data;
     } catch (error) {
-      throw new Error('Failed to fetch enrollments.');
+      handleApiError(error, 'Failed to fetch enrollments.');
     }
   },
   enrollInCourse: async (courseId: any) => {
@@ -212,19 +226,34 @@ export const enrollmentApi = {
       );
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to enroll in course ${courseId}.`);
+      handleApiError(error, `Failed to enroll in course ${courseId}.`);
     }
   },
   unenrollFromCourse: async (courseId: any) => {
     try {
       const token = getAuthToken();
       await axios.delete(`${apiUrl}/enrollments/${courseId}/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
     } catch (error) {
-      throw new Error(`Failed to unenroll from course ${courseId}.`);
+      handleApiError(error, `Failed to unenroll from course ${courseId}.`);
+    }
+  },
+  sendFeedback: async (enrollmentId: any, feedback: any) => {
+    try {
+      const token = getAuthToken();
+      const response = await axios.post(
+        `${apiUrl}/enrollments/${enrollmentId}/feedback/`,
+        { feedback },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      handleApiError(error, `Failed to send feedback for enrollment ${enrollmentId}.`);
     }
   },
   updateProgress: async (enrollmentId: any, progress: any) => {
@@ -241,7 +270,7 @@ export const enrollmentApi = {
       );
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to update progress for enrollment ${enrollmentId}.`);
+      handleApiError(error, `Failed to update progress for enrollment ${enrollmentId}.`);
     }
   },
   rateCourse: async (enrollmentId: any, rating: any) => {
@@ -258,19 +287,36 @@ export const enrollmentApi = {
       );
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to rate course for enrollment ${enrollmentId}.`);
+      handleApiError(error, `Failed to rate course for enrollment ${enrollmentId}.`);
+    }
+  },
+  inviteToEnroll: async (courseId: any, email: any) => {
+    try {
+      const token = getAuthToken();
+      const response = await axios.post(
+        `${apiUrl}/enrollments/invite/`,
+        { course: courseId, email },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      handleApiError(error, `Failed to invite user to enroll in course ${courseId}.`);
     }
   }
 };
 
-// --- Forum API ---
+// Forum API
 export const forumApi = {
   fetchForumPosts: async (courseId: any) => {
     try {
       const response = await axios.get(`${apiUrl}/courses/${courseId}/forums/`);
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to fetch forum posts for course ${courseId}.`);
+      handleApiError(error, `Failed to fetch forum posts for course ${courseId}.`);
     }
   },
   createForumPost: async (courseId: any, threadData: any) => {
@@ -287,7 +333,7 @@ export const forumApi = {
       );
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to create a forum post in course ${courseId}.`);
+      handleApiError(error, `Failed to create a forum post in course ${courseId}.`);
     }
   },
   fetchForumThreads: async (forumId: any) => {
@@ -295,7 +341,7 @@ export const forumApi = {
       const response = await axios.get(`${apiUrl}/forums/${forumId}/threads/`);
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to fetch threads for forum ${forumId}.`);
+      handleApiError(error, `Failed to fetch threads for forum ${forumId}.`);
     }
   },
   createForumThread: async (forumId: any, threadData: any) => {
@@ -312,7 +358,7 @@ export const forumApi = {
       );
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to create a thread in forum ${forumId}.`);
+      handleApiError(error, `Failed to create a thread in forum ${forumId}.`);
     }
   },
   fetchForumPostsForThread: async (threadId: any) => {
@@ -320,7 +366,7 @@ export const forumApi = {
       const response = await axios.get(`${apiUrl}/threads/${threadId}/posts/`);
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to fetch posts for thread ${threadId}.`);
+      handleApiError(error, `Failed to fetch posts for thread ${threadId}.`);
     }
   },
   createForumPostForThread: async (threadId: any, postData: any) => {
@@ -337,7 +383,7 @@ export const forumApi = {
       );
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to create a post in thread ${threadId}.`);
+      handleApiError(error, `Failed to create a post in thread ${threadId}.`);
     }
   },
   reportForumPost: async (postId: any, reason: any) => {
@@ -354,13 +400,29 @@ export const forumApi = {
       );
       return response.data;
     } catch (error) {
-      throw new Error(`Failed to report post ${postId}.`);
+      handleApiError(error, `Failed to report post ${postId}.`);
     }
   },
-  // ... other forum API functions
+  createDiffusionChannel: async (courseId: any, channelData: any) => {
+    try {
+      const token = getAuthToken();
+      const response = await axios.post(
+        `${apiUrl}/courses/${courseId}/diffusion/`,
+        channelData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      handleApiError(error, `Failed to create a diffusion channel in course ${courseId}.`);
+    }
+  }
 };
 
-// --- Resource API ---
+// Resource API
 export const resourceApi = {
   fetchResources: async (moduleId: any, searchQuery: any) => {
     try {
@@ -374,7 +436,7 @@ export const resourceApi = {
       const response = await axios.get(url);
       return response.data;
     } catch (error) {
-      throw new Error('Failed to fetch resources.');
+      handleApiError(error, 'Failed to fetch resources.');
     }
   },
   uploadResource: async (formData: any, onUploadProgress: any) => {
@@ -389,128 +451,172 @@ export const resourceApi = {
       });
       return response.data;
     } catch (error) {
-      throw new Error('Failed to upload resource.');
+      handleApiError(error, 'Failed to upload resource.');
     }
   },
-  // ... other resource API functions
-};
-
-// --- Assignment API ---
-export const assignmentApi = {
-  fetchAssignments: async (courseId: any) => {
-    try {
-      const response = await axios.get(`${apiUrl}/courses/${courseId}/assignments/`);
-      return response.data;
-    } catch (error) {
-      throw new Error(`Failed to fetch assignments for course ${courseId}.`);
-    }
-  },
-  fetchAssignmentDetails: async (assignmentId: any) => {
-    try {
-      const response = await axios.get(`${apiUrl}/assignments/${assignmentId}/`);
-      return response.data;
-    } catch (error) {
-      throw new Error(`Failed to fetch details for assignment ${assignmentId}.`);
-    }
-  },
-  submitAssignment: async (assignmentId: any, submissionData: any) => {
+  downloadResource: async (resourceId: any) => {
     try {
       const token = getAuthToken();
-      const response = await axios.post(
-        `${apiUrl}/assignments/${assignmentId}/submit/`,
-        submissionData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      return response.data;
-    } catch (error) {
-      throw new Error(`Failed to submit assignment ${assignmentId}.`);
-    }
-  },
-  // ... other assignment API functions
-};
-
-// --- Grade API ---
-export const gradeApi = {
-  fetchGrades: async () => {
-    try {
-      const token = getAuthToken();
-      const response = await axios.get(`${apiUrl}/grades/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const response = await axios.get(`${apiUrl}/resources/${resourceId}/download/`, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob',
       });
       return response.data;
     } catch (error) {
-      throw new Error('Failed to fetch grades.');
+      handleApiError(error, 'Failed to download resource.');
     }
-  },
-  // ... other grade API functions
+  }
 };
 
-// --- Notification API ---
+// Notification API
+
 export const notificationApi = {
   fetchNotifications: async () => {
     try {
       const token = getAuthToken();
       const response = await axios.get(`${apiUrl}/notifications/`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      return response.data;
-    } catch (error) {
-      throw new Error('Failed to fetch notifications.');
-    }
-  },
-  addNotification: async (notificationData: any) => {
-    try {
-      const token = getAuthToken();
-      const response = await axios.post(`${apiUrl}/notifications/`, notificationData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      return response.data;
-    } catch (error) {
-      throw new Error('Failed to add notification.');
-    }
-  },
-  deleteNotification: async (notificationId: any) => {
-    try {
-      const token = getAuthToken();
-      await axios.delete(`${apiUrl}/notifications/${notificationId}/`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      return notificationId;
+      return response.data;
     } catch (error) {
-      throw new Error('Failed to delete notification.');
+      handleApiError(error, 'Failed to fetch notifications.');
     }
   },
-  // ... other notification API functions
+  markAsRead: async (notificationId: any) => {
+    try {
+      const token = getAuthToken();
+      await axios.put(
+        `${apiUrl}/notifications/${notificationId}/`,
+        { read: true },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+    } catch (error) {
+      handleApiError(error, `Failed to mark notification ${notificationId} as read.`);
+    }
+  },
+  remindLater: async (notificationId: any) => {
+    try {
+      const token = getAuthToken();
+      await axios.put(
+        `${apiUrl}/notifications/${notificationId}/`,
+        { remind: true },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+    } catch (error) {
+      handleApiError(error, `Failed to remind later for notification ${notificationId}.`);
+    }
+  }
 };
 
-  // --- Error Handling ---
-  const handleApiError = (error: { response: { data: { detail: any; }; }; request: any; message: any; }, defaultMessage: string | undefined) => {
-    if (error.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
-      console.error('API Error:', error.response.data);
-      throw new Error(error.response.data.detail || defaultMessage);
-    } else if (error.request) {
-      // The request was made but no response was received
-      console.error('API Request Error:', error.request);
-      throw new Error('No response received from the server.');
-    } else {
-      // Something happened in setting up the request that triggered an Error
-      console.error('API Error:', error.message);
-      throw new Error(defaultMessage);
-    }
-    
-  };
+// Moderation API
 
-  export { handleApiError }; 
+export const moderationApi = {
+  fetchReports: async () => {
+    try {
+      const token = getAuthToken();
+      const response = await axios.get(`${apiUrl}/moderation/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Failed to fetch reports.');
+    }
+  },
+  resolveReport: async (reportId: any) => {
+    try {
+      const token = getAuthToken();
+      await axios.delete(`${apiUrl}/moderation/${reportId}/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch (error) {
+      handleApiError(error, `Failed to resolve report ${reportId}.`);
+    }
+  },
+  banUser: async (userId: any) => {
+    try {
+      const token = getAuthToken();
+      await axios.post(
+        `${apiUrl}/moderation/ban/`,
+        { userId },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+    } catch (error) {
+      handleApiError(error, `Failed to ban user ${userId}.`);
+    }
+  },
+};
+
+// Grade 
+
+export const gradeApi = {
+  fetchGrades: async () => {
+    try {
+      const token = getAuthToken();
+      const response = await axios.get(`${apiUrl}/grades/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Failed to fetch grades.');
+    }
+  },
+  resetGrades: async () => {
+    try {
+      const token = getAuthToken();
+      await axios.delete(`${apiUrl}/grades/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch (error) {
+      handleApiError(error, 'Failed to reset grades.');
+    }
+  },
+};
+
+// Assignment API
+
+export const assignmentApi = {
+  fetchAssignments: async () => {
+    try {
+      const token = getAuthToken();
+      const response = await axios.get(`${apiUrl}/assignments/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Failed to fetch assignments.');
+    }
+  },
+  revokeAssignment: async (assignmentId: any) => {
+    try {
+      const token = getAuthToken();
+      await axios.delete(`${apiUrl}/assignments/${assignmentId}/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch (error) {
+      handleApiError(error, `Failed to revoke assignment ${assignmentId}.`);
+    }
+  },
+  markAsComplete: async (assignmentId: any) => {
+    try {
+      const token = getAuthToken();
+      await axios.put(
+        `${apiUrl}/assignments/${assignmentId}/`,
+        { completed: true },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+    } catch (error) {
+      handleApiError(error, `Failed to mark assignment ${assignmentId} as complete.`);
+    }
+  },
+};
+
+
 
