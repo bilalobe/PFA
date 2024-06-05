@@ -8,7 +8,7 @@ interface QuizDetails {
 
 interface CourseState {
   loading: boolean;
-  error: string | null;
+  error: string | undefined | null;
   quiz?: QuizDetails;
 }
 
@@ -50,7 +50,7 @@ const courseSlice = createSlice({
         state.loading = false;
         state.quiz = action.payload;
       })
-      .addCase(createQuiz.rejected, (state, action: PayloadAction<string>) => {
+      .addCase(createQuiz.rejected, (state, action: PayloadAction<string | undefined>) => {
         state.loading = false;
         state.error = action.payload;
       });

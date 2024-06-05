@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { submitQuizAnswers } from '../../redux/actions/quizActions';
+import { submitAnswer } from '../../redux/actions/quizActions';
 import { useRouter } from 'next/router';
 import { Button, Typography, Box, CircularProgress, Alert } from '@mui/material';
 
@@ -37,27 +37,17 @@ const SubmitAndReview: React.FC<SubmitAndReviewProps> = ({ quizId, selectedAnswe
 
     return (
         <Box>
-            {!showResults && (
-                <Box>
-                    {submissionError && <Alert severity="error">{submissionError}</Alert>}
-                    {isSubmitting ? (
-                        <CircularProgress />
-                    ) : (
-                        <Button variant="contained" color="primary" onClick={handleSubmit}>
-                            Submit Quiz
-                        </Button>
-                    )}
-                </Box>
-            )}
+            <Button variant="contained" color="primary" onClick={handleSubmit}>
 
             {showResults && (
                 <Box>
                     <Typography variant="h6">Your Score: {score}</Typography>
-                    <Button variant="contained" color="secondary" onClick={handleReview}>
+                    <Button variant="contained" color="secondary" onclick={handleReview}>
                         Review Answers
                     </Button>
                 </Box>
             )}
+            </Button>
         </Box>
     );
 }

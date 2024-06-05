@@ -1,7 +1,7 @@
 // frontend2/src/redux/reducers/chatReducers.ts
 
 import { createReducer, PayloadAction } from '@reduxjs/toolkit';
-import { joinChatRoom, leaveChatRoom, sendChatMessage, receiveChatMessage, setTypingIndicator, fetchChatMessages, setOnlineUsers } from './chatActions';
+import { joinChatRoom, leaveChatRoom, sendChatMessage, receiveChatMessage, setTypingIndicator, fetchChatMessages, setOnlineUsers } from './../actions/chatAction';
 
 interface ChatState {
     roomId: string | null;

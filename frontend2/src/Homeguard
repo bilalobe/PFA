@@ -1,6 +1,6 @@
-import { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchUserProfile } from '../actions/userActions';
+import { fetchUserProfile, logoutUser } from '../actions/userActions';
 import {
     Box,
     CircularProgress,
@@ -25,17 +25,22 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { createSelector } from 'reselect';
 import dynamic from 'next/dynamic';
+import { RootState } from '../reducers';
 
 const Dashboard = dynamic(() => import('./Dashboard'));
 
 const drawerWidth = 240;
 
 const selectUserAndAuthState = createSelector(
-    state => ({ profile: state.user.profile, loading: state.user.loading, isAuthenticated: state.auth.isAuthenticated }),
+    (state: RootState) => ({
+        profile: state.user.profile,
+        loading: state.user.loading,
+        isAuthenticated: state.auth.isAuthenticated
+    }),
     userAndAuth => userAndAuth
 );
 
-function HomeGuard() {
+const HomeGuard: React.FC = () => {
     const dispatch = useDispatch();
     const { profile, loading, isAuthenticated } = useSelector(selectUserAndAuthState);
 
@@ -45,7 +50,7 @@ function HomeGuard() {
 
     const handleLogout = useCallback(() => {
         dispatch(logoutUser());
-    }, []);
+    }, [dispatch]);
 
     const [open, setOpen] = useState(false);
 
@@ -132,6 +137,6 @@ function HomeGuard() {
             </Box>
         </div>
     );
-}
+};
 
 export default HomeGuard;
