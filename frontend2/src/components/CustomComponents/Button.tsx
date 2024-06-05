@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button, styled } from '@mui/material';
+import { Button, CircularProgress, styled } from '@mui/material';
 
 const StyledButton = styled(Button)(({ theme, variant, fontSize, startIcon, endIcon, ...rest }) => ({
   fontWeight: 'bold',
@@ -33,6 +33,8 @@ const StyledButton = styled(Button)(({ theme, variant, fontSize, startIcon, endI
   }),
 }));
 
+import { Tooltip } from '@mui/material';
+
 function CustomButton({ children, variant = 'contained', fontSize, startIcon, endIcon, loading = false, tooltip, ...rest }) {
   const button = (
     <StyledButton variant={variant} fontSize={fontSize} startIcon={startIcon} endIcon={endIcon} disabled={loading} {...rest}>
@@ -40,7 +42,7 @@ function CustomButton({ children, variant = 'contained', fontSize, startIcon, en
     </StyledButton>
   );
 
-  return tooltip ? <tooltip title={tooltip}>{button}</tooltip> : button;
+  return tooltip ? <Tooltip title={tooltip}>{button}</Tooltip> : button;
 }
 
 CustomButton.propTypes = {
