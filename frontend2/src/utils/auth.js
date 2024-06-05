@@ -1,7 +1,46 @@
 import axios from 'axios';
 import { apiUrl } from '../../utils/api';
 
+// Function to get a new access token using refresh token
+const getNewToken = (refreshToken) => {
+    return axios.post(`${apiUrl}auth/token/refresh/`, {
+        refresh: refreshToken,
+    });
+};
+
+// Request interceptor to check if token is about to expire
+axios.interceptors.request.use(async (config) => {
+    const { accessToken, refreshToken } = config.headers;
+
+    // Check if token is about to expire
+    if ( accessToken && refreshToken) {
+        const response = await getNewToken(refreshToken);
+        config.headers['accessToken'] = response.data.access;
+    }
+
+    return config;
+}, (error) => {
+    return Promise.reject(error);
+});
+
+// Response interceptor to handle expired tokens
+axios.interceptors.response.use((response) => {
+    return response;
+}, async (error) => {
+    const originalRequest = error.config;
+    if (error.response.status === 401 && !originalRequest._retry) {
+        originalRequest._retry = true;
+        const refreshToken = 'YOUR_REFRESH_TOKEN'; // Replace 'YOUR_REFRESH_TOKEN' with the actual refresh token value
+        const response = await getNewToken(refreshToken);
+        originalRequest.headers['accessToken'] = response.data.access;
+        return axios(originalRequest);
+    }
+
+    return Promise.reject(error);
+});
+
 const authApi = {
+
     login: async (req, res) => {
         if (req.method === 'POST') {
             try {

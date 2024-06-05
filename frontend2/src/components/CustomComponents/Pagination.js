@@ -39,8 +39,8 @@ const CustomPagination = ({ currentPage, totalPages, paginate }) => {
           <Button
             key={index}
             onClick={() => paginate(number)}
-            variant="outlined"
-            color={number === currentPage ? 'secondary' : 'primary'}
+            variant={number === currentPage ? 'contained' : 'outlined'}
+            color="primary"
             sx={{ mx: 1 }}
             aria-label={`go to page ${number}`}
           >
