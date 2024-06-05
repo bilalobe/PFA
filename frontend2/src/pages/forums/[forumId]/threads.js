@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import { useDispatch, useSelector } from 'react-redux';
-import { createForumThread } from '../../../actions/forumActions';
+import { createForumThread } from '../../../redux/actions/forumActions';
 import { Button, TextField, Box, Typography, CircularProgress, Alert, AlertTitle, ErrorIcon, CheckCircleIcon } from '@mui/material';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';

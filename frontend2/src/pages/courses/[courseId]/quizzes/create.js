@@ -1,11 +1,13 @@
+import { Step, StepLabel, Stepper } from '@mui/material';
+import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { useRouter } from 'next/router';
-import { createQuiz } from '../../../store/courseSlice';
-import { Button, Stepper, Step, StepLabel } from '@mui/material';
-import QuizDetailsForm from '../../../components/QuizDetailsForm';
 import AddQuestionsForm from '../../../../components/Questions/AddQuestionsForm.js';
-import ReviewAndSubmit from '../../../components/ReviewAndSubmit';
+import QuizDetailsForm from '../../../components/QuizDetailsForm';
+import ReviewAndSubmit from '../../../components/ReviewAndSubmit.tsx/index.js';
+import { createQuiz } from '../../../store/courseSlice';
+import QuizReview from './QuizReview';
+
 
 function CreateQuizPage({ course }) {
     const dispatch = useDispatch();
@@ -14,6 +16,8 @@ function CreateQuizPage({ course }) {
   
     const [quizDetails, setQuizDetails] = useState({});
     const [questions, setQuestions] = useState([]);
+    const [quizSubmitted, setQuizSubmitted] = useState(false);
+
   
     const handleSubmit = async () => {
       try {
@@ -26,6 +30,9 @@ function CreateQuizPage({ course }) {
 
   const steps = ['Quiz Details', 'Add Questions', 'Review and Submit'];
 
+
+
+
   const getStepContent = (step) => {
     switch (step) {
       case 0:
@@ -34,11 +41,12 @@ function CreateQuizPage({ course }) {
         return <AddQuestionsForm onSubmit={setQuestions} onNext={() => setActiveStep(2)} />;
       case 2:
         return <ReviewAndSubmit quizDetails={quizDetails} questions={questions} onSubmit={handleSubmit} />;
+      case 3:
+        return quizSubmitted ? <QuizReview /> : 'Quiz not submitted'; // Display the QuizReview component if the quiz has been submitted
       default:
         return 'Unknown step';
     }
   };
-
   
   return (
     <div>

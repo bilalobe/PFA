@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import io from 'socket.io-client';
 import { useSelector, useDispatch } from 'react-redux';
-import { joinChatRoom, leaveChatRoom, sendChatMessage, receiveChatMessage, setTypingIndicator, fetchChatMessages, setOnlineUsers } from '../../actions/chatActions';
+import { joinChatRoom, leaveChatRoom, sendChatMessage, receiveChatMessage, setTypingIndicator, fetchChatMessages, setOnlineUsers } from '../../redux/actions/chatActions';
 import { Box, TextField, Button, Typography, List, ListItem, ListItemText, CircularProgress } from '@mui/material';
 
 const socket = io('http://localhost:8000'); // Replace with your backend URL and port

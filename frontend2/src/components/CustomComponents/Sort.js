@@ -6,6 +6,7 @@ function Sort({ value, onChange }) {
             <select value={value.field} onChange={(e) => onChange({ ...value, field: e.target.value })}>
                 <option value="name">Name</option>
                 <option value="type">Type</option>
+                <option value="date">Date</option>
                 {/* Add more options if needed */}
             </select>
             <label>

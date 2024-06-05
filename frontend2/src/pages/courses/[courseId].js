@@ -1,8 +1,8 @@
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchCourseDetails } from '../../actions/courseActions';
-import { enrollInCourse, fetchUnenroll } from '../../actions/enrollmentActions';
+import { fetchCourseDetails } from '../../redux/actions/courseActions';
+import { enrollInCourse, fetchUnenroll } from '../../redux/actions/enrollmentActions';
 import { Typography, Box, CircularProgress, Alert } from '@mui/material';
 import ModuleList from '../../components/Modules/ModuleList';
 import ReviewList from '../../components/Review/ReviewList';

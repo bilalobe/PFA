@@ -2,7 +2,7 @@ import axios from 'axios';
 import { apiUrl } from '../../utils/api';
 
 // Function to get a new access token using refresh token
-const getNewToken = (refreshToken) => {
+const getNewToken = (refreshToken: string) => {
     return axios.post(`${apiUrl}auth/token/refresh/`, {
         refresh: refreshToken,
     });
@@ -41,7 +41,7 @@ axios.interceptors.response.use((response) => {
 
 const authApi = {
 
-    login: async (req, res) => {
+    login: async (req: { method: string; body: { username: any; password: any; }; }, res: { status: (arg0: number) => { (): any; new(): any; json: { (arg0: { message: string; }): void; new(): any; }; end: { (): void; new(): any; }; }; }) => {
         if (req.method === 'POST') {
             try {
                 const { username, password } = req.body;
@@ -55,7 +55,7 @@ const authApi = {
             res.status(405).end();
         }
     },
-    register: async (req, res) => {
+    register: async (req: { method: string; body: { username: any; email: any; password: any; userType: any; }; }, res: { status: (arg0: number) => { (): any; new(): any; json: { (arg0: { message: string; }): void; new(): any; }; end: { (): void; new(): any; }; }; }) => {
         if (req.method === 'POST') {
             try {
                 const { username, email, password, userType } = req.body;
@@ -74,7 +74,7 @@ const authApi = {
             res.status(405).end();
         }
     },
-    refreshToken: async (req, res) => {
+    refreshToken: async (req: { method: string; body: { refreshToken: any; }; }, res: { status: (arg0: number) => { (): any; new(): any; json: { (arg0: { message: string; }): void; new(): any; }; end: { (): void; new(): any; }; }; }) => {
         if (req.method === 'POST') {
             try {
                 const { refreshToken } = req.body;
@@ -90,7 +90,7 @@ const authApi = {
             res.status(405).end();
         }
     },
-    logout: async (req, res) => {
+    logout: async (req: { method: string; body: { refreshToken: any; }; }, res: { status: (arg0: number) => { (): any; new(): any; json: { (arg0: { message: string; }): void; new(): any; }; end: { (): void; new(): any; }; }; }) => {
         if (req.method === 'POST') {
             try {
                 const { refreshToken } = req.body;
@@ -108,15 +108,16 @@ const authApi = {
     },
 };
 
-export default async (req, res) => {
+export default async (req: { body?: any; method?: any; }, res: { status: (arg0: number) => { (): any; new(): any; json: { (arg0: { message: string; }): void; new(): any; }; end: { (): void; new(): any; }; }; }) => {
     const { method } = req;
+    console.log('method', method);
 
     if (method === 'POST' && req.body.username && req.body.password) {
-        return authApi.login(req, res);
+        return authApi.login({ method: method, body: req.body }, res);
     } else if (method === 'POST' && req.body.username && req.body.email && req.body.password && req.body.userType) {
-        return authApi.register(req, res);
+        return authApi.register({ method: method, body: req.body }, res);
     } else if (method === 'POST' && req.body.refreshToken) {
-        return authApi.refreshToken(req, res);
+        return authApi.refreshToken({ method: method, body: req.body }, res);
     } else {
         res.status(405).end(); // Method Not Allowed
     }

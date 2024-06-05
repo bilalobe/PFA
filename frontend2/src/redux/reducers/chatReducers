@@ -1,7 +1,17 @@
-import { createReducer } from '@reduxjs/toolkit';
+// frontend2/src/redux/reducers/chatReducers.ts
+
+import { createReducer, PayloadAction } from '@reduxjs/toolkit';
 import { joinChatRoom, leaveChatRoom, sendChatMessage, receiveChatMessage, setTypingIndicator, fetchChatMessages, setOnlineUsers } from './chatActions';
 
-const initialState = {
+interface ChatState {
+    roomId: string | null;
+    username: string | null;
+    messages: Array<any>; // Replace 'any' with the actual message type
+    onlineUsers: Array<string>;
+    typingUsers: Array<string>;
+}
+
+const initialState: ChatState = {
     roomId: null,
     username: null,
     messages: [],
@@ -11,7 +21,7 @@ const initialState = {
 
 const chatReducer = createReducer(initialState, (builder) => {
     builder
-        .addCase(joinChatRoom, (state, action) => {
+        .addCase(joinChatRoom, (state, action: PayloadAction<{roomId: string, username: string}>) => {
             state.roomId = action.payload.roomId;
             state.username = action.payload.username;
         })

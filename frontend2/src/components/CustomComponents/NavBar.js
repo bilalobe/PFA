@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { AppBar, Toolbar, IconButton, Typography, Menu, MenuItem, Box, Link, ListItemIcon } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useSelector, useDispatch } from 'react-redux'; 
-import { logoutUser } from '../../actions/authActions';
+import { logoutUser } from '../../redux/actions/authActions';
 import CustomButton from './CustomButton';
 import HomeIcon from '@mui/icons-material/Home';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';

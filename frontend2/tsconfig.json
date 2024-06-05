@@ -21,6 +21,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/pages/profile.tsx", "src/utils/auth", "src/components/CustomComponents/Timer.js", "src/redux/actions/notificationActions.ts", "src/redux/reducers/chatReducers", "src/redux/reducers/notificationReducers.ts", "src/redux/reducers/quizReducers.ts"],
   "exclude": ["node_modules"]
 }

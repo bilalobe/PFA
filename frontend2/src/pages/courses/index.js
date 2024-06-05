@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchCourses } from '../../actions/courseActions';
+import { fetchCourses } from '../../redux/actions/courseActions';
 import { courseApi } from '../../api/api'; // Import courseApi from api.js
 import { Grid, Typography, TextField, Card, CardContent, CardActions, CircularProgress, Alert, Box, Pagination, Button, InputAdornment, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';

@@ -1,15 +1,33 @@
-// store/questionSlice.js
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import axios from 'axios';
 
 const apiUrl = 'http://localhost:8000/api';
 
+interface Question {
+  id: number;
+  text: string;
+  options: string[];
+  correctAnswer: string;
+}
+
+interface QuizResult {
+  score: number;
+  // Add other result properties
+}
+
+interface QuestionState {
+  questions: Question[];
+  loading: boolean;
+  error: string | null;
+  result: QuizResult | null;
+}
+
 // Fetch Questions
-export const fetchQuestions = createAsyncThunk(
+export const fetchQuestions = createAsyncThunk<Question[], number, { rejectValue: string }>(
   'question/fetchQuestions',
   async (quizId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${apiUrl}/quizzes/${quizId}/questions/`);
+      const response = await axios.get<Question[]>(`${apiUrl}/quizzes/${quizId}/questions/`);
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.detail || error.message);
@@ -18,11 +36,11 @@ export const fetchQuestions = createAsyncThunk(
 );
 
 // Submit Quiz
-export const submitQuiz = createAsyncThunk(
+export const submitQuiz = createAsyncThunk<QuizResult, { quizId: number, answers: any }, { rejectValue: string }>(
   'question/submitQuiz',
   async ({ quizId, answers }, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`${apiUrl}/quizzes/${quizId}/submit/`, { answers });
+      const response = await axios.post<QuizResult>(`${apiUrl}/quizzes/${quizId}/submit/`, { answers });
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.detail || error.message);
@@ -30,14 +48,16 @@ export const submitQuiz = createAsyncThunk(
   }
 );
 
+const initialState: QuestionState = {
+  questions: [],
+  loading: false,
+  error: null,
+  result: null,
+};
+
 const questionSlice = createSlice({
   name: 'question',
-  initialState: {
-    questions: [],
-    loading: false,
-    error: null,
-    result: null,
-  },
+  initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
@@ -46,11 +66,11 @@ const questionSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchQuestions.fulfilled, (state, action) => {
+      .addCase(fetchQuestions.fulfilled, (state, action: PayloadAction<Question[]>) => {
         state.loading = false;
         state.questions = action.payload;
       })
-      .addCase(fetchQuestions.rejected, (state, action) => {
+      .addCase(fetchQuestions.rejected, (state, action: PayloadAction<string>) => {
         state.loading = false;
         state.error = action.payload;
       })
@@ -59,11 +79,11 @@ const questionSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(submitQuiz.fulfilled, (state, action) => {
+      .addCase(submitQuiz.fulfilled, (state, action: PayloadAction<QuizResult>) => {
         state.loading = false;
         state.result = action.payload;
       })
-      .addCase(submitQuiz.rejected, (state, action) => {
+      .addCase(submitQuiz.rejected, (state, action: PayloadAction<string>) => {
         state.loading = false;
         state.error = action.payload;
       });
