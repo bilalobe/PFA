@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { apiUrl } from '../../utils/api';
+import { apiUrl } from '../../utils/api.ts';
 
 // Function to get a new access token using refresh token
 const getNewToken = (refreshToken: string) => {
