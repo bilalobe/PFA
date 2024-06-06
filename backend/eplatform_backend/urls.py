@@ -35,7 +35,7 @@ urlpatterns = [
     path('api/teacher/', teacher_only_view, name='teacher_only_view'),
 
     # Include app-specific URLs
-    path('api/utilisateur/', include('utilisateur.urls')),
+    path('api/user/', include('user.urls')),
     path('api/course/', include('course.urls')),
     path('api/module/', include('module.urls')),
     path('api/question/', include('question.urls')),
