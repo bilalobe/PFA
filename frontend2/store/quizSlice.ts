@@ -1,9 +1,8 @@
-import { resetQuiz } from '@/redux/actions/quizActions';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface QuizState {
   quiz: any; // replace 'any' with the type of your quiz
-  answers: { [key: string]: any }; // replace 'any' with the type of your answers
+  answers: { [key: string]: string };
   score: number;
   loading: boolean;
   error?: string;
@@ -15,6 +14,7 @@ const initialState: QuizState = {
   score: 0,
   loading: false,
 };
+
 
 const quizSlice = createSlice({
   name: 'quiz',
@@ -35,10 +35,19 @@ const quizSlice = createSlice({
       const { questionId, answer } = action.payload;
         state.answers[questionId] = answer;
     },
-    resetQuiz: () => initialState,
+    calculateScore: (state) => {
+      // Here you should implement the logic for calculating the score based on the answers
+      // For now, let's just count the number of answers
+      state.score = Object.keys(state.answers).length;
+      
+    },
+    resetQuiz: (state) => {
+      state.score = 0;
+      state.answers = {};
+    },
   },
 });
 
-export const { fetchQuizRequest, fetchQuizSuccess, fetchQuizFailure, submitAnswer } = quizSlice.actions;
+export const { fetchQuizRequest, fetchQuizSuccess, fetchQuizFailure, submitAnswer, calculateScore, resetQuiz } = quizSlice.actions;
 
 export default quizSlice.reducer;

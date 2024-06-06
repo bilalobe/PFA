@@ -10,7 +10,10 @@ import Container from '../../components/components/Container';
 import { RootState } from '../reducers'; // Import the type of your root state
 
 interface Quiz {
-  // Define the shape of your quiz object here
+    question: string;
+    choices: string[];
+    correctAnswer: string;
+    trivia: string;
 }
 
 interface QuizPageProps {
@@ -22,7 +25,7 @@ const QuizPage: React.FC<QuizPageProps> = ({ quiz }) => {
   const score = useSelector((state: RootState) => state.quiz.score);
   const answers = useSelector((state: RootState) => state.quiz.answers);
 
-    const handleAnswer = (questionId, answer) => {
+    const handleAnswer = (questionId: any, answer: any) => {
         dispatch(submitAnswer(questionId, answer));
     };
 
@@ -50,7 +53,7 @@ const QuizPage: React.FC<QuizPageProps> = ({ quiz }) => {
     );
 }
 
-export const getServerSideProps = wrapper.getServerSideProps(async ({ store }) => {
+export const getServerSideProps = wrapper.getServerSideProps(async ({ store }: { store: any }) => {
     await store.dispatch(loadQuiz());
 });
 

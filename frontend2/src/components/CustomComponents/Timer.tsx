@@ -1,12 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, FC } from 'react';
 import Dialog from '@mui/material/Dialog';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import LinearProgress from '@mui/material/LinearProgress';
 
-function Timer({ initialSeconds, onTimeUp }) {
+interface TimerProps {
+  initialSeconds: number;
+  onTimeUp: () => void;
+}
+
+const Timer: FC<TimerProps> = ({ initialSeconds, onTimeUp }) => {
   const [seconds, setSeconds] = useState(initialSeconds);
   const [open, setOpen] = useState(false);
 
@@ -27,7 +33,10 @@ function Timer({ initialSeconds, onTimeUp }) {
 
   return (
     <>
-      {seconds}
+      <Typography variant="h6" color="primary" gutterBottom>
+        Time remaining: {seconds} seconds
+      </Typography>
+      <LinearProgress variant="determinate" value={(seconds / initialSeconds) * 100} />
       <Dialog open={open} onClose={handleClose}>
         <DialogTitle>
           <Typography variant="h4" color="primary">Time's up!</Typography>

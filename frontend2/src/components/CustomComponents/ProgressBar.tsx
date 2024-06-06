@@ -1,14 +1,21 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { FC } from 'react';
 import { Box, LinearProgress, Typography } from '@mui/material';
 
-function CustomProgressBar({ 
+interface CustomProgressBarProps {
+  currentQuestionIndex?: number;
+  totalQuestions: number;
+  color?: 'primary' | 'secondary';
+  variant?: 'determinate' | 'indeterminate' | 'buffer' | 'query';
+  bufferValue?: number;
+}
+
+const CustomProgressBar: FC<CustomProgressBarProps> = ({ 
   currentQuestionIndex = 0, 
-  totalQuestions = 1, 
+  totalQuestions, 
   color = 'primary', 
   variant = 'determinate', 
   bufferValue = 80 
-}) {
+}) => {
   let progress = ((currentQuestionIndex + 1) / totalQuestions) * 100;
   progress = Math.min(progress, 100); // Ensure progress does not exceed 100%
 
@@ -28,13 +35,5 @@ function CustomProgressBar({
     </Box>
   );
 }
-
-CustomProgressBar.propTypes = {
-  currentQuestionIndex: PropTypes.number,
-  totalQuestions: PropTypes.number.isRequired,
-  color: PropTypes.string,
-  variant: PropTypes.string,
-  bufferValue: PropTypes.number,
-};
 
 export default CustomProgressBar;

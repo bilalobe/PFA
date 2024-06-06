@@ -21,6 +21,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/pages/profile.tsx", "src/utils/auth.ts", "src/components/CustomComponents/Timer.js", "src/redux/actions/notificationActions.ts", "src/redux/reducers/chatReducers.ts", "src/redux/reducers/notificationReducers.ts", "src/redux/reducers/quizReducers.ts", "src/Homeguard.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/pages/profile.tsx", "src/utils/auth.ts", "src/components/CustomComponents/Timer.tsx", "src/redux/actions/notificationActions.ts", "src/redux/reducers/chatReducers.ts", "src/redux/reducers/notificationReducers.ts", "src/redux/reducers/quizReducers.ts", "src/Homeguard.tsx"],
   "exclude": ["node_modules"]
 }

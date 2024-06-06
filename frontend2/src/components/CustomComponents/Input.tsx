@@ -16,7 +16,7 @@ const StyledTextField = styled(TextField)(({ theme, error }) => ({
   },
 }));
 
-function CustomInput({ label, sx, error = false, helperText, variant = 'outlined', ...props }) {
+function CustomInput({ label, sx, error = false, helperText, variant = 'outlined', fullWidth = false, ...props }) {
   const theme = useTheme();
   
   return (
@@ -27,6 +27,7 @@ function CustomInput({ label, sx, error = false, helperText, variant = 'outlined
       error={error}
       helperText={helperText}
       variant={variant}
+      fullWidth={fullWidth}
       {...props}
     />
   );
@@ -35,9 +36,10 @@ function CustomInput({ label, sx, error = false, helperText, variant = 'outlined
 CustomInput.propTypes = {
   label: PropTypes.string.isRequired,
   sx: PropTypes.object,
-  error: PropTypes.bool, 
-  helperText: PropTypes.string, 
-  variant: PropTypes.oneOf(['outlined', 'filled', 'standard']),
+  error: PropTypes.bool,
+  helperText: PropTypes.string,
+  variant: PropTypes.oneOf(['standard', 'filled', 'outlined']),
+  fullWidth: PropTypes.bool,
 };
 
 export default CustomInput;

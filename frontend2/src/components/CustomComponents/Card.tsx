@@ -19,12 +19,12 @@ const StyledCard = styled(Card)(({ theme, variant }) => ({
   ...(variant === 'outlined' && {
     border: `1px solid ${theme.palette.grey[400]}`,
   }),
-...(variant === 'default' && {
+  ...(variant === 'default' && {
     border: `1px solid ${theme.palette.grey[300]}`,
-}),
-...(variant === 'elevation' && {
+  }),
+  ...(variant === 'elevation' && {
     border: `1px solid ${theme.palette.grey[200]}`,
-}),
+  }),
 }));
 
 function CustomCard({ title, content, image, variant = 'default', sx, ...props }) {

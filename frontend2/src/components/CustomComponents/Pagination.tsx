@@ -1,25 +1,16 @@
-import { Box, Button, Typography } from '@mui/material';
+import { Button, Typography, Box } from '@mui/material';
+import { FC } from 'react';
 
-const CustomPagination = ({ currentPage, totalPages, paginate }) => {
+interface PaginationProps {
+  currentPage: number;
+  totalPages: number;
+  paginate: (pageNumber: number) => void;
+  pageNumbers: (number | string)[];
+}
 
-  const pageNumbers = [];
-  for (let i = 1; i <= totalPages; i++) {
-    if (
-      i === 1 ||
-      i === totalPages ||
-      (i >= currentPage - 2 && i <= currentPage + 2)
-    ) {
-      pageNumbers.push(i);
-    } else if (
-      i === currentPage - 3 ||
-      i === currentPage + 3
-    ) {
-      pageNumbers.push('...');
-    }
-  }
-
+const Pagination: FC<PaginationProps> = ({ currentPage, totalPages, paginate, pageNumbers }) => {
   return (
-    <Box display="flex" justifyContent="center" mt={4} aria-label="pagination navigation">
+    <Box display="flex" justifyContent="center" mt={4}>
       <Button
         onClick={() => paginate(currentPage - 1)}
         disabled={currentPage === 1}
@@ -38,7 +29,7 @@ const CustomPagination = ({ currentPage, totalPages, paginate }) => {
         ) : (
           <Button
             key={index}
-            onClick={() => paginate(number)}
+            onClick={() => paginate(number as number)}
             variant={number === currentPage ? 'contained' : 'outlined'}
             color="primary"
             sx={{ mx: 1 }}
@@ -62,17 +53,4 @@ const CustomPagination = ({ currentPage, totalPages, paginate }) => {
   );
 };
 
-export default CustomPagination;
-
-export const getServerSideProps = async (context) => {
-    // Fetch data and calculate totalPages based on your data
-    const totalPages = 10;
-    const currentPage = context.query.page || 1;
-
-    return {
-        props: {
-            currentPage,
-            totalPages,
-        },
-    };
-};
+export default Pagination;

@@ -30,7 +30,13 @@ function CustomFooter({ appName = 'MyApp', slogan = 'Enhancing Learning Experien
           {slogan}
         </Typography>
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, flexWrap: 'wrap' }}>
-          {/* ...existing links */}
+          <Link href="/about" color="inherit" sx={{ m: 1 }}>
+            About
+          </Link>
+          <Link href="/contact" color="inherit" sx={{ m: 1 }}>
+            Contact
+          </Link>
+          {/* ...other links */}
         </Box>
       </Container>
     </StyledBox>

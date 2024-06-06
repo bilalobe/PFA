@@ -1,14 +1,20 @@
-import React from 'react';
-import { Snackbar, Alert as MuiAlert } from '@mui/material';
-import PropTypes from 'prop-types';
+import React, { FC } from 'react';
+import { Snackbar, Alert as MuiAlert, AlertColor } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import ErrorIcon from '@mui/icons-material/Error';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import WarningIcon from '@mui/icons-material/Warning';
 import InfoIcon from '@mui/icons-material/Info';
 
+interface CustomSnackbarProps {
+  open: boolean;
+  message: string;
+  type: AlertColor;
+  autoHideDuration?: number;
+  onClose: () => void;
+}
+
 const Alert = styled(MuiAlert)(({ theme, severity }) => ({
-  // Add your custom styles here. For example:
   backgroundColor: severity === 'error' ? theme.palette.error.light : theme.palette.success.light,
   color: theme.palette.common.white,
   '& .MuiAlert-icon': {
@@ -16,7 +22,7 @@ const Alert = styled(MuiAlert)(({ theme, severity }) => ({
   },
 }));
 
-function CustomSnackbar({ open, message, type, autoHideDuration = 3000, onClose }) {
+const CustomSnackbar: FC<CustomSnackbarProps> = ({ open, message, type, autoHideDuration = 3000, onClose }) => {
   const getIcon = () => {
     switch (type) {
       case 'error':
@@ -39,14 +45,6 @@ function CustomSnackbar({ open, message, type, autoHideDuration = 3000, onClose 
       </Alert>
     </Snackbar>
   );
-}
-
-CustomSnackbar.propTypes = {
-  open: PropTypes.bool.isRequired,
-  message: PropTypes.string.isRequired,
-  type: PropTypes.oneOf(['success', 'error', 'warning', 'info']).isRequired,
-  autoHideDuration: PropTypes.number,
-  onClose: PropTypes.func.isRequired,
 };
 
 export default CustomSnackbar;

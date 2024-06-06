@@ -2,9 +2,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Button } from '@mui/material';
 
-function CustomModalDialog({ open, title = '', children, onClose, onConfirm, confirmText = 'Confirm', cancelText = 'Cancel' }) {
+function CustomModalDialog({ open, title, children, onClose, onConfirm, confirmText, cancelText }: {
+  open: boolean,
+  title: string,
+  children: React.ReactNode,
+  onClose: () => void,
+  onConfirm: () => void,
+  confirmText: string,
+  cancelText: string
+}) {
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog open={open} onClose={onClose} disableBackdropClick disableEscapeKeyDown>
       {title && <DialogTitle>{title}</DialogTitle>}
       <DialogContent>
         {typeof children === 'string' ? <DialogContentText>{children}</DialogContentText> : children}
@@ -13,7 +21,7 @@ function CustomModalDialog({ open, title = '', children, onClose, onConfirm, con
         <Button onClick={onClose} color="secondary">
           {cancelText}
         </Button>
-        <Button onClick={onConfirm} color="primary">
+        <Button onClick={onConfirm} color="primary" autoFocus>
           {confirmText}
         </Button>
       </DialogActions>
@@ -32,6 +40,7 @@ CustomModalDialog.propTypes = {
   onConfirm: PropTypes.func.isRequired,
   confirmText: PropTypes.string,
   cancelText: PropTypes.string,
+  disableBackdropClick: PropTypes.bool,
 };
 
 CustomModalDialog.defaultProps = {
