@@ -4,7 +4,8 @@ import { addNotification } from './notificationSlice';
 export const setupAgenda = createAsyncThunk(
   'agenda/setup',
   async (agendaDetails, { dispatch }) => {
-    // Perform agenda setup here
+
+    // 
     // ...
     
 

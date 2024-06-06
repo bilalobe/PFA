@@ -1,18 +1,26 @@
-// pages/quiz.js
 import { useSelector, useDispatch } from 'react-redux';
 import { wrapper } from '../store';
 import { submitAnswer, calculateScore, resetQuiz, loadQuiz } from '../actions/quizActions';
-import QuestionDisplay from '../components/QuestionDisplay';
-import AnswerChoices from '../components/AnswerChoices';
-import Timer from '../components/Timer';
-import ScoreDisplay from '../components/ScoreDisplay';
-import Button from '../components/Button';
-import Container from '../components/Container';
+import QuestionDisplay from '../../components/components/QuestionDisplay';
+import AnswerChoices from '../../components/components/AnswerChoices';
+import Timer from '../../components/components/Timer';
+import ScoreDisplay from '../../components/components/ScoreDisplay';
+import Button from '../../components/components/Button';
+import Container from '../../components/components/Container';
+import { RootState } from '../reducers'; // Import the type of your root state
 
-function QuizPage({ quiz }) {
-    const dispatch = useDispatch();
-    const score = useSelector((state) => state.quiz.score);
-    const answers = useSelector((state) => state.quiz.answers);
+interface Quiz {
+  // Define the shape of your quiz object here
+}
+
+interface QuizPageProps {
+  quiz: Quiz;
+}
+
+const QuizPage: React.FC<QuizPageProps> = ({ quiz }) => {
+  const dispatch = useDispatch();
+  const score = useSelector((state: RootState) => state.quiz.score);
+  const answers = useSelector((state: RootState) => state.quiz.answers);
 
     const handleAnswer = (questionId, answer) => {
         dispatch(submitAnswer(questionId, answer));

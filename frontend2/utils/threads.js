@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { apiUrl } from './api'; // Correct the path to your api.js file
+import { apiUrl } from './api';
 
 export default async (req, res) => {
   const { forumId } = req.query;
