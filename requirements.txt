@@ -20,7 +20,7 @@ boto3==1.28.12  # AWS S3, if needed
 django-storages==1.13.2  # Storage backends for AWS S3, Azure, etc.
 
 # Utilities
-requests==2.31.0
+requests==2.32.2
 django-extensions==3.2.6  # Extensions for Django
 whitenoise==6.4.0  # Static files handling
 django-redis==5.2.1  # Redis cache backend
