@@ -1,4 +1,5 @@
-import { Formik, Form, TextField, Rating } from 'formik';
+import { Formik, Form } from 'formik';
+import { TextField, Rating } from '@material-ui/core';
 import * as Yup from 'yup';
 
 const validationSchema = Yup.object().shape({
@@ -34,8 +35,8 @@ function QuizDetailsForm({ onSubmit, onNext, onError }) {
                 label="Title"
                 value={values.title}
                 onChange={handleChange}
-                error={!!errors.title}
-                helperText={errors.title}
+                error={!!errors?.title}
+                helperText={errors?.title}
                 variant="outlined"
                 color="primary"
                 fullWidth

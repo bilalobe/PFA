@@ -1,15 +1,14 @@
+import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchCourses } from '../../redux/actions/courseActions';
-import { courseApi } from '../../api/api'; // Import courseApi from api.js
 import { Grid, Typography, TextField, Card, CardContent, CardActions, CircularProgress, Alert, Box, Pagination, Button, InputAdornment, IconButton } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import { Link } from 'react-router-dom';
 
-function CourseList() {
+function CourseList({ courses: initialCourses }) {
   const dispatch = useDispatch();
-  const courses = useSelector(state => state.course.courses);
+  const courses = useSelector(state => state.course.courses) || initialCourses;
   const loading = useSelector(state => state.course.loading);
   const error = useSelector(state => state.course.error);
   const [searchQuery, setSearchQuery] = useState('');
@@ -17,7 +16,9 @@ function CourseList() {
   const [coursesPerPage] = useState(9);
 
   useEffect(() => {
-    dispatch(fetchCourses()); // Assuming fetchCourses action is defined
+    if (!initialCourses) {
+      dispatch(fetchCourses()); // Assuming fetchCourses action is defined
+    }
   }, [dispatch]);
 
   const handleSearchChange = (event) => {
@@ -34,6 +35,7 @@ function CourseList() {
 
   // Calculate the courses for the current page
   const indexOfLastCourse = currentPage * coursesPerPage;
+
   const indexOfFirstCourse = indexOfLastCourse - coursesPerPage;
   const currentCourses = courses.slice(indexOfFirstCourse, indexOfLastCourse);
 
@@ -149,6 +151,17 @@ function CourseList() {
     </Box>
     
   );
+}
+
+export async function getServerSideProps() {
+  const res = await axios.get('http://localhost:8000/api/courses'); // Replace with your Django API endpoint
+  const courses = res.data;
+
+  return {
+    props: {
+      courses,
+    },
+  };
 }
 
 export default CourseList;

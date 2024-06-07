@@ -23,7 +23,7 @@ import SchoolIcon from '@mui/icons-material/School';
 import ForumIcon from '@mui/icons-material/Forum';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { createSelector } from 'reselect';
-import { RootState } from '../store/courseSlice';
+import { RootState } from '../types/store/courseSlice';
 import { useRouter } from 'next/router';
 import { Navigate } from 'react-router-dom';
 import dynamic from 'next/dynamic';
