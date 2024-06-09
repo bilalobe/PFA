@@ -3,6 +3,7 @@ from rest_framework.views import exception_handler
 from rest_framework.exceptions import NotFound, PermissionDenied, AuthenticationFailed, APIException
 from django.http import JsonResponse
 
+# Initialize the logger
 logger = logging.getLogger(__name__)
 
 def custom_exception_handler(exc, context):
@@ -12,6 +13,7 @@ def custom_exception_handler(exc, context):
     # Call REST framework's default exception handler first
     response = exception_handler(exc, context)
 
+    # If a response is returned, log the error and customize the response data
     if response is not None:
         logger.error(f"Error: {str(exc)}", exc_info=True)
         custom_response_data = {
@@ -21,6 +23,7 @@ def custom_exception_handler(exc, context):
         }
         response.data = custom_response_data
     else:
+        # Handle different types of exceptions and customize the response accordingly
         if isinstance(exc, NotFound):
             custom_response_data = {
                 'error': 'Not Found',
@@ -64,6 +67,7 @@ def custom_exception_handler(exc, context):
             }
             return JsonResponse(custom_response_data, status=501)
         else:
+            # For any other unhandled exceptions, return a generic server error response
             custom_response_data = {
                 'error': 'Internal Server Error',
                 'status_code': 500,

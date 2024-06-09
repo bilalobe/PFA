@@ -1,12 +1,15 @@
 import os
+import logging
 from rest_framework import viewsets, permissions, parsers, status, filters
 from rest_framework.response import Response
 from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
+from azure.storage.blob import BlobServiceClient
 from .models import Resource
 from .serializers import ResourceSerializer
 from .permissions import IsInstructor, IsEnrolledStudent
-from azure.storage.blob import BlobServiceClient
+
+logger = logging.getLogger(__name__)
 
 class ResourceViewSet(viewsets.ModelViewSet):
     """
@@ -25,7 +28,7 @@ class ResourceViewSet(viewsets.ModelViewSet):
         Returns a queryset that only includes resources associated with the requested module.
         """
         queryset = Resource.objects.all()
-        module_id = self.request.query_params.get('module')
+        module_id = self.request.GET.get('module')
         if module_id is not None:
             queryset = queryset.filter(module_id=module_id)
         return queryset
@@ -54,8 +57,10 @@ class ResourceViewSet(viewsets.ModelViewSet):
             serializer.save(module_id=self.kwargs.get('module_pk'), uploaded_by=self.request.user, file=blob_client.url)
 
         except ValidationError as e:
+            logger.error(f'Validation error occurred: {str(e)}')
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            logger.error(f'An error occurred during upload: {str(e)}')
             return Response({'error': f'An error occurred during upload: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def create(self, request, *args, **kwargs):
@@ -107,9 +112,11 @@ class ResourceViewSet(viewsets.ModelViewSet):
                 return Response(serializer.data)
 
             except ValidationError as e:
-                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+                logger.error(f'Validation error occurred: {str(e)}')
+                return Response({'error': 'Validation error occurred.'}, status=status.HTTP_400_BAD_REQUEST)
             except Exception as e:
-                return Response({'error': f'An error occurred during upload: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                logger.error(f'An error occurred during upload: {str(e)}')
+                return Response({'error': 'An error occurred during upload.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         # Update other fields if a file is not provided
         self.perform_update(serializer)

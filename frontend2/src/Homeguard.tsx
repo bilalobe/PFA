@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchUserProfile, logoutUser } from '../slices/userSlice';
+import { fetchUserProfile, logoutUser } from './features/userSlice';
 import {
   Box,
   CircularProgress,
@@ -22,11 +22,11 @@ import HomeIcon from '@mui/icons-material/Home';
 import SchoolIcon from '@mui/icons-material/School';
 import ForumIcon from '@mui/icons-material/Forum';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import LogoutIcon from '@mui/icons-material/Logout';
 import { createSelector } from 'reselect';
-import { RootState } from './types/store/courseSlice';
-import { useRouter } from 'next/router';
-import { Navigate } from 'react-router-dom';
 import dynamic from 'next/dynamic';
+import { RootState } from './store';
+import { useRouter } from 'next/router';
 
 const Dashboard = dynamic(() => import('./Dashboard'));
 const drawerWidth = 240;
@@ -35,6 +35,7 @@ const selectUserAndAuthState = createSelector(
   (state: RootState) => ({
     profile: state.user.profile,
     loading: state.user.loading,
+    error: state.user.error,
     isAuthenticated: state.auth.isAuthenticated,
   }),
   (userAndAuth) => userAndAuth
@@ -42,8 +43,8 @@ const selectUserAndAuthState = createSelector(
 
 const HomeGuard: React.FC = () => {
   const dispatch = useDispatch();
-  const router = useRouter();
-  const { profile, loading, isAuthenticated } = useSelector(selectUserAndAuthState);
+  const router = useRouter(); 
+  const { profile, loading, error, isAuthenticated } = useSelector(selectUserAndAuthState);
 
   useEffect(() => {
     dispatch(fetchUserProfile());
@@ -65,10 +66,18 @@ const HomeGuard: React.FC = () => {
 
   if (loading) {
     return (
-      <Box
-        className="flex justify-center items-center h-1/2"
-      >
+      <Box className="flex justify-center items-center h-screen">
         <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box className="flex justify-center items-center h-screen">
+        <Typography variant="h6" className="text-red-500">
+          {error}
+        </Typography>
       </Box>
     );
   }
@@ -79,67 +88,49 @@ const HomeGuard: React.FC = () => {
 
   if (profile && profile.role !== 'admin') {
     return (
-      <Box
-        className="flex justify-center items-center h-1/2"
-      >
+      <Box className="flex justify-center items-center h-screen">
         <Typography variant="h6" className="text-gray-700">You are not authorized.</Typography>
       </Box>
     );
   }
 
   const drawerContent = (
-    <div className="bg-gray-200 h-screen">
+    <div className="bg-gray-200 h-full">
       <Toolbar className="bg-gray-700 text-white">
-        <IconButton
-          onClick={handleDrawerClose}
-          className="text-white"
-        >
+        <IconButton onClick={handleDrawerClose} className="text-white">
           <ChevronLeftIcon />
         </IconButton>
       </Toolbar>
       <List>
-        <ListItemButton
-          component={Link}
-          href="/"
-          className="hover:bg-gray-300"
-        >
+        <ListItemButton component={Link} href="/" className="hover:bg-gray-300">
           <ListItemIcon>
             <HomeIcon className="text-gray-700" />
           </ListItemIcon>
           <ListItemText primary="Home" />
         </ListItemButton>
-        <ListItemButton
-          component={Link}
-          href="/courses"
-          className="hover:bg-gray-300"
-        >
+        <ListItemButton component={Link} href="/courses" className="hover:bg-gray-300">
           <ListItemIcon>
             <SchoolIcon className="text-gray-700" />
           </ListItemIcon>
           <ListItemText primary="Courses" />
         </ListItemButton>
-        <ListItemButton
-          component={Link}
-          href="/forums"
-          className="hover:bg-gray-300"
-        >
+        <ListItemButton component={Link} href="/forums" className="hover:bg-gray-300">
           <ListItemIcon>
             <ForumIcon className="text-gray-700" />
           </ListItemIcon>
           <ListItemText primary="Forum" />
         </ListItemButton>
-      </List>
-      <Box sx={{ flexGrow: 1 }} />
-      <List>
-        <ListItemButton
-          component={Link}
-          href="/profile"
-          className="hover:bg-gray-300"
-        >
+        <ListItemButton component={Link} href="/profile" className="hover:bg-gray-300">
           <ListItemIcon>
             <AccountCircleIcon className="text-gray-700" />
           </ListItemIcon>
           <ListItemText primary="Profile" />
+        </ListItemButton>
+        <ListItemButton onClick={handleLogout} className="hover:bg-gray-300">
+          <ListItemIcon>
+            <LogoutIcon className="text-gray-700" />
+          </ListItemIcon>
+          <ListItemText primary="Logout" />
         </ListItemButton>
       </List>
     </div>
@@ -148,7 +139,7 @@ const HomeGuard: React.FC = () => {
   return (
     <Box className="flex">
       <CssBaseline />
-      <AppBar position="fixed" open={open} className="bg-blue-500">
+      <AppBar position="fixed" className="bg-blue-500">
         <Toolbar>
           <IconButton
             color="inherit"
@@ -168,10 +159,14 @@ const HomeGuard: React.FC = () => {
       <Drawer
         variant="permanent"
         open={open}
+        className="w-60"
       >
         {drawerContent}
       </Drawer>
-      <Dashboard />
+      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        <Toolbar />
+        <Dashboard />
+      </Box>
     </Box>
   );
 };

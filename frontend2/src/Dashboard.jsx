@@ -1,17 +1,16 @@
+// components/Dashboard.js
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchUserProfile } from '../../actions/userActions';
-import { Box, Container, CircularProgress, Typography, Drawer, List, ListItem, ListItemText, ListItemIcon, IconButton, Toolbar, AppBar, Alert, ListItemButton, Link } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu'; 
-import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'; 
-import HomeIcon from '@mui/icons-material/Home';
-import SchoolIcon from '@mui/icons-material/School';
-import ForumIcon from '@mui/icons-material/Forum';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import LogoutIcon from '@mui/icons-material/Logout';
+import { fetchUserProfile } from '../features/userSlice';
+import {
+  Box, Container, CircularProgress, Typography, Drawer, List, ListItem, ListItemText, ListItemIcon, IconButton, Toolbar, AppBar, Alert
+} from '@mui/material';
+import {
+  Menu as MenuIcon, ChevronLeft as ChevronLeftIcon, Home as HomeIcon, School as SchoolIcon, Forum as ForumIcon, AccountCircle as AccountCircleIcon, Logout as LogoutIcon
+} from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
-import { logoutUser } from '../../actions/authActions';
+import { logoutUser } from '../features/authSlice';
+import { useAuth } from '../hooks/useAuth';
 
 const drawerWidth = 240;
 
@@ -51,10 +50,9 @@ function Dashboard() {
     return null;
   }
 
-  // Example authorization logic: only admins and teachers can access
   const authorizedRoles = ['admin', 'teacher'];
-  if (!user || !authorizedRoles.includes(user.user_type)) {
-    navigate('/'); 
+  if (!user || !authorizedRoles.includes(user.role)) {
+    navigate('/');
     return null;
   }
 
@@ -123,6 +121,12 @@ function Dashboard() {
       <Drawer
         variant="permanent"
         open={drawerOpen}
+        sx={{
+          '& .MuiDrawer-paper': {
+            width: drawerWidth,
+            boxSizing: 'border-box',
+          },
+        }}
       >
         <Toolbar />
         <Box sx={{ overflow: 'auto' }}>
@@ -131,10 +135,7 @@ function Dashboard() {
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
-        {/* ... (Other elements for your dashboard, like title) */}
-        {/* ... (Your AI-powered components) */}
-        {/* RecommendationList */}
-        {/* Chatbot */}
+        {/* Add your dashboard content here */}
       </Box>
       {openAlert && (
         <Alert severity="error" onClose={handleAlertClose}>
