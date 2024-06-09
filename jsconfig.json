@@ -10,6 +10,9 @@
         "baseUrl": "./src",
         "paths": {
             "components/*": ["components/*"],
+            "pages/*": ["pages/*"],
+            "utils/*": ["utils/*"],
+            "types/*": ["types/*"],
         },
         "sourceMap": true, // Generate corresponding '.map' file.
         "outDir": "./dist", // Redirect output structure to the directory.
@@ -23,5 +26,6 @@
     "exclude": [
         "node_modules",
         "**/node_modules/*"
+
     ]
 }
