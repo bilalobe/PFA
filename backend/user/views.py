@@ -1,20 +1,28 @@
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions
+from .models import User, Enrollment
+from .serializers import (
+    UserSerializer, 
+    UserDetailSerializer, 
+    UserCreateSerializer, 
+    UserUpdateSerializer,
+    EnrollmentSerializer
+)
+from .permissions import IsOwnProfileOrReadOnly
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import User
-from .serializers import UserSerializer, UserDetailSerializer, UserCreateSerializer, UserUpdateSerializer
-from .permissions import IsOwnProfileOrReadOnly
+from rest_framework.exceptions import PermissionDenied
+
 
 class UserViewSet(viewsets.ModelViewSet):
     """
     API endpoint for managing users.
-    Provides actions for listing, retrieving, creating, updating, and deleting users.
     """
     queryset = User.objects.all()
-    
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]  
+
     def get_serializer_class(self):
         """
-        Returns the appropriate serializer class based on the action.
+        Returns the appropriate serializer based on the action being performed.
         """
         if self.action == 'list':
             return UserSerializer
@@ -28,15 +36,15 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """
-        Returns a filtered queryset for the 'list' action to only include basic user information.
+        For list action, return only basic user data.
         """
         if self.action == 'list':
-            return User.objects.all().values('id', 'username', 'first_name', 'last_name')
+            return User.objects.all().values('id', 'username')
         return super().get_queryset()
 
     def get_object(self):
         """
-        Allows users to retrieve their own profile using the 'me' keyword.
+        Allows retrieving own profile using 'me' keyword.
         """
         if self.action == 'retrieve' and self.kwargs['pk'] == 'me':
             return self.request.user
@@ -44,10 +52,10 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         """
-        Sets specific permissions based on the action.
-        - Anyone can create a user.
-        - Only authenticated users can retrieve user data.
-        - Only the owner can update or delete their profile.
+        Sets permissions based on the action:
+        - Allow anyone to create a user (registration).
+        - Allow only the owner or admin to update or delete a user.
+        - Allow authenticated users to retrieve user details.
         """
         if self.action == 'create':
             permission_classes = [permissions.AllowAny]
@@ -57,16 +65,16 @@ class UserViewSet(viewsets.ModelViewSet):
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
 
-    @action(detail=False, methods=['put'], url_path='update-language', permission_classes=[permissions.IsAuthenticated])
-    def update_language(self, request):
+    @action(detail=True, methods=['get'], url_path='enrollments', url_name='enrollments')
+    def list_enrollments(self, request, pk=None):
         """
-        Updates the user's preferred language.
+        List enrollments for a specific user.
+        Only the user themselves or an admin can access this.
         """
-        language = request.data.get('language')
-        if not language:
-            return Response({"detail": "Language is required."}, status=status.HTTP_400_BAD_REQUEST)
+        user = self.get_object()
+        if user != request.user and not request.user.is_staff:
+            raise PermissionDenied("You are not authorized to view these enrollments.")
 
-        request.user.preferred_language = language
-        request.user.save()
-        serializer = UserDetailSerializer(request.user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        enrollments = Enrollment.objects.filter(student=user)
+        serializer = EnrollmentSerializer(enrollments, many=True)
+        return Response(serializer.data)
