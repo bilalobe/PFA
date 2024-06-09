@@ -1,14 +1,13 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import api from './utils/api';
+import { userApi } from '../../utils/api';
 
-// Define async thunk for fetching user profile
 export const fetchUserProfile = createAsyncThunk(
   'user/fetchUserProfile',
   async (_, { rejectWithValue }) => {
     try {
-      const response = await api.fetchUserProfile();
+      const response = await userApi.getProfile();
       return response.data;
-    } catch (error) {
+    } catch (error: any) {
       return rejectWithValue(error.message);
     }
   }
@@ -29,6 +28,7 @@ interface Sort {
   field: string;
   direction: 'asc' | 'desc';
 }
+
 
 interface UserState {
   profile: User | null;

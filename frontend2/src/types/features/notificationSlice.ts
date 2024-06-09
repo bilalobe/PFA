@@ -1,10 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { RootState } from '../store';
 
 interface Notification {
     id: string;
     message: string;
-    type: 'success' | 'error';
-    createdAt: number;
+    type: 'error' | 'success' | 'info' | 'warning';
+    duration: number;
 }
 
 interface NotificationState {
@@ -23,10 +24,15 @@ const notificationSlice = createSlice({
             state.notifications.push(action.payload);
         },
         removeNotification: (state, action: PayloadAction<string>) => {
-            state.notifications = state.notifications.filter(notification => notification.id !== action.payload);
+            state.notifications = state.notifications.filter(
+                (notification) => notification.id !== action.payload
+            );
         },
     },
 });
+
+// Selectors
+export const selectNotifications = (state: RootState) => state.notification.notifications;
 
 export const { addNotification, removeNotification } = notificationSlice.actions;
 

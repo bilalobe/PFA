@@ -6,6 +6,7 @@ import questionReducer from './features/questionSlice';
 import quizReducer from './features/quizSlice';
 import resourceReducer from './features/resourceSlice';
 import userReducer from './features/userSlice';
+import authReducer from './features/authSlice';
 import { errorHandlingMiddleware } from './middleware/errorHandlingMiddleware';
 
 const rootReducer = combineReducers({
@@ -16,6 +17,7 @@ const rootReducer = combineReducers({
   quiz: quizReducer,
   resource: resourceReducer,
   question: questionReducer,
+  auth: authReducer,
 });
 
 import { Middleware } from '@reduxjs/toolkit';
@@ -23,7 +25,7 @@ import { Middleware } from '@reduxjs/toolkit';
 const store = configureStore({
   reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware<RootState>().concat(errorHandlingMiddleware as Middleware),
+    getDefaultMiddleware().concat(errorHandlingMiddleware as Middleware),
   devTools: true,
 });
 

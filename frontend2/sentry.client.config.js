@@ -15,4 +15,7 @@ Sentry.init({
   // We recommend adjusting this value in production, or using tracesSampler
   // for finer control
   tracesSampleRate: 1.0,
+
+  // Enable native crash reports for React Native
+  enableNative: true,
 });

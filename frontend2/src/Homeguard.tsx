@@ -28,7 +28,7 @@ import dynamic from 'next/dynamic';
 import { RootState } from './store';
 import { useRouter } from 'next/router';
 
-const Dashboard = dynamic(() => import('./Dashboard'));
+const Dashboard = dynamic(() => import('./pages/dashboard'));
 const drawerWidth = 240;
 
 const selectUserAndAuthState = createSelector(

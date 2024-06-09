@@ -2,7 +2,7 @@ import axios from 'axios';
 import { send } from 'process';
 
 // Replace with your actual Django backend URL (use environment variables in production)
-const apiUrl = 'http://localhost:8000/api';
+export const apiUrl = 'http://localhost:8000/api';
 
 // Helper function to get the authorization token
 const getAuthToken = () => {
