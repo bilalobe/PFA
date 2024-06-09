@@ -1,15 +1,14 @@
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from rest_framework_nested.routers import NestedSimpleRouter
+from rest_framework_nested.routers import NestedSimpleRouter 
 from .views import ResourceViewSet
 
-router = DefaultRouter()
-router.register(r'modules', ModuleViewSet) # Assuming you have ModuleViewSet
+router = DefaultRouter()  # You'll likely import this from your main urls.py
+# ... (Register other viewsets if needed, e.g., CourseViewSet)
 
-modules_router = NestedSimpleRouter(router, r'modules', lookup='module')
-modules_router.register(r'resources', ResourceViewSet, basename='module-resources')
+module_router = NestedSimpleRouter(router, r'modules', lookup='module')
+module_router.register(r'resources', ResourceViewSet, basename='module-resources')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('', include(modules_router.urls)),
-] 
+    path('', include(module_router.urls)),
+]

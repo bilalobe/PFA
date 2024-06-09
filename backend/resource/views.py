@@ -7,20 +7,20 @@ from django.core.exceptions import ValidationError
 from azure.storage.blob import BlobServiceClient
 from .models import Resource
 from .serializers import ResourceSerializer
-from .permissions import IsInstructorOrReadOnly, IsEnrolledStudent
+from .permissions import IsInstructor, IsEnrolledStudent
 
 logger = logging.getLogger(__name__)
 
 class ResourceViewSet(viewsets.ModelViewSet):
     """
-    API endpoint that allows resources to be viewed or edited.
+    API endpoint for managing resources.
     Only instructors can create, update, and delete resources.
     Enrolled students can only view resources associated with their courses.
     """
     queryset = Resource.objects.all()
     serializer_class = ResourceSerializer
-    parser_classes = (parsers.MultiPartParser, parsers.FormParser)
-    permission_classes = [permissions.IsAuthenticated]  # All users need to be authenticated
+    parser_classes = (parsers.MultiPartParser, parsers.FormParser)  # Handle file uploads
+    permission_classes = [permissions.IsAuthenticated & IsInstructor]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['title', 'description']
     ordering_fields = ['title', 'upload_date']
@@ -31,10 +31,10 @@ class ResourceViewSet(viewsets.ModelViewSet):
         For enrolled students, only resources associated with their enrolled courses are returned.
         """
         queryset = super().get_queryset()
-        module_id = self.request.GET.get('module')
+        module_id = self.request.query_params.get('module')
         if module_id is not None:
             queryset = queryset.filter(module_id=module_id)
-        
+
         if self.request.user.user_type == 'student':
             # Filter resources to only include those from enrolled courses
             enrolled_courses = self.request.user.enrollments.values_list('course', flat=True)
@@ -102,7 +102,7 @@ class ResourceViewSet(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         """
-        Updates a resource. 
+        Updates a resource.
         Handles file upload if a new file is provided.
         Only the instructor who created the resource can update it.
         """
@@ -110,7 +110,7 @@ class ResourceViewSet(viewsets.ModelViewSet):
         instance = self.get_object()
 
         # Check if the user is authorized to update the resource
-        if instance.uploaded_by != request.user: 
+        if instance.uploaded_by != request.user:
             raise PermissionDenied("You do not have permission to update this resource.")
 
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
@@ -144,4 +144,4 @@ class ResourceViewSet(viewsets.ModelViewSet):
             raise PermissionDenied("You do not have permission to delete this resource.")
 
         self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT) 
+        return Response(status=status.HTTP_204_NO_CONTENT)
