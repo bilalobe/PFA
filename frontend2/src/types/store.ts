@@ -1,10 +1,10 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
-import chatReducer from './features/chatSlice';
-import courseReducer from './features/courseSlice';
+import chatReducer from './features/chat-function/chatSlice';
+import courseReducer from './features/course/courseSlice';
 import notificationReducer from './features/notificationSlice';
-import questionReducer from './features/questionSlice';
-import quizReducer from './features/quizSlice';
-import resourceReducer from './features/resourceSlice';
+import questionReducer from './features/course/questionSlice';
+import quizReducer from './features/course/quizSlice';
+import resourceReducer from './features/course/resourceSlice';
 import userReducer from './features/userSlice';
 import authReducer from './features/authSlice';
 import { errorHandlingMiddleware } from './middleware/errorHandlingMiddleware';

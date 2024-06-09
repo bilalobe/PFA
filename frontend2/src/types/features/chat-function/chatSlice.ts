@@ -1,4 +1,3 @@
-import { setOnlineUsers, setTypingIndicator } from '@/redux/actions/chatActions';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 interface ChatState {
