@@ -17,7 +17,10 @@
         ]
       }
     ],
+    
+    "html-has-lang": "off",
     "apple-touch-icons": "off",
     "typescript-config/consistent-casing": "off"
+
   }
 }
