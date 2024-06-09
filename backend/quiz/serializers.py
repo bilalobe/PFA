@@ -1,60 +1,71 @@
 from rest_framework import serializers
-from .models import Quiz, Question, AnswerChoice, UserQuizAttempt
+from .models import Quiz, QuizQuestion, QuizAnswerChoice, UserQuizAttempt
+from django.utils import timezone 
 
-class AnswerChoiceSerializer(serializers.ModelSerializer):
+class QuizAnswerChoiceSerializer(serializers.ModelSerializer):
     class Meta:
-        model = AnswerChoice
+        model = QuizAnswerChoice
         fields = '__all__'
 
-class QuestionSerializer(serializers.ModelSerializer):
-    choices = AnswerChoiceSerializer(many=True, read_only=True)
+class QuizQuestionSerializer(serializers.ModelSerializer):
+    choices = QuizAnswerChoiceSerializer(many=True, read_only=True) 
 
     class Meta:
-        model = Question
+        model = QuizQuestion
         fields = '__all__'
-        
+
 class QuizSerializer(serializers.ModelSerializer):
-    questions = QuestionSerializer(many=True, read_only=True) 
+    questions = QuizQuestionSerializer(many=True, read_only=True)
 
     class Meta:
         model = Quiz
-        fields = ('id', 'title', 'module', 'questions')  
+        fields = '__all__'
 
 class UserQuizAttemptSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserQuizAttempt
-        fields = ('id', 'user', 'quiz', 'score', 'start_time', 'end_time', 'progress')
+        fields = '__all__'
+        read_only_fields = ('user', 'score', 'start_time', 'end_time', 'completed') 
 
 class UserQuizAttemptCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserQuizAttempt
-        fields = ('quiz', 'start_time', 'end_time', 'progress')
+        fields = ('quiz',)
 
     def create(self, validated_data):
-        attempt = UserQuizAttempt.objects.create(
+        """
+        Automatically associates the attempt with the current user and sets the start time.
+        """
+        return UserQuizAttempt.objects.create(
+            user=self.context['request'].user,
             quiz=validated_data['quiz'],
-            start_time=validated_data['start_time'],
-            end_time=validated_data['end_time'],
-            progress=validated_data['progress'],
-            user=self.context['request'].user
+            start_time=timezone.now()
         )
-        return attempt
 
-    def update(self, instance, validated_data):
-        instance.end_time = validated_data.get('end_time', instance.end_time)
-        instance.progress = validated_data.get('progress', instance.progress)
-        instance.save()
-        return instance
-    
 class UserQuizAttemptUpdateSerializer(serializers.ModelSerializer):
+    answers = serializers.JSONField(write_only=True)
+
     class Meta:
         model = UserQuizAttempt
-        fields = ('end_time', 'progress')
+        fields = ('end_time', 'progress', 'answers', 'completed')
 
     def update(self, instance, validated_data):
+        """
+        Updates the attempt with provided data, calculates score, and marks as complete if necessary.
+        """
         instance.end_time = validated_data.get('end_time', instance.end_time)
         instance.progress = validated_data.get('progress', instance.progress)
+        submitted_answers = validated_data.get('answers', [])
+
+        # Calculate the score (replace with your actual score calculation logic)
+        instance.score = calculate_quiz_score(instance.quiz, submitted_answers)
+
+        if instance.progress == 100:  # If progress is 100%, mark as completed
+            instance.completed = True
         instance.save()
         return instance
 
-
+# Helper function to calculate the quiz score (you need to implement this)
+def calculate_quiz_score(quiz, answers):
+    score = 0
+    return score 
