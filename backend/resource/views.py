@@ -7,131 +7,141 @@ from django.core.exceptions import ValidationError
 from azure.storage.blob import BlobServiceClient
 from .models import Resource
 from .serializers import ResourceSerializer
-from .permissions import IsInstructor, IsEnrolledStudent
+from .permissions import IsInstructorOrReadOnly, IsEnrolledStudent
 
 logger = logging.getLogger(__name__)
 
 class ResourceViewSet(viewsets.ModelViewSet):
     """
-    API endpoint for managing resources.
+    API endpoint that allows resources to be viewed or edited.
+    Only instructors can create, update, and delete resources.
+    Enrolled students can only view resources associated with their courses.
     """
     queryset = Resource.objects.all()
     serializer_class = ResourceSerializer
     parser_classes = (parsers.MultiPartParser, parsers.FormParser)
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]  # All users need to be authenticated
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['title', 'description']
     ordering_fields = ['title', 'upload_date']
 
     def get_queryset(self):
         """
-        Returns a queryset that only includes resources associated with the requested module.
+        Returns a queryset filtered by module if the 'module' query parameter is provided.
+        For enrolled students, only resources associated with their enrolled courses are returned.
         """
-        queryset = Resource.objects.all()
+        queryset = super().get_queryset()
         module_id = self.request.GET.get('module')
         if module_id is not None:
             queryset = queryset.filter(module_id=module_id)
+        
+        if self.request.user.user_type == 'student':
+            # Filter resources to only include those from enrolled courses
+            enrolled_courses = self.request.user.enrollments.values_list('course', flat=True)
+            queryset = queryset.filter(module__course__in=enrolled_courses)
+
         return queryset
 
     def perform_create(self, serializer):
         """
-        Handles the creation of a new resource, including file upload and validation.
+        Handles resource creation, including file upload, validation, and saving to Azure.
+        Only instructors can create resources.
         """
+        if self.request.user.user_type != 'teacher':
+            raise PermissionDenied("Only instructors can upload resources.")
+
         try:
-            file = serializer.validated_data.get('file')
-
-            # Validate file extensions
-            validator = FileExtensionValidator(allowed_extensions=['pdf'])
-            validator(file)
-
-            # Validate file size (limit to 5MB)
-            if file.size > 5 * 1024 * 1024:
-                raise ValidationError("File size exceeds the limit (5MB).")
-
-            # Upload the file to Azure Blob Storage
-            blob_service_client = BlobServiceClient.from_connection_string(os.environ.get('AZURE_STORAGE_CONNECTION_STRING'))
-            blob_client = blob_service_client.get_blob_client(container=os.environ.get('AZURE_STORAGE_CONTAINER_NAME'), blob=file.name)
-            blob_client.upload_blob(file, overwrite=True)
-
-            # Update the file field with the Azure Blob Storage URL
-            serializer.save(module_id=self.kwargs.get('module_pk'), uploaded_by=self.request.user, file=blob_client.url)
-
+            file = serializer.validated_data['file']
+            self.validate_file(file)
+            blob_url = self.upload_to_azure(file)
+            serializer.save(
+                module_id=self.kwargs.get('module_pk'),
+                uploaded_by=self.request.user,
+                file=blob_url
+            )
         except ValidationError as e:
-            logger.error(f'Validation error occurred: {str(e)}')
+            logger.error(f"Validation Error: {e}")
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
-            logger.error(f'An error occurred during upload: {str(e)}')
-            return Response({'error': f'An error occurred during upload: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            logger.error(f"Upload Error: {e}")
+            return Response({'error': 'An error occurred during upload.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-    def create(self, request, *args, **kwargs):
+    def validate_file(self, file):
         """
-        Handles the creation of a new resource, including file upload and validation.
+        Validates the uploaded file for allowed extensions and size limit.
         """
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        allowed_extensions = ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'txt', 'zip', 'rar']  # Add more as needed
+        validator = FileExtensionValidator(allowed_extensions=allowed_extensions)
+        validator(file)
+
+        max_file_size = 5 * 1024 * 1024  # 5MB
+        if file.size > max_file_size:
+            raise ValidationError(f"File size must be less than {max_file_size / (1024 * 1024)}MB.")
+
+    def upload_to_azure(self, file):
+        """
+        Uploads the file to Azure Blob Storage and returns the blob URL.
+        """
+        blob_service_client = BlobServiceClient.from_connection_string(os.environ.get('AZURE_STORAGE_CONNECTION_STRING'))
+        blob_client = blob_service_client.get_blob_client(
+            container=os.environ.get('AZURE_STORAGE_CONTAINER_NAME'),
+            blob=file.name
+        )
+        blob_client.upload_blob(file, overwrite=True)
+        return blob_client.url
+
+    def retrieve(self, request, *args, **kwargs):
+        """
+        Retrieves a resource. Ensures enrolled students can only access resources from their courses.
+        """
+        instance = self.get_object()
+        if self.request.user.user_type == 'student':
+            self.check_object_permissions(request, instance)
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     def update(self, request, *args, **kwargs):
         """
-        Updates a specific resource.
-        Handles authorization and updates the resource URL if a new file is uploaded.
+        Updates a resource. 
+        Handles file upload if a new file is provided.
+        Only the instructor who created the resource can update it.
         """
+        partial = kwargs.pop('partial', False)
         instance = self.get_object()
 
         # Check if the user is authorized to update the resource
-        if instance.module.course.instructor != request.user:
-            return Response({'detail': 'You are not authorized to update this resource.'}, status=status.HTTP_403_FORBIDDEN)
+        if instance.uploaded_by != request.user: 
+            raise PermissionDenied("You do not have permission to update this resource.")
 
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
 
-        # Handle file upload if a new file is provided
         if 'file' in request.data:
             try:
                 file = request.data['file']
-
-                # Validate file extensions
-                validator = FileExtensionValidator(allowed_extensions=['pdf'])
-                validator(file)
-
-                # Validate file size (limit to 5MB)
-                if file.size > 5 * 1024 * 1024:
-                    raise ValidationError("File size exceeds the limit (5MB).")
-
-                # Upload the file to Azure Blob Storage
-                blob_service_client = BlobServiceClient.from_connection_string(os.environ.get('AZURE_STORAGE_CONNECTION_STRING'))
-                blob_client = blob_service_client.get_blob_client(container=os.environ.get('AZURE_STORAGE_CONTAINER_NAME'), blob=file.name)
-                blob_client.upload_blob(file, overwrite=True)
-
-                # Update the file field with the Azure Blob Storage URL
-                instance.file = blob_client.url
+                self.validate_file(file)
+                blob_url = self.upload_to_azure(file)
+                instance.file = blob_url
                 instance.save()
-
-                serializer.instance = instance
-                return Response(serializer.data)
-
             except ValidationError as e:
-                logger.error(f'Validation error occurred: {str(e)}')
-                return Response({'error': 'Validation error occurred.'}, status=status.HTTP_400_BAD_REQUEST)
+                logger.error(f"Validation Error: {e}")
+                return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
             except Exception as e:
-                logger.error(f'An error occurred during upload: {str(e)}')
+                logger.error(f"Upload Error: {e}")
                 return Response({'error': 'An error occurred during upload.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-        # Update other fields if a file is not provided
         self.perform_update(serializer)
         return Response(serializer.data)
 
     def destroy(self, request, *args, **kwargs):
         """
-        Deletes a specific resource.
-        Handles authorization.
+        Deletes a resource.
+        Only the instructor who created the resource can delete it.
         """
         instance = self.get_object()
 
-        # Check if the user is authorized to delete the resource
-        if instance.module.course.instructor != request.user:
-            return Response({'detail': 'You are not authorized to delete this resource.'}, status=status.HTTP_403_FORBIDDEN)
+        if instance.uploaded_by != request.user:
+            raise PermissionDenied("You do not have permission to delete this resource.")
 
         self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT) 
