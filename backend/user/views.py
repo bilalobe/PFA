@@ -5,7 +5,6 @@ from .serializers import (
     UserDetailSerializer, 
     UserCreateSerializer, 
     UserUpdateSerializer,
-    EnrollmentSerializer
 )
 from .permissions import IsOwnProfileOrReadOnly
 from rest_framework.decorators import action

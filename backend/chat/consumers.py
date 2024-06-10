@@ -1,40 +1,66 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
-from channels.db import database_sync_to_async
-from django.utils import timezone
 from .models import ChatMessage
+from django.contrib.auth.models import User
+from asgiref.sync import async_to_sync, database_sync_to_async
+from channels.layers import get_channel_layer
+from courses.models import Course  # Import your Course model
+from django.utils import timezone
 
-class ChatConsumer(AsyncWebsocketConsumer): 
+class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.room_name = self.scope['url_route']['kwargs']['room_name']
-        self.room_group_name = f'chat_{self.room_name}'
+        if self.scope['url_route']['kwargs']['room_type'] == 'private':
+            self.other_user_id = self.scope['url_route']['kwargs']['room_id']
+            self.user = self.scope['user']
 
-        if self.channel_layer is not None:  # Check if channel_layer is available
+            # Ensure users cannot chat with themselves
+            if self.user.id == int(self.other_user_id):
+                await self.close(code=4003)
+                return
+
+            # Generate a unique room name
+            user_ids = sorted([self.user.id, int(self.other_user_id)])
+            self.room_name = f'private_chat_{user_ids[0]}_{user_ids[1]}'
+            self.room_group_name = f'chat_{self.room_name}'
+
+            # Join room group
+            await self.channel_layer.group_add(
+                self.room_group_name,
+                self.channel_name
+            )
+        else:
+            self.course_id = self.scope['url_route']['kwargs']['room_id']
+            self.user = self.scope['user']
+
+            # Check if the course exists
+            try:
+                self.course = await self.get_course(self.course_id)
+            except Course.DoesNotExist:
+                await self.close(code=4004)  # Close connection: Course not found
+                return
+
+            # Check if the user is enrolled in the course
+            if not await self.is_user_enrolled(self.user, self.course):
+                await self.close(code=4003)  # Close connection: Not enrolled
+                return
+
+            self.room_name = f'course_chat_{self.course_id}'
+            self.room_group_name = f'chat_{self.room_name}'
+
             # Join room group
             await self.channel_layer.group_add(
                 self.room_group_name,
                 self.channel_name
             )
 
-            # Add user to online users list
-            await self.add_user_to_online()
-            await self.send_online_users()
-
-            await self.send_recent_messages()
-        
         await self.accept()
 
-    async def disconnect(self, close_code):
-        if self.channel_layer is not None:  # Check if channel_layer is available
-            # Leave room group
-            await self.channel_layer.group_discard(
-                self.room_group_name,
-                self.channel_name
-            )
-
-            # Remove user from online users list
-            await self.remove_user_from_online()
-            await self.send_online_users()
+    async def disconnect(self, code):
+        # Leave room group
+        await self.channel_layer.group_discard(
+            self.room_group_name,
+            self.channel_name
+        )
 
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
@@ -80,24 +106,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         }))
 
     @database_sync_to_async
-    def save_message(self, message):
-        ChatMessage.objects.create(
-            room_name=self.room_name,
-            user=self.scope['user'],
-            message=message
-        )
-
-    @database_sync_to_async
-    def add_user_to_online(self):
-        # Your logic to add user to online list, e.g., using Redis or a database
-        pass
-
-    @database_sync_to_async
-    def remove_user_from_online(self):
-        # Your logic to remove user from online list, e.g., using Redis or a database
-        pass
-
-    @database_sync_to_async
     def get_recent_messages(self):
         return ChatMessage.objects.filter(room_name=self.room_name).order_by('-timestamp')[:20]  # Get last 20 messages
 
@@ -110,24 +118,3 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'user': message.user.username,
                 'timestamp': message.timestamp.isoformat(),
             }))
-
-    async def send_online_users(self):
-        if self.channel_layer is not None:
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    'type': 'online_users',
-                    'users': await self.get_online_users(),
-                }
-            )
-
-    @database_sync_to_async
-    def get_online_users(self):
-        # Your logic to get online users, e.g., using Redis or a database
-        return ["User1", "User2"]  # Replace with actual online users logic
-
-    async def online_users(self, event):
-        await self.send(text_data=json.dumps({
-            'type': 'online_users',
-            'users': event['users'],
-        }))

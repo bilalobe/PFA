@@ -18,6 +18,7 @@ from pathlib import Path
 from datetime import timedelta
 
 from decouple import config
+from celery.schedules import crontab
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
@@ -43,7 +44,9 @@ AZURE_STORAGE_CONTAINER_NAME = config('AZURE_STORAGE_CONTAINER_NAME')
 
 DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
 STATICFILES_STORAGE = 'storages.backends.azure_storage.AzureStorage'
-STATICFILES_LOCATION = 'static'
+# STATIC_URL = f'https://{AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/{STATIC_LOCATION}/'
+
+os.environ['VIRUSTOTAL_API_KEY'] = '282f905c823596cb41dbff23c8fc62b595ed9585248a16ee2fe329969a0e85ad'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -61,6 +64,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_nested',
     'dj_rest_auth',
+    'storages',  # Azure Storage
     'channels',  # Websockets
     'allauth',
     'allauth.account',
@@ -167,6 +171,13 @@ REST_FRAMEWORK = {
     'COERCE_DECIMAL_TO_STRING': False,  
 } 
 
+# Advanced search capabilities
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': 'localhost:9200'  
+    },
+}
+
 # CACHES setting
 CACHES = {
     'default': {
@@ -223,7 +234,7 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -273,4 +284,20 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'ALGORITHM': 'HS256',
+}
+
+# Celery Settings
+CELERY_BROKER_URL = 'redis://localhost:6379'  # Use Redis as your message broker
+CELERY_RESULT_BACKEND = 'redis://localhost:6379' 
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json' 
+CELERY_RESULT_SERIALIZER = 'json'
+
+# Celery Beat Settings (for scheduling tasks)
+
+CELERY_BEAT_SCHEDULE = {
+    'update-course-stats': { 
+        'task': 'update_course_statistics', 
+        'schedule': crontab('5'),  # Run daily at midnight (adjust as needed)
+    },
 }
