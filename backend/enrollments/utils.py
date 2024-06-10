@@ -38,30 +38,6 @@ def generate_certificate(enrollment):
 
     c.save()
 
+    # Return the relative URL of the certificate
     return os.path.join('certificates', filename)  # Return the relative URL of the certificate
 
-
-
-def send_enrollment_email(enrollment, subject, template_name):
-    """
-    Sends an email notification about enrollment status.
-    """
-    user = enrollment.student
-    course = enrollment.course
-
-    context = {
-        'user': user,
-        'course': course,
-        'enrollment': enrollment, 
-    }
-
-    message = render_to_string(template_name, context)
-
-    send_mail(
-        subject,
-        message,
-        'your_email@example.com', # From email
-        [user.email],
-        fail_silently=False,
-        html_message=message  # For HTML email
-    )
