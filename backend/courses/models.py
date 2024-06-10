@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from .models import User  
+from .models import User
 
 class Course(models.Model):
     title = models.CharField(max_length=255)
@@ -16,6 +16,7 @@ class Course(models.Model):
 
 class Module(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='modules')
+    quizzes = models.ManyToManyField('Quiz', related_name='modules', blank=True)
     title = models.CharField(max_length=255)
     content = models.TextField(blank=True)
     order = models.PositiveIntegerField()
