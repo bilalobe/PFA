@@ -1,10 +1,11 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import UserViewSet
+from rest_framework import permissions
 
-router = DefaultRouter()
-router.register(r'users', UserViewSet)
-
-urlpatterns = [
-    path('', include(router.urls)),
-]
+class IsOwnProfileOrReadOnly(permissions.BasePermission):
+    """
+    Object-level permission to only allow owners of a profile to edit it.
+    Assumes the model instance has an `user` attribute.
+    """
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return obj == request.user
