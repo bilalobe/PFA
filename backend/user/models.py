@@ -60,7 +60,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         if self.profile_picture:
-            self.resize_profile_picture()
+            from .utils import resize_profile_picture 
+            resize_profile_picture(self.profile_picture.path)
 
     def resize_profile_picture(self):
         """
