@@ -10,7 +10,7 @@ from rest_framework.decorators import action
 from azure.storage.blob import BlobServiceClient, generate_blob_sas, BlobSasPermissions
 from .models import Resource
 from .serializers import ResourceSerializer
-from .permissions import IsInstructorOrReadOnly, IsEnrolledStudent
+from .permissions import IsInstructor, IsEnrolledStudent
 
 logger = logging.getLogger(__name__)
 
