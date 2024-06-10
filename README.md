@@ -3,14 +3,18 @@
 PFA is an open-source e-learning platform built with Django (backend) and React (frontend). It empowers both learners and educators to create, share, and engage in a dynamic learning experience.
   
 ## ✨ Features That Spark _Curiosity_  
-  
+
 - **Tailored Learning:** Discover courses that match your interests and skills.  
 - **Interactive Modules:** Dive into content with engaging videos, quizzes, and resources.  
 - **Expertly Crafted Courses:** Explore a growing library of courses crafted by passionate educators.  
 - **Connect and Collaborate:** Join vibrant discussions in our forum and connect with fellow learners.  
 - **Track Your Progress:** Monitor your learning journey and celebrate your achievements.  
-- **AI-Powered Enhancements:** Experience a smarter learning experience with integrated AI features (under development).
-
+- **AI-Powered Enhancements:** Experience a smarter learning experience with integrated AI features:
+    - **Sentiment Analysis:** Understand user sentiment in forum posts and quizzes.
+    - **Language Detection:** Automatically identify the language of user-generated content.
+    - **Chatbot (Under Development):** Get quick answers and guidance from our AI chatbot. 
+    - **Personalized Recommendations (Under Development):** Receive tailored course recommendations based on your learning history.
+    
 ## 🚀 Launch Your Learning Journey  
   
 ### Prerequisites  
@@ -105,6 +109,7 @@ PFA is an open-source e-learning platform built with Django (backend) and React 
     - Admin Interface: Powerful data management.
     - Templating Engine: Dynamic HTML rendering.
     - Security: Protection against vulnerabilities.
+    - Channels: Real-time communication using WebSockets.
 
 - **Django REST Framework (DRF):** A powerful toolkit for building REST APIs with Django.
   - Features:
@@ -120,10 +125,15 @@ PFA is an open-source e-learning platform built with Django (backend) and React 
     - Scalability & Performance: Handles large datasets.
 
 - **Celery:** A distributed task queue for running background tasks.
-- **Waitress:** A pure-Python WSGI server suitable for production deployments, especially on Windows.
+  - Features:
+    - Asynchronous Processing: Offloads tasks to background workers, improving performance.
+    - Scheduling:  Use Celery Beat to schedule tasks.
+
 - **Redis:** An in-memory data store used as a cache and message broker for performance enhancement.
-- **Sentry:** A real-time error tracking system.
-- **TextBlob:** A Python library for natural language processing (NLP), used for sentiment analysis and other AI-powered features.
+
+- **Sentry:** A real-time error tracking system for monitoring and resolving issues.
+
+- **TextBlob:** A Python library for natural language processing (NLP), used for sentiment analysis, translation, and spelling correction.
 
 ### Frontend:
 
@@ -146,12 +156,14 @@ PFA is an open-source e-learning platform built with Django (backend) and React 
     - Accessibility: Components designed for accessibility.
 
 - **Tailwind CSS:** A utility-first CSS framework for styling.
+
 - **Redux Toolkit:** A state management library for JavaScript applications (simplifies Redux development).
   - Features:
     - createSlice: Simplifies reducer creation.
     - createAsyncThunk: Makes handling asynchronous actions easier.
 
 - **Axios:** A JavaScript library for making HTTP requests to interact with the Django API.
+
 - **Socket.IO:** A library for real-time, bidirectional communication (used for chat).
 
 ### Development Tools:
