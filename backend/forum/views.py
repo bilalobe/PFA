@@ -12,16 +12,9 @@ from .models import Forum, Thread, Post, Moderation, Comment
 from .serializers import ForumSerializer, ThreadSerializer, PostSerializer, ModerationSerializer, CommentSerializer
 from .permissions import IsInstructorOrReadOnly, IsEnrolledStudentOrReadOnly
 from django.contrib.auth.decorators import login_required, permission_required
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
 from django.core.mail import send_mail
 
-
 class ForumViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint for managing forums.
-    Allows searching by title and description.
-    """
     queryset = Forum.objects.all()
     serializer_class = ForumSerializer
     permission_classes = [permissions.IsAuthenticated, IsInstructorOrReadOnly]
@@ -29,10 +22,6 @@ class ForumViewSet(viewsets.ModelViewSet):
     search_fields = ['title', 'description']
 
 class ThreadViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint for managing threads within a forum.
-    Allows searching by title.
-    """
     queryset = Thread.objects.all()
     serializer_class = ThreadSerializer
     permission_classes = [permissions.IsAuthenticated, IsEnrolledStudentOrReadOnly]
@@ -40,17 +29,10 @@ class ThreadViewSet(viewsets.ModelViewSet):
     search_fields = ['title']
 
     def perform_create(self, serializer):
-        """
-        Associates the new thread with the specified forum and sets the created_by field.
-        """
         forum = serializer.validated_data['forum']
         serializer.save(created_by=self.request.user, forum=forum)
 
 class PostViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint for managing posts within a thread.
-    Allows searching by content.
-    """
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -58,10 +40,6 @@ class PostViewSet(viewsets.ModelViewSet):
     search_fields = ['content']
 
     def perform_create(self, serializer):
-        """
-        Creates a new post, associates it with the thread and author,
-        then analyzes sentiment and flags for moderation if negative.
-        """
         if self.request.user.banned_from_forum:
             raise PermissionDenied("You are banned from posting in the forum.")
 
@@ -72,20 +50,8 @@ class PostViewSet(viewsets.ModelViewSet):
         if post.sentiment == 'negative':
             flag_post_for_moderation.delay(post.id) 
 
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            self.thread_group_name,
-            {
-                'type': 'send_new_post',
-                'post_data': serializer.data
-            }
-        )
-
     @action(detail=True, methods=['get'])
     def analyze_sentiment(self, request, pk=None):
-        """
-        Analyzes sentiment of a post and returns it as a response.
-        """
         post = self.get_object()
         corrected_content = self.correct_spelling(post.content)
         analysis = TextBlob(corrected_content)
@@ -95,27 +61,32 @@ class PostViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'])
     def translate(self, request, pk=None):
         """
-        Translates the post content using TextBlob and caches the result.
+        Translates the post content to a specified target language using TextBlob, with caching.
         """
         post = self.get_object()
-        target_language = request.query_params.get('to', 'en')
-        cache_key = f'post_{post.id}_translation_{target_language}'
+        target_language = request.query_params.get('to', 'en')  # Get target language from query parameter
+
+        # Create a unique cache key based on post ID and target language
+        cache_key = f'post_translation_{post.id}_{target_language}'
+
+        # Check if the translation is already in the cache
         translated_content = cache.get(cache_key)
 
         if translated_content is None:
             try:
+                # Perform the translation using TextBlob
                 analysis = TextBlob(post.content)
                 translated_content = str(analysis.translate(to=target_language))
-                cache.set(cache_key, translated_content, 60 * 60)
+
+                # Store the translated content in the cache with an expiration time
+                cache.set(cache_key, translated_content, 60 * 60)  # Cache for 1 hour
             except Exception as e:
                 return Response({'error': f'Translation failed: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response({'translation': translated_content})
 
+
     def correct_spelling(self, text):
-        """
-        Corrects spelling in the given text.
-        """
         corrected_text = ""
         words = text.split(' ')
         for word in words:
@@ -124,9 +95,6 @@ class PostViewSet(viewsets.ModelViewSet):
         return corrected_text.strip()
 
     def get_sentiment_label(self, polarity):
-        """
-        Returns a sentiment label based on the polarity score.
-        """
         if polarity > 0:
             return 'positive'
         elif polarity < 0:
@@ -137,15 +105,18 @@ class PostViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def search(self, request):
         """
-        Searches for forums, threads, and posts based on a query parameter 'q'.
+        Custom search endpoint to search across forums, threads, and posts.
         """
         query = request.query_params.get('q', '')
+
         forums = Forum.objects.filter(Q(title__icontains=query) | Q(description__icontains=query))
         threads = Thread.objects.filter(title__icontains=query)
         posts = Post.objects.filter(content__icontains=query)
+
         forums_serializer = ForumSerializer(forums, many=True, context={'request': request})
         threads_serializer = ThreadSerializer(threads, many=True, context={'request': request})
         posts_serializer = PostSerializer(posts, many=True, context={'request': request})
+
         return Response({
             'forums': forums_serializer.data,
             'threads': threads_serializer.data,
@@ -153,47 +124,24 @@ class PostViewSet(viewsets.ModelViewSet):
         })
 
 class CommentViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint for managing comments.
-    """
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):
-        """
-        Associates the new comment with the post and the author.
-        """
         post = serializer.validated_data['post']
         serializer.save(author=self.request.user, post=post)
 
 class ModerationViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint for managing moderation reports.
-    """
     queryset = Moderation.objects.all()
     serializer_class = ModerationSerializer
     permission_classes = [permissions.IsAuthenticated, IsInstructorOrReadOnly]
 
     def perform_create(self, serializer):
-        """
-        Saves a new moderation report and sends a notification to the instructor.
-        """
         moderation_instance = serializer.save(reported_by=self.request.user)
         post = moderation_instance.post
         forum = post.thread.forum
         instructor = forum.course.instructor
-
-        # Send a notification to the moderation group
-
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            'moderation',  # The moderation group name 
-            {
-                'type': 'send_moderation_notification',
-                'moderation_data': serializer.data 
-            }
-        )
         send_mail(
             'Post Reported',
             f'A post in your course "{forum.course.title}" has been reported.\n'
@@ -206,10 +154,6 @@ class ModerationViewSet(viewsets.ModelViewSet):
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated, IsInstructorOrReadOnly])
 def take_action(request, moderation_id):
-    """
-    Allows instructors to take action on a moderation report.
-    Possible actions: delete, warn, ban, or no action.
-    """
     try:
         moderation = Moderation.objects.get(pk=moderation_id)
     except Moderation.DoesNotExist:

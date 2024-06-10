@@ -1,19 +1,29 @@
 from django.db import models
-from django.conf import settings 
-from backend.course.models import Module
-from .models import User  # Import your User model
+from django.conf import settings
+from course.models import Module
+from django.contrib.auth.models import User
 
 def resource_directory_path(instance, filename):
-    # File will be uploaded to MEDIA_ROOT/course_<course_id>/module_<module_id>/<filename>
-    return f'course_{instance.module.course.id}/module_{instance.module.id}/{filename}' 
+    return 'course_{0}/module_{1}/{2}'.format(instance.module.course.id, instance.module.id, filename)
+
 
 class Resource(models.Model):
     module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='resources')
+    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='resources_uploaded') 
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    file = models.FileField(upload_to=resource_directory_path)  # Use the directory path function
+    file = models.FileField(upload_to=resource_directory_path)
+    file_type = models.CharField(max_length=50, blank=True)  # Store file type
+    file_size = models.PositiveIntegerField(default=0)  # Store file size in bytes
     upload_date = models.DateTimeField(auto_now_add=True)
-    uploaded_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)  # Store who uploaded the resource
+    download_count = models.PositiveIntegerField(default=0) 
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):
+        # Calculate and store file size on save
+        if self.file:
+            self.file_size = self.file.size
+            self.file_type = self.file.file.content_type
+        super().save(*args, **kwargs)

@@ -10,8 +10,8 @@ class IsEnrolledStudentPermissionTests(TestCase):
     def setUp(self):
         self.factory = APIRequestFactory()
         self.view = ResourceViewSet.as_view({'get': 'retrieve'})
-        self.user = User.objects.create_user(username='teststudent', email='teststudent@example.com', password='testpassword', user_type='student')
-        self.instructor = User.objects.create_user(username='testinstructor', email='testinstructor@example.com', password='testpassword', user_type='teacher')
+        self.user = User.objects.create(username='teststudent', email='teststudent@example.com', password='testpassword', user_type='student')
+        self.instructor = User.objects.create(username='testinstructor', email='testinstructor@example.com', password='testpassword', user_type='teacher')
         self.course = Course.objects.create(title='Test Course', description='Test Description', instructor=self.instructor)
         self.module = Module.objects.create(course=self.course, title='Test Module', content='Test Content', order=1)
         self.resource = Resource.objects.create(module=self.module, title='Test Resource', description='Test Description', file='test.pdf')
@@ -28,3 +28,9 @@ class IsEnrolledStudentPermissionTests(TestCase):
         request.user = self.user
         response = self.view(request, pk=self.resource.pk)
         self.assertEqual(response.status_code, 403) # Check for 403 Forbidden 
+
+    def test_unauthenticated_user_cannot_view_resource(self):
+        request = self.factory.get('/fake-url/')
+        response = self.view(request, pk=self.resource.pk)
+        self.assertEqual(response.status_code, 401) # Check for 401 Unauthorized
+    
