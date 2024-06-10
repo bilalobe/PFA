@@ -2,7 +2,6 @@ from django.db.models import Q
 from django.core.cache import cache
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required, permission_required
-from pytz import timezone
 from rest_framework import viewsets, permissions, status, filters
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
@@ -11,6 +10,9 @@ from textblob import TextBlob, Word
 from django.core.mail import send_mail
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+
+from backend.moderation.models import Moderation
+from backend.moderation.utils import send_moderation_notification
 from .tasks import flag_post_for_moderation
 from .models import Forum, Thread, Post, Comment, UserForumPoints
 from .serializers import (
@@ -46,6 +48,24 @@ class ForumViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter]
     search_fields = ['title', 'description']
     pagination_class = StandardResultsSetPagination
+
+    def list(self, request):
+        """
+        Retrieves a list of forums, using caching for improved performance.
+        """
+        cache_key = 'forum_list'
+        cached_data = cache.get(cache_key)
+
+        if cached_data:
+            return Response(cached_data)
+
+        queryset = self.filter_queryset(self.get_queryset())
+        serializer = self.get_serializer(queryset, many=True)
+        data = serializer.data
+
+        # Cache the data for 1 hour
+        cache.set(cache_key, data, 60 * 60)
+        return Response(data)
 
 class ThreadViewSet(viewsets.ModelViewSet):
     """
@@ -157,13 +177,8 @@ class PostViewSet(viewsets.ModelViewSet):
     def translate(self, request, pk=None):
         """
         Translates the post content to the specified target language, with caching.
-        Handles Post.DoesNotExist and translation errors.
         """
-        try:
-            post = self.get_object()
-        except Post.DoesNotExist:
-            raise NotFound("Post not found")
-
+        post = self.get_object()
         target_language = request.query_params.get('to', 'en')
         cache_key = f'post_translation_{post.id}_{target_language}'
         translated_content = cache.get(cache_key)
@@ -172,9 +187,9 @@ class PostViewSet(viewsets.ModelViewSet):
             try:
                 analysis = TextBlob(post.content)
                 translated_content = str(analysis.translate(to=target_language))
-                cache.set(cache_key, translated_content, 60 * 60)
+                cache.set(cache_key, translated_content, 60 * 60)  # Cache for 1 hour
             except Exception as e:
-                return Response({'error': f'Translation failed: {e}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response({'error': f'Translation failed: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response({'translation': translated_content})
 
@@ -271,7 +286,7 @@ def report_content(request):
     if not content_type_id or not content_id or not reason:
         raise ValidationError("Content type, content ID, and reason are required.")
 
-    content_type = ContentType.objects.get_for_id(content_type_id)
+    content_type = content_type.objects.get_for_id(content_type_id)
     content_object = content_type.get_object_for_this_type(id=content_id)
 
     moderation = Moderation.objects.create(

@@ -1,10 +1,18 @@
 from django.db import models
 from django.contrib.auth.models import User
 from textblob import TextBlob
-from .models import Course
+
+from backend.courses.models import Course
 
 class Forum(models.Model):
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255) 
+    description = models.TextField(blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['title']), 
+            models.Index(fields=['description']),
+        ]
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='forums')
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True) 

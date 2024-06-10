@@ -6,7 +6,13 @@ class Course(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     instructor = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'user_type': 'teacher'})
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True) 
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['created_at']), 
+        ]
+        
     enrollment_count = models.PositiveIntegerField(default=0)
     completion_rate = models.FloatField(default=0)
 
