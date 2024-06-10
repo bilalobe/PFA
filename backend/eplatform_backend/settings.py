@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'rest_framework_nested',
     'dj_rest_auth',
+    'channels',  # Websockets
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -112,6 +113,18 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'dj_ango.wsgi.application'
+
+ASGI_APPLICATION = 'dj_ango.asgi.application' # Your ASGI application
+
+# Channel Layers Configuration (using Redis) 
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)], # Update with your Redis connection
+        },
+    },
+}
 
 # Ensure DATABASE_URL default value is a string
 REST_FRAMEWORK = {  

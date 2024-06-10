@@ -2,8 +2,6 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-
-from backend.course.models import Course
 from .models import Quiz, QuizQuestion, QuizAnswerChoice, UserQuizAttempt
 from .serializers import (
     QuizSerializer, 

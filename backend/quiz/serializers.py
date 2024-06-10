@@ -67,5 +67,6 @@ class UserQuizAttemptUpdateSerializer(serializers.ModelSerializer):
 
 # Helper function to calculate the quiz score (you need to implement this)
 def calculate_quiz_score(quiz, answers):
-    score = 0
-    return score 
+    # ... your logic to calculate the score based on answers ...
+    score = 0  # Replace with your actual score calculation logic
+    return score

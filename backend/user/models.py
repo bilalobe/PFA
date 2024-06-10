@@ -36,6 +36,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='student')
     bio = models.TextField(blank=True)
     profile_picture = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
+    banned_from_forum = models.BooleanField(default=False) # zzzz's tribute
+    is_active = models.BooleanField(default=True)
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']

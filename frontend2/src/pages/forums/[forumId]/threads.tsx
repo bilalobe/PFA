@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useDispatch, useSelector } from 'react-redux';
 import { createForumThread } from '../../../redux/actions/forumActions';
@@ -7,8 +7,9 @@ import { Formik, Form, Field, ErrorMessage, FormikHelpers } from 'formik';
 import * as Yup from 'yup';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
-import { RootState } from '../../../redux/store'; // Import the type from your store
+import { RootState } from '../../../redux/store';
 import axios from 'axios';
+import io from 'socket.io-client';
 
 // Define the type of the form values
 interface FormValues {
@@ -19,7 +20,7 @@ interface FormValues {
 // Validation schema for the form
 const validationSchema = Yup.object().shape({
   title: Yup.string().required('Title is required.'),
-  content: Yup.string().required('Content is required.')
+  content: Yup.string().required('Content is required.'),
 });
 
 const CreateForumThread: React.FC = () => {
@@ -34,7 +35,6 @@ const CreateForumThread: React.FC = () => {
     try {
       await dispatch(createForumThread(forumId as string, values.title, values.content));
       setSubmitting(false);
-      // Redirect to the forum page or show a success message
       router.push(`/forums/${forumId}`);
     } catch (err) {
       console.error('Error creating thread:', err);
@@ -76,9 +76,8 @@ const CreateForumThread: React.FC = () => {
             <Button type="submit" variant="contained" color="primary" disabled={isSubmitting}>
               Create Thread
             </Button>
-            {/* Display loading or error states */}
             {loading && <CircularProgress />}
-            {error && error.submit && (
+            {error && (
               <Alert severity="error" variant="filled" icon={<ErrorIcon fontSize="inherit" />}>
                 <AlertTitle>Error</AlertTitle>
                 {error.submit}
