@@ -1,5 +1,4 @@
 import axios from 'axios';
-import { send } from 'process';
 
 // Replace with your actual Django backend URL (use environment variables in production)
 export const apiUrl = 'http://localhost:8000/api';
