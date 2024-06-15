@@ -1,31 +1,14 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchUserProfile, logoutUser } from '../types/features/user/userSlice';
+import { fetchUserProfile, logoutUser } from '../features/userSlice';
 import {
-  Box,
-  CircularProgress,
-  Drawer,
-  List,
-  ListItemText,
-  ListItemIcon,
-  IconButton,
-  Toolbar,
-  AppBar,
-  Typography,
-  CssBaseline,
-  Alert,
-  ListItemButton,
-  Link,
-  Divider,
-  styled,
+  Box, CircularProgress, Drawer, List, ListItemText, ListItemIcon, IconButton,
+  Toolbar, AppBar, Typography, CssBaseline, Alert, ListItemButton, Link, Divider, styled
 } from '@mui/material';
 import { useLocation } from 'react-router-dom';
 import { createSelector } from 'reselect';
-import dynamic from 'next/dynamic';
-import { RootState } from '../types/index';
 import { useRouter } from 'next/router';
 import PrivateRoute from '../utils/PrivateRoute';
-import { Dispatch, UnknownAction } from '@reduxjs/toolkit/react';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import HomeIcon from '@mui/icons-material/Home';
@@ -34,9 +17,15 @@ import ForumIcon from '@mui/icons-material/Forum';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AdminIcon from '@mui/icons-material/Security';
 import LogoutIcon from '@mui/icons-material/Logout';
+import ChatIcon from '@mui/icons-material/Chat';
+import dynamic from 'next/dynamic';
+import { RootState } from '../store';
+import Chatbot from 'react-chatbot-kit';
+import 'react-chatbot-kit/build/main.css';
+import config from '../chatbot/config';
+import MessageParser from '../chatbot/MessageParser';
+import ActionProvider from '../chatbot/ActionProvider';
 
-
-const Dashboard = dynamic(() => import('../pages/dashboard'));
 const drawerWidth = 240;
 
 const selectUserAndAuthState = createSelector(
@@ -50,23 +39,52 @@ const selectUserAndAuthState = createSelector(
 );
 
 const DrawerContent: React.FC<{ handleDrawerClose: () => void; handleLogout: () => void }> = ({
-  handleDrawerClose,
-  handleLogout,
+  handleDrawerClose, handleLogout
 }) => (
   <div>
-    <Toolbar className="flex justify-end">
-      <IconButton onClick={handleDrawerClose} className="text-white">
+    <Toolbar>
+      <IconButton onClick={handleDrawerClose}>
         <ChevronLeftIcon />
       </IconButton>
     </Toolbar>
     <Divider />
     <List>
-      {/* List items */}
+      <ListItemButton component={Link} href="/">
+        <ListItemIcon>
+          <HomeIcon />
+        </ListItemIcon>
+        <ListItemText primary="Home" />
+      </ListItemButton>
+      <ListItemButton component={Link} href="/courses">
+        <ListItemIcon>
+          <SchoolIcon />
+        </ListItemIcon>
+        <ListItemText primary="Courses" />
+      </ListItemButton>
+      <ListItemButton component={Link} href="/forum">
+        <ListItemIcon>
+          <ForumIcon />
+        </ListItemIcon>
+        <ListItemText primary="Forum" />
+      </ListItemButton>
+      <ListItemButton component={Link} href="/profile">
+        <ListItemIcon>
+          <AccountCircleIcon />
+        </ListItemIcon>
+        <ListItemText primary="Profile" />
+      </ListItemButton>
       <ListItemButton onClick={handleLogout}>
         <ListItemIcon>
           <LogoutIcon />
         </ListItemIcon>
         <ListItemText primary="Logout" />
+      </ListItemButton>
+      <Divider />
+      <ListItemButton component={Link} href="#" onClick={() => setChatbotVisible(prev => !prev)}>
+        <ListItemIcon>
+          <ChatIcon />
+        </ListItemIcon>
+        <ListItemText primary="Chatbot" />
       </ListItemButton>
     </List>
   </div>
@@ -74,51 +92,49 @@ const DrawerContent: React.FC<{ handleDrawerClose: () => void; handleLogout: () 
 
 const StyledDrawer = styled(Drawer)`
   .MuiDrawer-paper {
-    background-color: #f5f5f5; /* Customize background color */
-    border-radius: 8px; /* Add rounded corners */
+    background-color: #f5f5f5;
+    border-radius: 8px;
   }
 `;
 
-const HomeGuard: React.FC = () => {
-  const dispatch = useDispatch<Dispatch<UnknownAction>>();
-  const router = useRouter();
-  const location = useLocation(); // Track current route for active styling
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
-  const { error } = useSelector((state: RootState) => state.user);
+const Dashboard = dynamic(() => import('../pages/dashboard'));
 
-  const user = useSelector((state: RootState) => state.user.profile); // Access user data
+const HomeGuard: React.FC = () => {
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const location = useLocation();
+
+  const { profile, loading, error, isAuthenticated } = useSelector(selectUserAndAuthState);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [chatbotVisible, setChatbotVisible] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(fetchUserProfile());
+    }
+  }, [isAuthenticated, dispatch]);
+
+  const handleLogout = useCallback(() => {
+    dispatch(logoutUser()).then(() => {
+      router.push('/login');
+    });
+  }, [dispatch, router]);
+
+  const handleDrawerOpen = useCallback(() => {
+    setDrawerOpen(true);
+  }, []);
+
+  const handleDrawerClose = useCallback(() => {
+    setDrawerOpen(false);
+  }, []);
 
   const drawerItems = useMemo(() => [
     { href: '/', text: 'Home', Icon: HomeIcon },
     { href: '/courses', text: 'Courses', Icon: SchoolIcon },
-    { href: '/forums', text: 'Forums', Icon: ForumIcon },
+    { href: '/forum', text: 'Forum', Icon: ForumIcon },
     { href: '/profile', text: 'Profile', Icon: AccountCircleIcon },
-    // Conditionally show admin tools based on user role
-    user?.role === 'admin' && { href: '/admin', text: 'Admin Tools', Icon: AdminIcon },
-  ].filter(Boolean), [user]);
-
-  useEffect(() => {
-    dispatch(fetchUserProfile() as any);
-  }, [dispatch]);
-
-  const { loading } = useSelector((state: RootState) => state.user);
-
-  const handleLogout = useCallback(() => {
-    dispatch(logoutUser() as any);
-    router.push('/login');
-  }, [dispatch, router]);
-
-  const [open, setOpen] = useState(false);
-
-  const handleDrawerOpen = useCallback(() => {
-    setOpen(true);
-  }, []);
-
-  const handleDrawerClose = useCallback(() => {
-    setOpen(false);
-  }, []);
-
-  const drawerContent = useMemo(() => <DrawerContent handleDrawerClose={handleDrawerClose} handleLogout={handleLogout} />, [handleDrawerClose, handleLogout]);
+    profile?.role === 'admin' && { href: '/admin', text: 'Admin Tools', Icon: AdminIcon },
+  ].filter(Boolean), [profile]);
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -138,31 +154,32 @@ const HomeGuard: React.FC = () => {
           </Typography>
         </Toolbar>
       </AppBar>
-      <Drawer
+      <StyledDrawer
         variant="permanent"
+        open={drawerOpen}
         sx={{
           width: drawerWidth,
           flexShrink: 0,
           [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
         }}
-        open={open}
       >
         <Toolbar />
         <Divider />
-        <List>
-          {drawerItems.map(({ href, text, Icon }) => (
-            <ListItemButton key={href} component={Link} href={href}>
-              <ListItemIcon><Icon /></ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          ))}
-        </List>
-      </Drawer>
+        <DrawerContent handleDrawerClose={handleDrawerClose} handleLogout={handleLogout} />
+      </StyledDrawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
+        {loading && <CircularProgress />}
         {error && <Alert severity="error">{error}</Alert>}
         <PrivateRoute isAuthenticated={isAuthenticated}>
           <Dashboard />
+          {chatbotVisible && (
+            <Chatbot
+              config={config}
+              messageParser={MessageParser}
+              actionProvider={ActionProvider}
+            />
+          )}
         </PrivateRoute>
       </Box>
     </Box>

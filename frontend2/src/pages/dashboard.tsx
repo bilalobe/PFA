@@ -1,16 +1,20 @@
-// components/Dashboard.js
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchUserProfile } from '../features/userSlice';
 import {
-  Box, Container, CircularProgress, Typography, Drawer, List, ListItem, ListItemText, ListItemIcon, IconButton, Toolbar, AppBar, Alert
+  Box, Container, CircularProgress, Typography, Drawer, List, ListItem, ListItemText, ListItemIcon, IconButton, Toolbar, AppBar, Alert, Divider
 } from '@mui/material';
 import {
-  Menu as MenuIcon, ChevronLeft as ChevronLeftIcon, Home as HomeIcon, School as SchoolIcon, Forum as ForumIcon, AccountCircle as AccountCircleIcon, Logout as LogoutIcon
+  Menu as MenuIcon, Home as HomeIcon, School as SchoolIcon, Forum as ForumIcon, AccountCircle as AccountCircleIcon, Logout as LogoutIcon, Chat as ChatIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { logoutUser } from '../features/authSlice';
 import { useAuth } from '../hooks/useAuth';
+import Chatbot from 'react-chatbot-kit';
+import 'react-chatbot-kit/build/main.css';
+import config from '../chatbot/config';
+import MessageParser from '../chatbot/MessageParser';
+import ActionProvider from '../chatbot/ActionProvider';
 
 const drawerWidth = 240;
 
@@ -21,6 +25,7 @@ function Dashboard() {
   const profile = useSelector((state) => state.user.profile);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [chatbotVisible, setChatbotVisible] = useState(false);
   const [openAlert, setOpenAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
 
@@ -94,6 +99,13 @@ function Dashboard() {
         </ListItemIcon>
         <ListItemText primary="Logout" />
       </ListItem>
+      <Divider />
+      <ListItem button onClick={() => setChatbotVisible(!chatbotVisible)}>
+        <ListItemIcon>
+          <ChatIcon />
+        </ListItemIcon>
+        <ListItemText primary="Chatbot" />
+      </ListItem>
     </List>
   );
 
@@ -103,7 +115,7 @@ function Dashboard() {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <AppBar position="fixed" open={drawerOpen}>
+      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Toolbar>
           <IconButton
             color="inherit"
@@ -136,6 +148,13 @@ function Dashboard() {
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
         {/* Add your dashboard content here */}
+        {chatbotVisible && (
+          <Chatbot
+            config={config}
+            messageParser={MessageParser}
+            actionProvider={ActionProvider}
+          />
+        )}
       </Box>
       {openAlert && (
         <Alert severity="error" onClose={handleAlertClose}>
