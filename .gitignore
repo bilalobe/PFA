@@ -21,8 +21,6 @@ keys.env
 # Ignore VS Code build
 .vscode/
 
-frontend/
-
 # Node modules  
 node_modules/  
 *.env
