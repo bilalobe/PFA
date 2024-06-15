@@ -10,10 +10,12 @@ PFA is an open-source e-learning platform built with Django (backend) and React 
 - **Connect and Collaborate:** Join vibrant discussions in our forum and connect with fellow learners.  
 - **Track Your Progress:** Monitor your learning journey and celebrate your achievements.  
 - **AI-Powered Enhancements:** Experience a smarter learning experience with integrated AI features:
+
     - **Sentiment Analysis:** Understand user sentiment in forum posts and quizzes.
     - **Language Detection:** Automatically identify the language of user-generated content.
-    - **Chatbot (Under Development):** Get quick answers and guidance from our AI chatbot. 
-    - **Personalized Recommendations (Under Development):** Receive tailored course recommendations based on your learning history.
+    - **Chatbot:** Get quick answers and guidance from our AI chatbot. 
+    - **Personalized Recommendations:** Receive tailored course recommendations based on your learning history.
+    - **Translator:** Apprehend thought provoking words using our augmented live translation facility.
     
 ## 🚀 Launch Your Learning Journey  
   
@@ -95,7 +97,7 @@ PFA is an open-source e-learning platform built with Django (backend) and React 
         ```  
 
 8. Access your platform:  
-    Open your web browser and visit [http://localhost:8000/](http://localhost:8000/) (or the port specified by your backend server).
+    Open your web browser and visit [http://localhost:8000/](http://localhost:8000/).
 
 
   
@@ -172,6 +174,8 @@ PFA is an open-source e-learning platform built with Django (backend) and React 
 - **VS Code:** A popular code editor.
 - **Git:** A version control system.
 - **Docker:** A containerization platform for consistent deployments.
+- **Jest:** A tool for generating unit tests.
+- **DRF Spectacular:** For exhaustive documentation.
 
 ## 🤝 Contribute to the Future of Learning
 
