@@ -2,9 +2,9 @@ import { Step, StepLabel, Stepper } from '@mui/material';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import AddQuestionsForm from '../../../../components/Questions/AddQuestionsForm.js';
-import QuizDetailsForm from '../../../../components/components/QuizDetailsForm.js';
-import ReviewAndSubmit from '../../../../components/Quizzes/ReviewAndSubmit.tsx/index.js';
+import AddQuestionsForm from '../../../../components/Questions/AddQuestionsForm';
+import QuizDetailsForm from '../../../../components/Quiz/QuizDetailsForm';
+import ReviewAndSubmit from '../../../../components/Quiz/ReviewAndSubmit';
 import { createQuiz } from '../../../store/courseSlice';
 import QuizReview from './QuizReview';
 

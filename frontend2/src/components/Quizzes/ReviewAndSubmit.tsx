@@ -54,3 +54,7 @@ const SubmitAndReview: React.FC<SubmitAndReviewProps> = ({ quizId, selectedAnswe
 
 export default SubmitAndReview;
 
+
+function submitQuizAnswers(arg0: { attemptId: string; answers: any[]; }): any {
+  throw new Error('Function not implemented.');
+}

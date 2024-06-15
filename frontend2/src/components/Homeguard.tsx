@@ -18,8 +18,8 @@ import {
   Link,
   Divider,
   styled,
-  useLocation,
 } from '@mui/material';
+import { useLocation } from 'react-router-dom';
 import { createSelector } from 'reselect';
 import dynamic from 'next/dynamic';
 import { RootState } from '../types/index';

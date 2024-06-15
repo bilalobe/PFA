@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { joinChatRoom, leaveChatRoom, sendChatMessage, receiveChatMessage, setTypingIndicator } from '../../actions/chatActions';
 import { Typography, TextField, Button, List, ListItem, ListItemText, Box } from '@mui/material';
 import io from 'socket.io-client';
+import { RootState } from '../../store';
 
 const socket = io('http://localhost:8000');
 
@@ -11,8 +12,8 @@ function CourseChat() {
   const router = useRouter();
   const { courseId } = router.query;
   const dispatch = useDispatch();
-  const messages = useSelector(state => state.chat.messages);
-  const user = useSelector(state => state.auth.user);
+  const messages = useSelector((state: RootState) => state.chat.messages);
+  const user = useSelector((state: RootState) => state.auth.user);
   const [newMessage, setNewMessage] = useState('');
   const chatContainerRef = useRef(null);
 
@@ -25,7 +26,9 @@ function CourseChat() {
       });
 
       // Scroll to the bottom when a new message is received
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      if (chatContainerRef.current) {
+        chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      }
 
       return () => {
         dispatch(leaveChatRoom(`course_${courseId}`, user.username));

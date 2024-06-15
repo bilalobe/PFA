@@ -4,7 +4,7 @@ import { submitAnswer, calculateScore, resetQuiz, loadQuiz } from '../actions/qu
 import QuestionDisplay from '../../components/components/QuestionDisplay';
 import AnswerChoices from '../../components/components/AnswerChoices';
 import Timer from '../../components/components/Timer';
-import ScoreDisplay from '../../components/components/ScoreDisplay';
+import ScoreDisplay from '../../components/CustomComponents/ScoreDisplay';
 import Button from '../../components/components/Button';
 import Container from '../../components/components/Container';
 import { RootState } from '../reducers'; // Import the type of your root state

@@ -8,14 +8,14 @@ import { useFormik } from 'formik';
 import { debounce } from 'lodash';
 import 'tailwindcss/tailwind.css';
 
-// Assuming you have a CourseCard component:
 import CourseCard from './CourseCard'; 
+import { RootState } from '../../store';
 
 function CourseList() {
   const dispatch = useDispatch();
-  const courses = useSelector(state => state.course.courses);
-  const loading = useSelector(state => state.course.loading);
-  const error = useSelector(state => state.course.error);
+  const courses = useSelector((state: RootState) => state.course.courses);
+  const loading = useSelector((state: RootState) => state.course.loading);
+  const error = useSelector((state: RootState) => state.course.error);
   const [currentPage, setCurrentPage] = useState(1);
   const [coursesPerPage] = useState(9);
 
@@ -73,7 +73,7 @@ function CourseList() {
         InputProps={{
           endAdornment: (
             <InputAdornment position="end">
-              {searchQuery && (
+              {formik.values.searchQuery && (
                 <IconButton onClick={handleClearSearch}>
                   <ClearIcon />
                 </IconButton>

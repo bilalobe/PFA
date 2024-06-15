@@ -11,7 +11,13 @@ const validationSchema = Yup.object().shape({
     .integer('Must be an integer')
 });
 
-function QuizDetailsForm({ onSubmit, onNext, onError }) {
+type QuizDetailsFormProps = {
+  onSubmit: (values: any) => void;
+  onNext: () => void;
+  onError: (error: string) => void;
+};
+
+function QuizDetailsForm({ onSubmit, onNext, onError }: QuizDetailsFormProps) {
     return (
         <Formik
           initialValues={{ title: '', description: '', difficulty: 0 }}
@@ -27,7 +33,7 @@ function QuizDetailsForm({ onSubmit, onNext, onError }) {
             }
           }}
         >
-          {({ isSubmitting, values, handleChange }) => (
+          {({ isSubmitting, values, handleChange, errors }) => (
             <Form>
               <TextField
                 id="title"

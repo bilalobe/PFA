@@ -2,8 +2,9 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchResources } from '../../actions/resourceActions';
 import { Typography, Grid, CircularProgress, Box } from '@mui/material';
+import { RootState } from '../../store';
 
-function ResourceList({ moduleId }) {
+function ResourceList({ moduleId }: { moduleId: string }) {
   const dispatch = useDispatch();
   const { resources, loading, error } = useSelector((state) => ({
     resources: state.resource.resources,
@@ -33,7 +34,7 @@ function ResourceList({ moduleId }) {
         Resources
       </Typography>
       <Grid container spacing={3} aria-label="Resource list">
-        {resources.map((resource) => (
+        {resources.map((resource: { id: React.Key | null | undefined; title: string | number | bigint | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<React.AwaitedReactNode> | null | undefined; description: string | number | bigint | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<React.AwaitedReactNode> | null | undefined; }) => (
           <Grid item xs={12} sm={6} md={4} key={resource.id}>
             <Typography variant="h6" component="div" gutterBottom>
               {resource.title}

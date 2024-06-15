@@ -13,11 +13,11 @@ function PrivateChat() {
   const router = useRouter();
   const { userId } = router.query;
   const dispatch = useDispatch();
-  const messages = useSelector(selectMessages);
-  const user = useSelector(selectUser);
+  const messages: Message[] = useSelector(selectMessages) as Message[];
+  const user = useSelector(selectUser) as any;
 
   const [newMessage, setNewMessage] = useState('');
-  const chatContainerRef = useRef(null);
+  const chatContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (userId && user) {
@@ -53,7 +53,7 @@ function PrivateChat() {
     }
   };
 
-  const handleInputChange = (event) => {
+  const handleInputChange = (event: { target: { value: React.SetStateAction<string>; }; }) => {
     setNewMessage(event.target.value);
   };
 
