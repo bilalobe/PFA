@@ -1,19 +1,18 @@
-import axios from 'axios';
+import axios from 'axios'; 
 
 // Replace with your actual Django backend URL (use environment variables in production)
-export const apiUrl = 'http://localhost:8000/api';
+export const apiUrl = 'http://localhost:8000/api'; 
 
 // Helper function to get the authorization token
 const getAuthToken = () => {
-  // Adapt based on your token storage (localStorage or cookies)
-  return localStorage.getItem('token');
+  // Adapt based on your token storage (localStorage or cookies) 
+  return localStorage.getItem('token'); 
 };
 
 // --- Error Handling ---
-const handleApiError = (error: any, defaultMessage?: string) => {
+const handleApiError = (error: any, defaultMessage: string) => {
   if (error.response) {
     const { status, data } = error.response;
-
     // Customized error messages for different status codes
     switch (status) {
       case 400:
@@ -195,7 +194,18 @@ export const quizApi = {
     } catch (error) {
       handleApiError(error, `Failed to submit answer for question ${questionId}.`);
     }
-  }
+  },
+  getQuizScore: async (attemptId: any) => {
+    try {
+      const token = getAuthToken();
+      const response = await axios.get(`${apiUrl}/attempts/${attemptId}/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return response.data.score; // Assuming the score is in the response data
+    } catch (error) {
+      handleApiError(error, `Failed to get score for attempt ${attemptId}.`);
+    }
+  },
 };
 
 // Enrollment API
@@ -305,7 +315,18 @@ export const enrollmentApi = {
     } catch (error) {
       handleApiError(error, `Failed to invite user to enroll in course ${courseId}.`);
     }
-  }
+  },
+  getEnrollmentProgress: async (enrollmentId: any) => {
+    try {
+      const token = getAuthToken();
+      const response = await axios.get(`${apiUrl}/enrollments/${enrollmentId}/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return response.data.progress; // Assuming progress is in the response data 
+    } catch (error) {
+      handleApiError(error, `Failed to get progress for enrollment ${enrollmentId}.`);
+    }
+  },
 };
 
 // Forum API
@@ -403,22 +424,33 @@ export const forumApi = {
     }
   },
   createDiffusionChannel: async (courseId: any, channelData: any) => {
-    try {
-      const token = getAuthToken();
-      const response = await axios.post(
-        `${apiUrl}/courses/${courseId}/diffusion/`,
-        channelData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      return response.data;
-    } catch (error) {
-      handleApiError(error, `Failed to create a diffusion channel in course ${courseId}.`);
-    }
-  }
+      try {
+          const token = getAuthToken();
+          const response = await axios.post(
+              `${apiUrl}/courses/${courseId}/diffusion/`,
+              channelData,
+              {
+                  headers: {
+                      Authorization: `Bearer ${token}`,
+                  },
+              }
+          );
+          return response.data;
+      } catch (error) {
+          handleApiError(error, `Failed to create a diffusion channel in course ${courseId}.`);
+      }
+  },
+  analyzeSentiment: async (postId: any) => {
+      try {
+          const token = getAuthToken(); 
+          const response = await axios.get(`${apiUrl}/posts/${postId}/analyze_sentiment/`, {
+              headers: { Authorization: `Bearer ${token}` },
+          });
+          return response.data; 
+      } catch (error) {
+          handleApiError(error, `Failed to analyze sentiment for post ${postId}.`);
+      }
+  },
 };
 
 // Resource API
@@ -617,5 +649,54 @@ export const assignmentApi = {
   },
 };
 
+// --- AI Features API ---
+
+export const aiApi = {
+  translateText: async (text: any, targetLanguage: any) => {
+    try {
+      const response = await axios.post(`${apiUrl}/translate/`, { 
+          text, 
+          target_language: targetLanguage
+      }); 
+      return response.data.translation;
+    } catch (error) {
+      handleApiError(error, 'Translation failed.');
+    }
+  },
+
+  generateSummary: async (text: any) => {
+    try {
+      const response = await axios.post(`${apiUrl}/ai/summarize/`, { text }); // Replace with your actual endpoint
+      return response.data.summary; 
+    } catch (error) {
+      handleApiError(error, 'Summary generation failed.');
+    }
+  },
+
+  getPersonalizedRecommendations: async () => {
+    try {
+      const token = getAuthToken();
+      const response = await axios.get(`${apiUrl}/ai/recommendations/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return response.data;
+    } catch (error) {
+      handleApiError(error, 'Failed to get personalized recommendations.');
+    }
+  },
+
+  analyzeForumPostSentiment: async (postId: any) => { 
+    try {
+      const token = getAuthToken();
+      const response = await axios.get(`${apiUrl}/posts/${postId}/analyze_sentiment/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return response.data;
+    } catch (error) {
+      handleApiError(error, `Failed to analyze sentiment for post ${postId}.`);
+    }
+  },
+
+};
 
 
