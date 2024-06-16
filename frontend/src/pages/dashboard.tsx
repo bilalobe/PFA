@@ -1,12 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchUserProfile } from '../features/userSlice';
-import {
-  Box, Container, CircularProgress, Typography, Drawer, List, ListItem, ListItemText, ListItemIcon, IconButton, Toolbar, AppBar, Alert, Divider
-} from '@mui/material';
-import {
-  Menu as MenuIcon, Home as HomeIcon, School as SchoolIcon, Forum as ForumIcon, AccountCircle as AccountCircleIcon, Logout as LogoutIcon, Chat as ChatIcon
-} from '@mui/icons-material';
+import { Box, Container, CircularProgress, Typography, Drawer, List, ListItem, ListItemText, ListItemIcon, IconButton, Toolbar, AppBar, Alert, Divider } from '@mui/material';
+import { Menu as MenuIcon, Home as HomeIcon, School as SchoolIcon, Forum as ForumIcon, AccountCircle as AccountCircleIcon, Logout as LogoutIcon, Chat as ChatIcon } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { logoutUser } from '../features/authSlice';
 import { useAuth } from '../hooks/useAuth';
@@ -15,6 +11,9 @@ import 'react-chatbot-kit/build/main.css';
 import config from '../chatbot/config';
 import MessageParser from '../chatbot/MessageParser';
 import ActionProvider from '../chatbot/ActionProvider';
+import AutoCorrect from '../components/AI/AutoCorrect';
+import TextSummarization from '../components/AI/TextSummarization';
+import QuestionGeneration from '../components/AI/QuestionGeneration';
 
 const drawerWidth = 240;
 
@@ -147,7 +146,10 @@ function Dashboard() {
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
-        {/* Add your dashboard content here */}
+        {/* Add your AI components here */}
+        <AutoCorrect />
+        <TextSummarization />
+        <QuestionGeneration />
         {chatbotVisible && (
           <Chatbot
             config={config}
