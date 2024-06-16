@@ -3,8 +3,9 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from .models import Enrollment, ModuleCompletion
 from .serializers import EnrollmentSerializer
-from courses.models import Module 
+from courses.models import Module
 from .tasks import generate_certificate_task
+
 
 class EnrollmentViewSet(viewsets.ModelViewSet):
     queryset = Enrollment.objects.all()

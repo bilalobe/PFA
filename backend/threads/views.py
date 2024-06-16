@@ -10,6 +10,7 @@ from .utils import send_new_thread_notification
 from rest_framework.exceptions import PermissionDenied
 from django.utils import timezone
 
+
 class ThreadViewSet(viewsets.ModelViewSet):
     queryset = Thread.objects.all()
     permission_classes = [permissions.IsAuthenticated, IsEnrolledStudentOrReadOnly]
