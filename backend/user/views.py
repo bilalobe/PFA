@@ -1,4 +1,5 @@
 from rest_framework import viewsets, permissions
+from rest_framework import status
 from .models import User, Enrollment
 from .serializers import (
     UserSerializer, 
