@@ -17,3 +17,5 @@ export interface RootState {
   user: UserState;
   auth: AuthState;
 }
+
+export { ResourceState };

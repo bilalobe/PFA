@@ -1,14 +1,14 @@
-async (params:type) => {
   import { combineReducers, configureStore } from '@reduxjs/toolkit';
   import chatReducer from './features/chat-function/chatSlice';
   import courseReducer from './features/course/courseSlice';
-  import notificationReducer from './features/notificationSlice';
-  import questionReducer from './features/course/questionSlice';
-  import quizReducer from './features/course/quizSlice';
-  import resourceReducer from './features/course/resourceSlice';
-  import userReducer from './features/userSlice';
-  import authReducer from './features/authSlice';
-  import { errorHandlingMiddleware } from './middleware/errorHandlingMiddleware';
+  import notificationReducer from './features/notification/notificationSlice';
+  import questionReducer from './features/question/questionSlice';
+  import quizReducer from './features/quiz/quizSlice';
+  import resourceReducer from './features/resource/resourceSlice';
+  import userReducer from './features/user/userSlice';
+  import authReducer from './features/authentification/authSlice';
+  import contentGenerationReducer from "./features/genAI/contentGenerationSlice"; 
+ import { errorHandlingMiddleware } from './middleware/errorHandlingMiddleware';
   
   const rootReducer = combineReducers({
     user: userReducer,
@@ -19,6 +19,7 @@ async (params:type) => {
     resource: resourceReducer,
     question: questionReducer,
     auth: authReducer,
+    contentGeneration: contentGenerationReducer,
   });
   
   import { Middleware } from '@reduxjs/toolkit';
@@ -30,7 +31,4 @@ async (params:type) => {
     devTools: true,
   });
   
-  export default store;
-  export type RootState = ReturnType<typeof rootReducer>;
-  
-}
+  export default store;  export type RootState = ReturnType<typeof rootReducer>;
