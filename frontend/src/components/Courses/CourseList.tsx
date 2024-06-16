@@ -93,7 +93,7 @@ function CourseList() {
           </CardContent>
         </Card>
       ))}
-    </Box>
+    </form>
   );
 }
 
