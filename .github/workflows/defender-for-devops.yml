@@ -31,12 +31,13 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Run CodeQL Analysis
-      uses: github/codeql-action/analyze@v3
+    - name: Initialize MSDO
+      uses: microsoft/security-devops-action/init@beta
       with:
-        category: "msdo-analysis"
-    
-    - name: Upload SARIF file
-      uses: github/codeql-action/upload-sarif@v3
+        # Specify configuration options here
+        # Ensure the path to the config file is correct
+
+    - name: Run MSDO Analysis
+      uses: microsoft/security-devops-action/analyze@beta
       with:
-        sarif_file: D:\a\PFA\PFA\.gdn\msdo.sarif
+        # Specify analysis options here

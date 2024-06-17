@@ -21,7 +21,7 @@ django-storages==1.13.2
 
 # Utilities
 requests==2.32.2
-django-extensions==3.2.6 
+django-extensions>=3.2.0,<3.3.0
 whitenoise==6.4.0
 django-redis==5.2.1
 
@@ -31,3 +31,8 @@ waitress==2.1.2
 # Monitoring and Error Tracking
 sentry-sdk==1.24.0  
 django-sentry==0.6.3  
+
+
+# Testing
+pytest==7.0.1
+pytest-django==4.6.0
