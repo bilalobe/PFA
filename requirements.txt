@@ -3,59 +3,58 @@ aiosignal==1.3.1
 amqp==5.2.0
 annotated-types==0.7.0
 anyio==4.4.0
-asgiref @ file:///home/conda/feedstock_root/build_artifacts/asgiref_1711268871457/work
+asgiref==3.7.2
 attrs==23.2.0
-azure-cognitiveservices-language-textanalytics==0.2.2
 azure-common==1.1.28
 azure-core==1.30.1
 azure-mgmt-core==1.4.0
 azure-storage-blob==12.20.0
-Babel @ file:///home/conda/feedstock_root/build_artifacts/babel_1702422572539/work
-bcrypt @ file:///D:/bld/bcrypt_1715971805756/work
+Babel==2.12.1
+bcrypt==4.0.1
 billiard==4.2.0
-black @ file:///C:/b/abs_78b8tb3pkd/croot/black_1717597506351/work
-blinker @ file:///home/conda/feedstock_root/build_artifacts/blinker_1715091184126/work
+black==23.3.0
+blinker==1.5
 blis==0.7.11
 botbuilder-core==4.15.0
 botbuilder-schema==4.15.0
 botframework-connector==4.15.0
 botframework-streaming==4.15.0
-Brotli @ file:///D:/bld/brotli-split_1695989908365/work
+Brotli==1.0.9
 catalogue==2.0.10
 celery==5.4.0
-certifi @ file:///C:/b/abs_55jxithrm3/croot/certifi_1717618077850/work/certifi
-cffi @ file:///C:/b/abs_78eb1_vq6z/croot/cffi_1714483206096/work
+certifi==2023.6.15
+cffi==1.15.1
 cfgv==3.4.0
 channels==4.1.0
 channels-redis==4.2.0
 chardet==5.2.0
-charset-normalizer @ file:///home/conda/feedstock_root/build_artifacts/charset-normalizer_1698833585322/work
-click @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/click_1699473800648/work
+charset-normalizer==2.1.1
+click==8.1.3
 click-didyoumean==0.3.1
 click-plugins==1.1.1
 click-repl==0.3.0
 cloudpathlib==0.16.0
-colorama @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/colorama_1699472650914/work
+colorama==0.4.6
 confection==0.1.4
-cryptography @ file:///D:/bld/cryptography-split_1715044029809/work
+cryptography==40.0.2
 cymem==2.0.8
-defusedxml @ file:///tmp/build/80754af9/defusedxml_1615228127516/work
+defusedxml==0.7.1
 distlib==0.3.8
 dj-database-url==2.1.0
-dj-rest-auth @ file:///home/conda/feedstock_root/build_artifacts/dj-rest-auth_1713280391089/work
-Django @ file:///home/conda/feedstock_root/build_artifacts/django_1715181266597/work
-django-allauth @ file:///home/conda/feedstock_root/build_artifacts/django-allauth_1717201990427/work
-django-cors-headers @ file:///home/conda/feedstock_root/build_artifacts/django-cors-headers_1699990178824/work
-django-decouple==2.1
-django-elasticsearch-dsl==8.0
-django-extensions @ file:///home/conda/feedstock_root/build_artifacts/django-extensions_1685993622656/work
-django-filter @ file:///home/conda/feedstock_root/build_artifacts/django-filter_1711546265763/work
+dj-rest-auth==2.1.0
+Django==3.2.16
+django-allauth==0.52.0
+django-cors-headers==3.13.0
+django-decouple==3.8
+django-elasticsearch-dsl==7.2.1
+django-extensions==3.2.3
+django-filter==22.1
 django-redis==5.4.0
 django-secure==1.0.2
 django-storages==1.14.3
-djangorestframework @ file:///home/conda/feedstock_root/build_artifacts/djangorestframework_1711135016139/work
-dnspython==2.6.1
-docker @ file:///home/conda/feedstock_root/build_artifacts/docker-py_1716508870406/work
+djangorestframework==3.14.0
+dnspython==2.3.0
+docker==6.1.3
 drf-nested-routers==0.94.1
 drf-spectacular==0.27.2
 drf-yasg==1.21.7
@@ -63,11 +62,11 @@ elastic-transport==8.13.1
 elasticsearch==8.14.0
 elasticsearch-dsl==8.13.1
 email_validator==2.1.1
-en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl#sha256=86cc141f63942d4b2c5fcee06630fd6f904788d2f0ab005cce45aadb8fb73889
+en-core-web-sm==3.7.1
 fastapi==0.111.0
 fastapi-cli==0.0.4
 filelock==3.15.1
-flake8 @ file:///C:/b/abs_caud66drfv/croot/flake8_1708965316778/work
+flake8==6.1.0
 frozenlist==1.4.1
 fsspec==2024.6.0
 h11==0.14.0
@@ -76,12 +75,12 @@ httptools==0.6.1
 httpx==0.27.0
 huggingface-hub==0.23.4
 identify==2.5.36
-idna @ file:///C:/b/abs_aad84bnnw5/croot/idna_1714398896795/work
+idna==3.4
 inflection==0.5.1
 iniconfig==2.0.0
 isodate==0.6.1
 Jinja2==3.1.4
-joblib @ file:///C:/b/abs_f4b98l6lgk/croot/joblib_1718217224240/work
+joblib==1.3.2
 jsonpickle==1.4.2
 jsonschema==4.22.0
 jsonschema-specifications==2023.12.1
@@ -91,83 +90,83 @@ language_data==1.2.0
 marisa-trie==1.1.1
 markdown-it-py==3.0.0
 MarkupSafe==2.1.5
-mccabe @ file:///opt/conda/conda-bld/mccabe_1644221741721/work
+mccabe==0.7.0
 mdurl==0.1.2
-mkl-fft @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/mkl_fft_1699473528480/work
-mkl-random @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/mkl_random_1699473588250/work
+mkl-fft==1.3.5
+mkl-random==1.3.2
 mkl-service==2.4.0
 msal==1.28.0
 msgpack==1.0.8
 msrest==0.7.1
 multidict==6.0.5
 murmurhash==1.0.10
-mypy-extensions @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/mypy_extensions_1699482634516/work
-nltk @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/nltk_1699503238228/work
+mypy-extensions==1.0.0
+nltk==3.8.1
 nodeenv==1.9.1
-numpy @ file:///C:/b/abs_c1ywpu18ar/croot/numpy_and_numpy_base_1708638681471/work/dist/numpy-1.26.4-cp312-cp312-win_amd64.whl#sha256=becc06674317799ad0165a939a7613809d0bee9bd328a1e4308c57c39cacf08c
-oauthlib @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/oauthlib_1699485031206/work
+numpy==1.26.4
+oauthlib==3.2.2
 orjson==3.10.5
-packaging @ file:///home/conda/feedstock_root/build_artifacts/packaging_1710075952259/work
-paramiko @ file:///home/conda/feedstock_root/build_artifacts/paramiko_1703015906107/work
-pathspec @ file:///home/conda/feedstock_root/build_artifacts/pathspec_1702249949303/work
-pillow @ file:///D:/bld/pillow_1712154618372/work
-platformdirs @ file:///home/conda/feedstock_root/build_artifacts/platformdirs_1715777629804/work
+packaging==23.0
+paramiko==3.1.0
+pathspec==0.11.1
+pillow==9.5.0
+platformdirs==3.10.0
 pluggy==1.5.0
 pre-commit==3.7.1
 preshed==3.0.9
 prompt_toolkit==3.0.46
-psycopg2 @ file:///D:/bld/psycopg2-split_1701737629088/work
-psycopg2-binary @ file:///home/conda/feedstock_root/build_artifacts/psycopg2-split_1701737547976/work/psycopg2-binary
-pycodestyle @ file:///C:/b/abs_e9pt4mahct/croot/pycodestyle_1701910643139/work
-pycparser @ file:///home/conda/feedstock_root/build_artifacts/pycparser_1711811537435/work
+psycopg2==2.9.6
+psycopg2-binary==2.9.6
+pycodestyle==2.11.0
+pycparser==2.21
 pydantic==2.7.1
 pydantic_core==2.18.2
-pyflakes @ file:///C:/b/abs_b6t1aazq2e/croot/pyflakes_1708963020907/work
+pyflakes==3.0.1
 Pygments==2.18.0
-PyJWT @ file:///C:/b/abs_04qhgo75wz/croot/pyjwt_1715095119685/work
-PyNaCl @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/pynacl_1699563077212/work
-PySocks @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/pysocks_1699473336188/work
+PyJWT==2.7.0
+PyNaCl==1.5.0
+PySocks==1.7.1
 pytest==8.2.1
 pytest-django==4.8.0
 python-dateutil==2.9.0.post0
 python-decouple==3.8
 python-dotenv==1.0.1
 python-multipart==0.0.9
-python3-openid @ file:///tmp/build/80754af9/python3-openid_1614366121783/work
-pytz @ file:///C:/b/abs_6ap4tsz1ox/croot/pytz_1713974360290/work
+python3-openid==3.2.0
+pytz==2023.3
 pywin32==306
 PyYAML==6.0.1
 redis==5.0.4
 referencing==0.35.1
-regex @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/regex_1699483134599/work
+regex==2023.6.1
 reportlab==4.2.0
-requests @ file:///C:/b/abs_9c5n24p1y7/croot/requests_1716902867639/work
-requests-oauthlib @ file:///home/conda/feedstock_root/build_artifacts/requests-oauthlib_1711290127547/work
+requests==2.32.0
+requests-oauthlib==1.3.1
 rich==13.7.1
 rpds-py==0.18.1
 safetensors==0.4.3
-scikit-learn @ file:///C:/b/abs_d6_krvz8aa/croot/scikit-learn_1714164798159/work
-scipy @ file:///C:/b/abs_efv75hqhju/croot/scipy_1717521501389/work/dist/scipy-1.13.1-cp312-cp312-win_amd64.whl#sha256=b29dba691773ea983857b31cad894f31623348583937b6f03783facfd7abc734
+scikit-learn==1.3.0
+scipy==1.10.1
 sentry-sdk==2.3.1
 setuptools==69.5.1
 shellingham==1.5.4
-six @ file:///tmp/build/80754af9/six_1644875935023/work
+six==1.16.0
 smart-open==6.4.0
 sniffio==1.3.1
 spacy==3.7.4
 spacy-legacy==3.0.12
 spacy-loggers==1.0.5
-sqlparse @ file:///home/conda/feedstock_root/build_artifacts/sqlparse_1715013953229/work
+sqlparse==0.4.4
 srsly==2.4.8
 starlette==0.37.2
 textblob==0.15.3
 thinc==8.2.3
-threadpoolctl @ file:///home/conda/feedstock_root/build_artifacts/threadpoolctl_1714400101435/work
+threadpoolctl==3.1.0
 tokenizers==0.19.1
-tqdm @ file:///C:/b/abs_a7h7n45ccq/croot/tqdm_1716395987133/work
+tqdm==4.65.0
 transformers==4.41.2
 typer==0.12.3
-typing_extensions @ file:///C:/b/abs_0as9mdbkfl/croot/typing_extensions_1715268906610/work
+typing_extensions==4.5.0
 tzdata==2024.1
 ujson==5.10.0
 uritemplate==4.1.1
@@ -181,9 +180,9 @@ wasabi==1.1.2
 watchfiles==0.22.0
 wcwidth==0.2.13
 weasel==0.3.4
-websocket-client @ file:///C:/b/abs_5dmnxxoci9/croot/websocket-client_1715878351319/work
+websocket-client==1.6.0
 websockets==12.0
 wheel==0.43.0
 whitenoise==6.6.0
-win-inet-pton @ file:///C:/Users/dev-admin/perseverance-python-buildout/croot/win_inet_pton_1699472992992/work
+win-inet-pton==1.1.0
 yarl==1.9.4
