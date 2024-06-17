@@ -1,5 +1,6 @@
 from PIL import Image
 
+
 def resize_profile_picture(image_path, new_width=200, new_height=200):
     """
     Resizes a profile picture to the specified dimensions.

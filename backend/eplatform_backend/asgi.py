@@ -8,16 +8,20 @@ from django.urls import path, re_path
 from backend.chat.consumers import ChatConsumer
 from forums.consumers import ForumConsumer, ModerationConsumer
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dj_ango.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "dj_ango.settings")
 
-application = ProtocolTypeRouter({
-    'http': get_asgi_application(),
-    'websocket': AuthMiddlewareStack(
-        URLRouter([
-            path('ws/forum/<str:thread_id>/', ForumConsumer.as_asgi()),
-            path('ws/moderation/', ModerationConsumer.as_asgi()),
-            re_path(r"ws/forum/(?P<thread_id>\d+)/$", ForumConsumer.as_asgi()),
-            re_path(r'ws/chat/(?P<room_name>\w+)/$', ChatConsumer.as_asgi()),
-        ])
-    ),
-})
+application = ProtocolTypeRouter(
+    {
+        "http": get_asgi_application(),
+        "websocket": AuthMiddlewareStack(
+            URLRouter(
+                [
+                    path("ws/forum/<str:thread_id>/", ForumConsumer.as_asgi()),
+                    path("ws/moderation/", ModerationConsumer.as_asgi()),
+                    re_path(r"ws/forum/(?P<thread_id>\d+)/$", ForumConsumer.as_asgi()),
+                    re_path(r"ws/chat/(?P<room_name>\w+)/$", ChatConsumer.as_asgi()),
+                ]
+            )
+        ),
+    }
+)

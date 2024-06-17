@@ -18,20 +18,19 @@ def send_enrollment_email(enrollment_id, subject, template_name):
     course = enrollment.course
 
     context = {
-        'user': user,
-        'course': course,
+        "user": user,
+        "course": course,
     }
     message = render_to_string(template_name, context)
 
     send_mail(
         subject,
         message,
-        'your_email@example.com', 
+        "your_email@example.com",
         [user.email],
         fail_silently=False,
-        html_message=message 
+        html_message=message,
     )
-
 
 
 @shared_task
@@ -48,15 +47,15 @@ def generate_certificate_task(enrollment_id):
         # Send email notification
         subject = f"Your Certificate for {enrollment.course.title} is Ready!"
         context = {
-            'user': enrollment.student,
-            'course': enrollment.course,
-            'certificate_url': request.build_absolute_uri(enrollment.certificate_url),
+            "user": enrollment.student,
+            "course": enrollment.course,
+            "certificate_url": request.build_absolute_uri(enrollment.certificate_url),
         }
-        message = render_to_string('enrollment/certificate_ready_email.html', context)
+        message = render_to_string("enrollment/certificate_ready_email.html", context)
         send_mail(
             subject,
             message,
-            'your_email@example.com', # Replace with your email 
+            "your_email@example.com",  # Replace with your email
             [enrollment.student.email],
             fail_silently=False,
             html_message=message,

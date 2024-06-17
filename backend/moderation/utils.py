@@ -9,9 +9,11 @@ def send_moderation_notification(moderation, request):
     """
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
-        'moderation',  
+        "moderation",
         {
-            'type': 'moderation_action',
-            'moderation_data': ModerationSerializer(moderation, context={'request': request}).data
-        }
+            "type": "moderation_action",
+            "moderation_data": ModerationSerializer(
+                moderation, context={"request": request}
+            ).data,
+        },
     )

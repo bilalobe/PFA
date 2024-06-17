@@ -5,14 +5,14 @@ from rest_framework.response import Response
 from rest_framework.exceptions import NotFound, PermissionDenied
 from .models import Module, Course, Quiz, Review
 from .serializers import (
-    ModuleSerializer, 
-    CourseSerializer, 
-    QuizSerializer, 
-    ReviewSerializer, 
-    ModuleDetailSerializer, 
-    ModuleCreateSerializer, 
+    ModuleSerializer,
+    CourseSerializer,
+    QuizSerializer,
+    ReviewSerializer,
+    ModuleDetailSerializer,
+    ModuleCreateSerializer,
     ModuleUpdateSerializer,
-    ReviewCreateSerializer
+    ReviewCreateSerializer,
 )
 from .permissions import IsTeacher, IsSupervisor, IsTeacherOrReadOnly
 from rest_framework import filters
@@ -23,12 +23,13 @@ class CourseViewSet(viewsets.ModelViewSet):
     """
     API endpoint for managing courses.
     """
-    queryset = Course.objects.all().annotate(average_rating=Avg('reviews__rating'))
+
+    queryset = Course.objects.all().annotate(average_rating=Avg("reviews__rating"))
     serializer_class = CourseSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsTeacherOrReadOnly]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
-    search_fields = ['title', 'description']
-    ordering_fields = ['title', 'created_at', 'average_rating']
+    search_fields = ["title", "description"]
+    ordering_fields = ["title", "created_at", "average_rating"]
 
     def perform_create(self, serializer):
         """
@@ -36,7 +37,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         """
         serializer.save(created_by=self.request.user)
 
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=["get"])
     def modules(self, request, pk=None):
         """
         Retrieves a list of modules associated with the specified course.
@@ -46,7 +47,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         serializer = ModuleSerializer(modules, many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=["post"])
     def reviews(self, request, pk=None):
         """
         Creates a new review for the specified course.
@@ -54,13 +55,15 @@ class CourseViewSet(viewsets.ModelViewSet):
         Checks if the user is enrolled in the course before creating the review.
         """
         course = self.get_object()
-        serializer = ReviewCreateSerializer(data=request.data, context={'request': request, 'course': course})
+        serializer = ReviewCreateSerializer(
+            data=request.data, context={"request": request, "course": course}
+        )
         if serializer.is_valid():
             serializer.save()  # The serializer will handle associating the course and user
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=["get"])
     def get_reviews(self, request, pk=None):
         """
         Retrieves a list of reviews associated with the specified course.
@@ -70,7 +73,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         serializer = ReviewSerializer(reviews, many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['delete'])
+    @action(detail=True, methods=["delete"])
     def delete_review(self, request, pk=None, review_pk=None):
         """
         Deletes a review associated with the specified course.
@@ -88,12 +91,15 @@ class CourseViewSet(viewsets.ModelViewSet):
         review.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+
 # ... (The rest of your views (ModuleViewSet, QuizViewSet) remain unchanged)
+
 
 class ModuleViewSet(viewsets.ModelViewSet):
     """
     API endpoint for managing modules within a course.
     """
+
     queryset = Module.objects.all()
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsTeacherOrReadOnly]
 
@@ -101,13 +107,13 @@ class ModuleViewSet(viewsets.ModelViewSet):
         """
         Returns the appropriate serializer class based on the action.
         """
-        if self.action == 'list':
+        if self.action == "list":
             return ModuleSerializer
-        if self.action == 'retrieve':
+        if self.action == "retrieve":
             return ModuleDetailSerializer
-        if self.action == 'create':
+        if self.action == "create":
             return ModuleCreateSerializer
-        if self.action in ['update', 'partial_update']:
+        if self.action in ["update", "partial_update"]:
             return ModuleUpdateSerializer
         return ModuleSerializer
 
@@ -116,11 +122,11 @@ class ModuleViewSet(viewsets.ModelViewSet):
         Associates the new module with the specified course and sets the created_by field.
         Handles potential errors if the course does not exist.
         """
-        course_id = self.kwargs.get('course_pk')
-        course = get_object_or_404(Course, pk=course_id) 
-        serializer.save(course=course, created_by=self.request.user) 
+        course_id = self.kwargs.get("course_pk")
+        course = get_object_or_404(Course, pk=course_id)
+        serializer.save(course=course, created_by=self.request.user)
 
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=["get"])
     def quizzes(self, request, pk=None):
         """
         Retrieves a list of quizzes associated with the specified module.
@@ -148,12 +154,14 @@ class ModuleViewSet(viewsets.ModelViewSet):
         Handles the Module.DoesNotExist exception with a 404 response.
         Checks if the user is authorized to update the module.
         """
-        partial = kwargs.pop('partial', False)
+        partial = kwargs.pop("partial", False)
         instance = self.get_object()
 
         # Check if the user is authorized to update the module
         if instance.course.created_by != request.user:
-            raise PermissionDenied(detail="You do not have permission to update this module.")
+            raise PermissionDenied(
+                detail="You do not have permission to update this module."
+            )
 
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
@@ -170,8 +178,9 @@ class ModuleViewSet(viewsets.ModelViewSet):
 
         # Check if the user is authorized to delete the module
         if instance.course.created_by != request.user:
-            raise PermissionDenied(detail="You do not have permission to delete this module.")
+            raise PermissionDenied(
+                detail="You do not have permission to delete this module."
+            )
 
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
-

@@ -4,15 +4,20 @@ from django.contrib.auth.models import User
 from threads.models import Thread
 from textblob import TextBlob, Word
 
+
 class Post(models.Model):
-    thread = models.ForeignKey(Thread, on_delete=models.CASCADE, related_name='posts')
+    thread = models.ForeignKey(Thread, on_delete=models.CASCADE, related_name="posts")
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     sentiment = models.CharField(
-        max_length=10, 
-        choices=(('positive', 'Positive'), ('negative', 'Negative'), ('neutral', 'Neutral')), 
-        blank=True
+        max_length=10,
+        choices=(
+            ("positive", "Positive"),
+            ("negative", "Negative"),
+            ("neutral", "Neutral"),
+        ),
+        blank=True,
     )
     language = models.CharField(max_length=10, blank=True)
     is_moderated = models.BooleanField(default=False)
@@ -29,11 +34,11 @@ class Post(models.Model):
     def analyze_sentiment(self):
         analysis = TextBlob(self.content)
         if analysis.sentiment.polarity > 0:
-            return 'positive'
+            return "positive"
         elif analysis.sentiment.polarity < 0:
-            return 'negative'
+            return "negative"
         else:
-            return 'neutral'
+            return "neutral"
 
     def detect_language(self):
         analysis = TextBlob(self.content)
@@ -44,7 +49,7 @@ class Post(models.Model):
         Corrects spelling in the post content.
         """
         corrected_text = ""
-        words = self.content.split(' ')
+        words = self.content.split(" ")
         for word in words:
             corrected_word = Word(word).spellcheck()[0][0]
             corrected_text += " " + corrected_word
