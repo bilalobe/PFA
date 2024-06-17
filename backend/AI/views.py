@@ -1,6 +1,6 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from textblob import TextBlob  # Or your preferred AI library for text correction
+from textblob import TextBlob
 
 
 @api_view(["POST"])
