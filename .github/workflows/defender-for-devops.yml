@@ -16,32 +16,27 @@
 # and provide permission before this can report data back to azure.
 # Read the official documentation here : https://learn.microsoft.com/en-us/azure/defender-for-cloud/quickstart-onboard-github
 
-name: "Microsoft Defender For Devops"
+name: Microsoft Defender For Devops
 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  schedule:
-    - cron: '32 19 * * 6'
+on: [push]
 
 jobs:
   MSDO:
-    # currently only windows latest is supported
     runs-on: windows-latest
+    permissions:
+      contents: write
+      security-events: write
 
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-dotnet@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Run CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
       with:
-        dotnet-version: |
-          5.0.x
-          6.0.x
-    - name: Run Microsoft Security DevOps
-      uses: microsoft/security-devops-action@v1.6.0
-      id: msdo
-    - name: Upload results to Security tab
-      uses: github/codeql-action/upload-sarif@v2
+        category: "msdo-analysis"
+    
+    - name: Upload SARIF file
+      uses: github/codeql-action/upload-sarif@v3
       with:
-        sarif_file: ${{ steps.msdo.outputs.sarifFile }}
+        sarif_file: D:\a\PFA\PFA\.gdn\msdo.sarif
