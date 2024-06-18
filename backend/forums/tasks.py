@@ -2,7 +2,9 @@
 from asyncio.log import logger
 from celery import shared_task
 from django.contrib.auth import get_user_model
-from .models import Moderation, Post
+
+from backend.moderation.models import Moderation
+from .models import Post
 
 
 @shared_task(bind=True)

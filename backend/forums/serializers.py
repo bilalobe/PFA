@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Forum, Thread, Post, Comment, UserForumPoints
+from .models import Forum, Thread, Post
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -26,15 +26,3 @@ class ForumSerializer(serializers.ModelSerializer):
     class Meta:
         model = Forum
         fields = ("id", "title", "course", "description", "created_at", "threads")
-
-
-class CommentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Comment
-        fields = "__all__"
-
-
-class UserForumPointsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = UserForumPoints
-        fields = "__all__"
