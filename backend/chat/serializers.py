@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from .models import ChatRoom, ChatMessage
-from user.models import User
 
 
 class ChatRoomSerializer(serializers.ModelSerializer):

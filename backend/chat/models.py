@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from backend.user.models import User
 from courses.models import Course
 
 
@@ -29,17 +29,27 @@ class ChatRoom(models.Model):
 class ChatMessage(models.Model):
     """
     Represents a single message in a chat room.
+
+    Attributes:
+        chat_room (ChatRoom): The chat room to which the message belongs.
+        sender (User): The user who sent the message.
+        receiver (User): The user who received the message.
+        message (str): The content of the message.
+        timestamp (datetime): The timestamp when the message was created.
     """
 
     chat_room = models.ForeignKey(
         ChatRoom, on_delete=models.CASCADE, related_name="messages"
     )
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
+    receiver = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="received_messages"
+    )
     message = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.sender.username}: {self.message}"
 
-
-# ... (You might want to add additional fields, like a "read" flag) ...
+    class Meta:
+        ordering = ["timestamp"]
