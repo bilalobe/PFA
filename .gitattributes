@@ -1,2 +1,9 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Exclude files from Git
+*.env
+*.log
+
+# Exclude directories from Git
+node_modules/

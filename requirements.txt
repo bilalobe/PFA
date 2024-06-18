@@ -16,7 +16,7 @@ botocore==1.34.128
 Brotli==1.0.9
 catalogue==2.0.10
 celery==5.4.0
-certifi==2023.7.22
+certifi== 2024.6.2
 cffi==1.15.1
 cfgv==3.4.0
 channels==4.1.0
