@@ -1,0 +1,33 @@
+<!-- templates/welcome_email.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to the Course!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        h1 {
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the Course!</h1>
+        <p>Hello {{ student_name }},</p>
+        <p>We are excited to have you on board. You are now enrolled in our course. This journey will be an enriching experience for you.</p>
+        <p>Best wishes,<br>The Course Team</p>
+    </div>
+</body>
+</html>
