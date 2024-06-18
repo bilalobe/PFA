@@ -13,9 +13,6 @@ def correct_text(request):
         return Response({"error": "No text provided."}, status=400)
 
 
-# Add endpoints for text summarization, question generation, etc.
-
-
 @api_view(["POST"])
 def summarize_text(request):
     text = request.data.get("text", "")
@@ -36,3 +33,31 @@ def generate_questions(request):
         return Response({"questions": questions})
     else:
         return Response({"error": "No text provided."}, status=400)
+
+@api_view(["POST"]) 
+def sentiment_analysis(request):
+    text = request.data.get("text", "")
+    if text:
+        sentiment = TextBlob(text).sentiment
+        return Response({"sentiment": sentiment})
+    else:
+        return Response({"error": "No text provided."}, status=400)
+    
+@api_view(["POST"])
+def detect_language(request):
+    text = request.data.get("text", "")
+    if text:
+        language = TextBlob(text).detect_language()
+        return Response({"language": language})
+    else:
+        return Response({"error": "No text provided."}, status=400)
+    
+@api_view(["POST"])
+def translate_text(request):
+    text = request.data.get("text", "")
+    language = request.data.get("language", "")
+    if text and language:
+        translated_text = TextBlob(text).translate(to=language)
+        return Response({"translated_text": translated_text})
+    else:
+        return Response({"error": "No text or language provided."}, status=400)

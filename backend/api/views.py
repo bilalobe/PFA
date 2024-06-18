@@ -1,7 +1,6 @@
 import os
 import jwt
 import logging
-import asyncio
 from typing import Optional
 from fastapi import FastAPI, HTTPException, status, Request, Depends
 from fastapi.security import OAuth2PasswordBearer
