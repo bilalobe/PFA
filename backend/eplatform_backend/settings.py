@@ -51,6 +51,25 @@ os.environ["VIRUSTOTAL_API_KEY"] = (
     "282f905c823596cb41dbff23c8fc62b595ed9585248a16ee2fe329969a0e85ad"
 )
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': '/path/to/django/errors.log',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
+}
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -75,7 +94,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.google",
     "dj_rest_auth.registration",
     "drf_spectacular",  # API documentation
-    "chatbot",
+    "chat",  # Chat application
     "user",
     "course",
     "module",
@@ -84,7 +103,6 @@ INSTALLED_APPS = [
     "quiz",
     "enrollment",
     "forum",
-    "moderation",
     "resource",
 ]
 
