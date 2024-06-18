@@ -1,8 +1,10 @@
 from rest_framework import serializers
-from .models import Module, Course, Quiz, Review, Comment
-from quizzes.models import QuizQuestion, QuizAnswerChoice
-from quizzes.serializers import QuizQuestionSerializer, QuizAnswerChoiceSerializer
+from .models import Module, Course, Review
+from quizzes.serializers import QuizQuestionSerializer
 from user.serializers import UserSerializer
+from quizzes.models import Quiz
+from quizzes.serializers import QuizSerializer
+from resources.serializers import ResourceSerializer
 
 
 class CourseSerializer(serializers.ModelSerializer):
@@ -11,7 +13,7 @@ class CourseSerializer(serializers.ModelSerializer):
     """
 
     instructor = UserSerializer(read_only=True)  # Use nested UserSerializer
-    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M", read_only=True)
+    created_at = serializers.DateTimeField( read_only=True)
     average_rating = serializers.FloatField(read_only=True)
 
     class Meta:
@@ -43,7 +45,9 @@ class ModuleDetailSerializer(serializers.ModelSerializer):
 
     course = CourseSerializer(read_only=True)
     created_by = serializers.CharField(source="created_by.username", read_only=True)
-    quizzes = QuizSerializer(many=True, read_only=True)  # Include related quizzes
+    quizzes = QuizSerializer(
+        many=True, read_only=True
+    )  # Include related quizzes
     resources = ResourceSerializer(
         many=True, read_only=True
     )  # Include related resources
@@ -103,7 +107,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     """
 
     user = serializers.CharField(source="user.username", read_only=True)
-    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M", read_only=True)
+    created_at = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = Review
@@ -163,16 +167,3 @@ class QuizSerializer(serializers.ModelSerializer):
             "created_at",
             "questions",
         )
-
-
-class CommentSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the Comment model.
-    """
-
-    author = serializers.CharField(source="author.username", read_only=True)
-    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M", read_only=True)
-
-    class Meta:
-        model = Comment
-        fields = ("id", "post", "author", "content", "created_at")
