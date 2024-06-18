@@ -156,7 +156,7 @@ textblob==0.15.3
 thinc==8.2.3
 threadpoolctl==3.1.0
 tokenizers==0.19.1
-tqdm==4.65.0
+tqdm==4.66.3
 transformers==4.41.2
 typer==0.12.3
 typing_extensions==4.5.0
