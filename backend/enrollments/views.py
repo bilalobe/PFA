@@ -1,13 +1,30 @@
+from asyncio.log import logger
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from .models import Enrollment, ModuleCompletion
 from .serializers import EnrollmentSerializer
 from courses.models import Module
-from .tasks import generate_certificate_task
-
+from .utils import generate_certificate
+from .tasks import send_enrollment_email_task, send_progress_update_email_task, send_completion_email_task
+from django.db import transaction
 
 class EnrollmentViewSet(viewsets.ModelViewSet):
+    """
+    A viewset for managing enrollments.
+
+    This viewset provides the following actions:
+    - List: Retrieve a list of all enrollments.
+    - Retrieve: Retrieve a specific enrollment by ID.
+    - Create: Create a new enrollment.
+    - Update: Update an existing enrollment.
+    - Partial Update: Partially update an existing enrollment.
+    - Destroy: Delete an existing enrollment.
+    - Complete Module: Mark a module as completed for a specific enrollment.
+
+    Only authenticated users are allowed to perform these actions.
+    """
+
     queryset = Enrollment.objects.all()
     serializer_class = EnrollmentSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -23,15 +40,8 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST,
             )
         enrollment = serializer.save(student=self.request.user)
-
         # Send enrollment confirmation email
-        from .utils import send_enrollment_email
-
-        send_enrollment_email(
-            enrollment,
-            f"Welcome to {course.title}!",
-            "enrollment/enrollment_confirmation.html",
-        )
+        send_enrollment_email_task(enrollment)
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -44,7 +54,7 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True, methods=["post"])
-    def complete_module(self, request, pk=None):
+    def complete_module(self, request, *args, **kwargs):
         enrollment = self.get_object()
         module_id = request.data.get("module_id")
 
@@ -85,18 +95,37 @@ class EnrollmentViewSet(viewsets.ModelViewSet):
             status=status.HTTP_201_CREATED,
         )
 
-    def update_progress(self, enrollment):
-        """
-        Updates the enrollment progress based on completed modules and quizzes.
-        """
+    
+    def calculate_progress(self, enrollment):
         completed_modules = enrollment.completions.count()
+        completed_quizzes = enrollment.quiz_completions.count() 
         total_modules = enrollment.course.modules.count()
-        # ... (Add logic to calculate quiz completion if needed) ...
-
-        if total_modules > 0:
-            progress = (completed_modules / total_modules) * 100
+        total_quizzes = enrollment.course.quizzes.count()
+    
+        if total_modules + total_quizzes == 0:
+            return 0
+    
+        return ((completed_modules + completed_quizzes) / (total_modules + total_quizzes)) * 100
+    
+    @transaction.atomic
+    def update_progress(self, enrollment):
+        try:
+            progress = self.calculate_progress(enrollment)
             enrollment.progress = progress
-            if progress == 100:
+    
+            if progress >= 100:
                 enrollment.completed = True
-                # ... Generate and save certificate here (see previous examples) ...
+                generate_certificate(enrollment)
+    
             enrollment.save()
+    
+            # Send progress update email
+            send_progress_update_email_task(enrollment)
+            
+            if enrollment.completed:
+                send_completion_email_task(enrollment)
+                generate_certificate.delay(enrollment.id)
+    
+        except Exception as e:
+            # Log the error
+            logger.error(f"Failed to update progress for enrollment {enrollment.id}: {e}")
