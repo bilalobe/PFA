@@ -1,30 +1,32 @@
 from rest_framework import permissions
-from user.models import Enrollment
+from enrollments.models import Enrollment
 
+# Constants for user types
+STUDENT = "student"
+TEACHER = "teacher"
+
+def is_safe_method(request):
+    """Utility function to check if the request method is safe."""
+    return request.method in permissions.SAFE_METHODS
 
 class IsEnrolledStudent(permissions.BasePermission):
     def has_permission(self, request, view):
-        # Always allow safe methods (GET, HEAD, OPTIONS)
-        if request.method in permissions.SAFE_METHODS:
+        if is_safe_method(request):
             return True
-        # For other actions, check if the user is authenticated and a student
-        return request.user.is_authenticated and request.user.user_type == "student"
+        return request.user.is_authenticated and request.user.user_type == STUDENT
 
     def has_object_permission(self, request, view, obj):
-        # Always allow safe methods
-        if request.method in permissions.SAFE_METHODS:
+        if is_safe_method(request):
             return True
-        # For other actions, check if the user is enrolled in the course
+        # Use `exists()` directly for efficiency
         return Enrollment.objects.filter(
             student=request.user, course=obj.module.course
         ).exists()
 
-
 class IsInstructor(permissions.BasePermission):
     def has_permission(self, request, view):
-        # Check if the user is authenticated and an instructor
-        return request.user.is_authenticated and request.user.user_type == "teacher"
+        return request.user.is_authenticated and request.user.user_type == TEACHER
 
     def has_object_permission(self, request, view, obj):
-        # Check if the user is the instructor of the course associated with the resource
+        # Directly return the comparison result
         return obj.module.course.instructor == request.user

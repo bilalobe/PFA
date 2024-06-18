@@ -1,12 +1,14 @@
 from rest_framework import viewsets, permissions
 from rest_framework import status
-from .models import User, Enrollment
+
+from backend.enrollments.models import Enrollment
+from backend.enrollments.serializers import EnrollmentSerializer
+from .models import User
 from .serializers import (
     UserSerializer,
     UserDetailSerializer,
     UserCreateSerializer,
     UserUpdateSerializer,
-    EnrollmentSerializer,
 )
 from .permissions import IsOwnProfileOrReadOnly
 from rest_framework.decorators import action
@@ -83,50 +85,3 @@ class UserViewSet(viewsets.ModelViewSet):
         enrollments = Enrollment.objects.filter(student=user)
         serializer = EnrollmentSerializer(enrollments, many=True)
         return Response(serializer.data)
-
-
-class EnrollmentViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint for managing enrollments.
-    """
-
-    queryset = Enrollment.objects.all()
-    serializer_class = EnrollmentSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        """
-        Returns a queryset that only includes the logged-in user's enrollments.
-        """
-        return self.queryset.filter(student=self.request.user)
-
-    def perform_create(self, serializer):
-        """
-        Handles the creation of an enrollment, checking for existing enrollments.
-        """
-        course = serializer.validated_data["course"]
-
-        # Check if the user is already enrolled in the course
-        if Enrollment.objects.filter(student=self.request.user, course=course).exists():
-            return Response(
-                {"detail": "You are already enrolled in this course."},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        serializer.save(student=self.request.user)
-
-    def destroy(self, request, *args, **kwargs):
-        """
-        Handles the deletion of an enrollment, checking authorization.
-        """
-        instance = self.get_object()
-
-        # Check if the user is the student of the enrollment
-        if instance.student != request.user:
-            return Response(
-                {"detail": "You are not authorized to unenroll from this course."},
-                status=status.HTTP_403_FORBIDDEN,
-            )
-
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
