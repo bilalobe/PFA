@@ -1,9 +1,28 @@
 from django.db import models
-from django.contrib.auth.models import User
+from backend.user.models import User
 from forums.models import Forum
 
 
 class Thread(models.Model):
+    """
+    Represents a thread in a forum.
+
+    Attributes:
+        forum (Forum): The forum to which the thread belongs.
+        title (str): The title of the thread.
+        created_by (User): The user who created the thread.
+        created_at (datetime): The timestamp when the thread was created.
+        is_closed (bool): Indicates whether the thread is closed or not.
+        closed_by (User): The user who closed the thread.
+        closed_at (datetime): The timestamp when the thread was closed.
+        is_solved (bool): Indicates whether the thread is solved or not.
+        solved_by (User): The user who solved the thread.
+        solved_at (datetime): The timestamp when the thread was solved.
+        is_pinned (bool): Indicates whether the thread is pinned or not.
+        pinned_by (User): The user who pinned the thread.
+        pinned_at (datetime): The timestamp when the thread was pinned.
+    """
+
     forum = models.ForeignKey(Forum, on_delete=models.CASCADE, related_name="threads")
     title = models.CharField(max_length=255)
     created_by = models.ForeignKey(

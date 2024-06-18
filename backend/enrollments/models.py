@@ -1,20 +1,23 @@
 from django.db import models
 from user.models import User
-from courses.models import Course
+from courses.models import Course, Module
+from .models import ModuleCompletion
 
 
 class Enrollment(models.Model):
+    id = models.AutoField(primary_key=True)
     student = models.ForeignKey(
         User, on_delete=models.CASCADE, limit_choices_to={"user_type": "student"}
     )
     course = models.ForeignKey(
-        Course, on_delete=models.CASCADE, related_name="enrollments"
+        Course, on_delete=models.CASCADE, related_name="modules"
     )
     enrolled_at = models.DateTimeField(auto_now_add=True)
-    completed = models.BooleanField(default=False)
+    completions = models.ManyToManyField(ModuleCompletion)
     progress = models.PositiveIntegerField(
         default=0, help_text="Percentage of course completed (0-100)"
     )
+
 
     class Meta:
         unique_together = ("student", "course")
@@ -27,17 +30,16 @@ class Enrollment(models.Model):
         Updates the enrollment progress based on completed modules and quizzes.
         """
         completed_modules = self.completions.count()
-        total_modules = self.course.modules.count()
-        # ... (Add logic to calculate quiz completion if needed) ...
+        total_modules = self.course.module_set.count()
 
         if total_modules > 0:
             progress = (completed_modules / total_modules) * 100
             self.progress = progress
             if progress == 100:
                 self.completed = True
-                from .tasks import generate_certificate_task
+                from .utils import generate_certificate
 
-                generate_certificate_task.delay(self.id)
+                generate_certificate.delay(self.id)
             self.save()
 
 
@@ -45,7 +47,7 @@ class ModuleCompletion(models.Model):
     enrollment = models.ForeignKey(
         Enrollment, on_delete=models.CASCADE, related_name="completions"
     )
-    module = models.ForeignKey("course.Module", on_delete=models.CASCADE)
+    module = models.ForeignKey(Module, on_delete=models.CASCADE)
     completed_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

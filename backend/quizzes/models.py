@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from backend.user.models import User
 from courses.models import Course
 
 

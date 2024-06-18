@@ -1,16 +1,31 @@
 from django.db import models
 from django.conf import settings
 from courses.models import Module
-from django.contrib.auth.models import User
-
+from backend.user.models import User
 
 def resource_directory_path(instance, filename):
-    return "course_{0}/module_{1}/{2}".format(
-        instance.module.course.id, instance.module.id, filename
-    )
-
+    # Use a setting from settings.py for base upload path if applicable
+    base_upload_path = getattr(settings, 'RESOURCE_UPLOAD_BASE_PATH', 'uploads/')
+    return f"{base_upload_path}course_{instance.module.course.id}/module_{instance.module.id}/{filename}"
 
 class Resource(models.Model):
+    """
+    Represents a resource uploaded to the system.
+
+    Attributes:
+        id (AutoField): The primary key for the resource.
+        module (ForeignKey): The module to which the resource belongs.
+        uploaded_by (ForeignKey): The user who uploaded the resource.
+        title (CharField): The title of the resource.
+        description (TextField): The description of the resource.
+        file (FileField): The file associated with the resource.
+        file_type (CharField): The type of the file.
+        file_size (PositiveIntegerField): The size of the file in bytes.
+        upload_date (DateTimeField): The date and time when the resource was uploaded.
+        download_count (PositiveIntegerField): The number of times the resource has been downloaded.
+        thumbnail (ImageField): The thumbnail image associated with the resource.
+    """
+
     id = models.AutoField(primary_key=True)
     module = models.ForeignKey(
         Module, on_delete=models.CASCADE, related_name="resources"
@@ -34,5 +49,6 @@ class Resource(models.Model):
         # Calculate and store file size on save
         if self.file:
             self.file_size = self.file.size
+            # Ensure file_type is determined correctly; might need manual handling
             self.file_type = self.file.file.content_type
         super().save(*args, **kwargs)
