@@ -26,3 +26,4 @@ node_modules/
 *.env
 
 frontend/PFA.code-workspace
+*.env
