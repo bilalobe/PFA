@@ -39,17 +39,45 @@ if isinstance(allowed_hosts, str):
 else:
     ALLOWED_HOSTS = ["localhost"]
 
-AZURE_STORAGE_CONNECTION_STRING = config("AZURE_STORAGE_CONNECTION_STRING")
-AZURE_STORAGE_ACCOUNT_NAME = config("AZURE_STORAGE_ACCOUNT_NAME")
-AZURE_STORAGE_CONTAINER_NAME = config("AZURE_STORAGE_CONTAINER_NAME")
+# Secure cookies
+SESSION_COOKIE_SECURE = True  # Ensure session cookies are sent over HTTPS
+CSRF_COOKIE_SECURE = True  # Ensure CSRF cookies are sent over HTTPS
 
-DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
-STATICFILES_STORAGE = "storages.backends.azure_storage.AzureStorage"
-# STATIC_URL = f'https://{AZURE_STORAGE_ACCOUNT_NAME}.blob.core.windows.net/{STATIC_LOCATION}/'
+# Enforce HTTPS
+SECURE_SSL_REDIRECT = True  # Redirect all non-HTTPS requests to HTTPS
+SECURE_HSTS_SECONDS = 31536000  # Set HTTP Strict Transport Security (HSTS) header for a year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Include subdomains in the HSTS policy
+SECURE_HSTS_PRELOAD = True  # Allow preloading of the site's HSTS policy
 
-os.environ["VIRUSTOTAL_API_KEY"] = (
-    "282f905c823596cb41dbff23c8fc62b595ed9585248a16ee2fe329969a0e85ad"
-)
+# AWS S3 Settings for secure access
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = 'eplatform-media'  # Your S3 bucket name
+AWS_S3_REGION_NAME = 'eu'  # Your AWS region (e.g., 'us-east-1')
+AWS_S3_SIGNATURE_VERSION = 's3v4'  # Use Signature Version 4
+AWS_S3_FILE_OVERWRITE = False  # Prevent overwriting files with the same name
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+AWS_DEFAULT_ACL = 'private'  # Set default ACL to private to ensure files are not publicly accessible by default
+
+# Optional: Serve static files from S3 securely
+# STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+
+VIRUS_TOTAL_API_KEY = config("VIRUS_TOTAL_API_KEY")
+
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('DB_NAME'),
+        'USER': config('DB_USER'),
+        'PASSWORD': config('DB_PASSWORD'),
+        'HOST': config('DB_HOST'),
+        'PORT': config('DB_PORT'),
+        'OPTIONS': {
+            'sslmode': 'require',  # This is the key part for SSL connection
+        },
+    }
+}
 
 LOGGING = {
     'version': 1,
@@ -71,6 +99,7 @@ LOGGING = {
 }
 
 INSTALLED_APPS = [
+    "storages",  # AWS S3 Storage
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -315,6 +344,6 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_BEAT_SCHEDULE = {
     "update-course-stats": {
         "task": "update_course_statistics",
-        "schedule": crontab("5"),  # Run daily at midnight (adjust as needed)
+        "schedule": crontab("* * 5 * *"),  # Run every day at 5:00 AM
     },
 }
