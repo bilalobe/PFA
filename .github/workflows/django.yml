@@ -31,4 +31,36 @@ jobs:
       - name: Run tests
         run: python manage.py test
 
-      # Optional: Add steps for linting, static analysis, or other CI tasks
+      # Run linters
+      - name: Run linters
+        run: |
+          pip install flake8
+          flake8 .
+      
+      - name: Static analysis
+        run: |
+          pip install pylint
+          pylint backend
+      
+      # Run security checks
+      - name: Run security checks
+        run: |
+          pip install bandit
+          bandit -r .
+      
+      # Run dependency checks
+      - name: Run dependency checks
+        run: |
+          pip install safety
+          safety check
+      
+      # Run code coverage
+      - name: Run code coverage
+        run: |
+          pip install coverage
+          coverage run --source='.' manage.py test
+          coverage report
+          coverage xml
+          pip install codecov
+          codecov
+      
