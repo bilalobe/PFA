@@ -5,7 +5,6 @@ from django.shortcuts import get_object_or_404
 from rest_framework import permissions
 from .models import ChatMessage, ChatRoom, Course
 from .serializers import ChatMessageSerializer
-from .utils import send_chat_message
 
 class ChatMessageViewSet(viewsets.ModelViewSet):
     """
@@ -31,6 +30,22 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
 class ChatRoomViewSet(viewsets.ModelViewSet):
     """
     A viewset for viewing and editing chat room instances.
+
+    This viewset provides the following actions:
+    - perform_create: Overrides the default perform_create method to handle chat room creation
+      with specific logic based on the type of chat room.
+    - messages: Retrieves chat messages for a specific room.
+    - send_message: Sends a message to the chat room and simulates a chatbot response.
+
+    Attributes:
+        permission_classes (list): A list of permission classes for the viewset.
+        queryset (QuerySet): The queryset of ChatRoom objects.
+
+    Methods:
+        perform_create: Overrides the default perform_create method to handle chat room creation
+        with specific logic based on the type of chat room.
+        messages: Retrieves chat messages for a specific room.
+        send_message: Sends a message to the chat room and simulates a chatbot response.
     """
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
@@ -59,20 +74,33 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def send_message(self, request, *args, **kwargs):
         """
-        Handles sending a message to a chat room. Validates the incoming data,
-        saves the message, and then sends it to the chat room.
+        Sends a message to the chat room and simulates a chatbot response.
+
+        Args:
+            request (Request): The HTTP request object.
+
+        Returns:
+            Response: The HTTP response object containing the serialized user message data
+            and the status code.
+
+        Raises:
+            HTTP 400 Bad Request: If the user message serializer is not valid.
         """
         chat_room = self.get_object()
-        serializer = ChatMessageSerializer(data=request.data)
-        if serializer.is_valid():
-            message_instance = serializer.save(sender=request.user, chat_room=chat_room)[0]
-            send_chat_message(
-                chat_room.name,
-                message_instance.message,  # Access the message directly from the instance
-                request.user.username  # Assuming send_chat_message expects a username
-            )
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        user_message_serializer = ChatMessageSerializer(data=request.data)
+        if user_message_serializer.is_valid():
+            user_message_instance = user_message_serializer.save(sender=request.user, chat_room=chat_room)
+            # Simulate chatbot response
+            bot_response = "This is a response from the chatbot."
+            bot_message_serializer = ChatMessageSerializer(data={
+                'chat_room': chat_room.id,
+                'message': bot_response,
+                'sender': None,  # Assuming your model allows for a bot sender
+            })
+            if bot_message_serializer.is_valid():
+                bot_message_serializer.save()  # Save bot response as a new message
+            return Response(user_message_serializer.data, status=status.HTTP_201_CREATED)
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(user_message_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
     queryset = ChatRoom.objects.all()
