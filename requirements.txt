@@ -36,7 +36,7 @@ click-repl==0.3.0
 cloudpathlib==0.16.0
 colorama==0.4.6
 confection==0.1.4
-cryptography==40.0.2
+cryptography==42.0.4
 cymem==2.0.8
 defusedxml==0.7.1
 distlib==0.3.8
