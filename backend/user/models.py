@@ -7,6 +7,8 @@ from django.contrib.auth.models import (
 from django.utils.translation import gettext_lazy as _
 from PIL import Image
 
+from backend.courses.models import Course
+
 
 class UserManager(BaseUserManager):
     """
@@ -63,6 +65,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS = ["username"]
 
     objects = UserManager()
+    courses = models.ManyToManyField(Course, related_name="students")
+
 
     def __str__(self):
         return self.username

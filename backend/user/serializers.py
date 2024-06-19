@@ -29,14 +29,14 @@ class UserCreateSerializer(serializers.ModelSerializer):
     Serializer for registering new users.
     Password field is write-only.
     """
-
+    
     class Meta:
         model = User
         fields = ("username", "email", "password", "user_type")
         extra_kwargs = {"password": {"write_only": True}}
-
+    
     def create(self, validated_data):
-        user = User.objects.create(**validated_data)
+        user = self.Meta.model.objects.create(**validated_data)
         return user
 
 
@@ -48,3 +48,5 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("username", "email", "user_type", "bio", "profile_picture")
+
+
