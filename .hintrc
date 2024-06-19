@@ -17,10 +17,10 @@
         ]
       }
     ],
-    
     "html-has-lang": "off",
-    "apple-touch-icons": "off",
-    "typescript-config/consistent-casing": "off"
-
+    "typescript-config/consistent-casing": "on",
+    "typescript-config/no-useless-files": "on",
+    "typescript-config/strict-boolean-expressions": "off",
+    "typescript-config/strict-type-assertions": "off"
   }
 }
