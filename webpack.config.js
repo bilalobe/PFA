@@ -20,7 +20,15 @@ export const module = {
                 'style-loader',
                 'css-loader'
             ]
-        }
+        },
+        {
+            test: /\.(png|svg|jpg|gif)$/,
+            use: [
+                'file-loader'
+            ]
+        
+        },
+
     ]
 };
 export const devServer = {
