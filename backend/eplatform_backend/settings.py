@@ -86,7 +86,7 @@ LOGGING = {
         'file': {
             'level': 'ERROR',
             'class': 'logging.FileHandler',
-            'filename': '/path/to/django/errors.log',
+            'filename': './errors.log',
         },
     },
     'loggers': {
@@ -125,14 +125,17 @@ INSTALLED_APPS = [
     "drf_spectacular",  # API documentation
     "chat",  # Chat application
     "user",
-    "course",
-    "module",
-    "question",
-    "profile",
-    "quiz",
-    "enrollment",
-    "forum",
-    "resource",
+    "courses",
+    "moderation",
+    "quizzes",
+    "comments",
+    "enrollments",
+    "game",
+    "posts",
+    "reviews",
+    "threads",
+    "forums",
+    "resources",
 ]
 
 MIDDLEWARE = [
@@ -168,7 +171,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "dj_ango.wsgi.application"
 
-ASGI_APPLICATION = "dj_ango.asgi.application"  # Your ASGI application
+ASGI_APPLICATION = "eplatform_backend.custom_asgi.application"
 
 # Channel Layers Configuration (using Redis)
 CHANNEL_LAYERS = {

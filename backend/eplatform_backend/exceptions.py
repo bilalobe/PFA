@@ -11,74 +11,62 @@ from django.http import JsonResponse
 # Initialize the logger
 logger = logging.getLogger(__name__)
 
-
 def custom_exception_handler(exc, context):
     """
     Custom exception handler that logs errors and provides consistent error responses.
     """
-    # Call REST framework's default exception handler first
+    # Call REST framework's default exception handler first, to get the standard error response
     response = exception_handler(exc, context)
 
-    # If a response is returned, log the error and customize the response data
+    # Define a method to create custom response data
+    def create_custom_response_data(error_message, status_code, details):
+        return {
+            "error": error_message,
+            "status_code": status_code,
+            "details": details,
+        }
+
+    # If a response is returned by the default handler, customize it
     if response is not None:
         logger.error(f"Error: {str(exc)}", exc_info=True)
-        custom_response_data = {
-            "error": str(exc),
-            "status_code": response.status_code,
-            "details": response.data,
-        }
-        response.data = custom_response_data
+        response.data = create_custom_response_data(
+            error_message=str(exc),
+            status_code=response.status_code,
+            details=response.data
+        )
     else:
-        # Handle different types of exceptions and customize the response accordingly
+        # Handle different types of exceptions explicitly
         if isinstance(exc, NotFound):
-            custom_response_data = {
-                "error": "Not Found",
-                "status_code": 404,
-                "details": str(exc),
-            }
-            return JsonResponse(custom_response_data, status=404)
+            error_message = "Not Found"
+            status_code = 404
         elif isinstance(exc, PermissionDenied):
-            custom_response_data = {
-                "error": "Permission Denied",
-                "status_code": 403,
-                "details": str(exc),
-            }
-            return JsonResponse(custom_response_data, status=403)
+            error_message = "Permission Denied"
+            status_code = 403
         elif isinstance(exc, AuthenticationFailed):
-            custom_response_data = {
-                "error": "Authentication Failed",
-                "status_code": 401,
-                "details": str(exc),
-            }
-            return JsonResponse(custom_response_data, status=401)
+            error_message = "Authentication Failed"
+            status_code = 401
         elif isinstance(exc, APIException):
-            custom_response_data = {
-                "error": "API Exception",
-                "status_code": 500,
-                "details": str(exc),
-            }
-            return JsonResponse(custom_response_data, status=500)
+            error_message = "API Exception"
+            status_code = 500
         elif isinstance(exc, ValueError):
-            custom_response_data = {
-                "error": "Value Error",
-                "status_code": 400,
-                "details": str(exc),
-            }
-            return JsonResponse(custom_response_data, status=400)
+            error_message = "Value Error"
+            status_code = 400
         elif isinstance(exc, NotImplementedError):
-            custom_response_data = {
-                "error": "Not Implemented",
-                "status_code": 501,
-                "details": str(exc),
-            }
-            return JsonResponse(custom_response_data, status=501)
+            error_message = "Not Implemented"
+            status_code = 501
         else:
             # For any other unhandled exceptions, return a generic server error response
-            custom_response_data = {
-                "error": "Internal Server Error",
-                "status_code": 500,
-                "details": str(exc),
-            }
-            return JsonResponse(custom_response_data, status=500)
+            error_message = "Internal Server Error"
+            status_code = 500
+
+        # Log the error
+        logger.error(f"Unhandled exception: {str(exc)}", exc_info=True)
+        # Create and return the custom JSON response
+        custom_response_data = create_custom_response_data(
+            error_message=error_message,
+            status_code=status_code,
+            details=str(exc)
+        )
+        return JsonResponse(custom_response_data, status=status_code)
 
     return response
