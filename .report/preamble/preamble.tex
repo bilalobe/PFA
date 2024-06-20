@@ -1,0 +1,93 @@
+% !TeX spellcheck = fr_FR
+% !TeX encoding = UTF-8
+% !TeX program = pdflatex
+% !TeX TXS-program:compile = txs:///pdflatex/[--shell-escape]
+% !BIB program = biber
+% !TeX root = document.tex
+
+%-------------------------------------------------------------------------------
+% PREAMBLE
+%-------------------------------------------------------------------------------
+
+\documentclass[12pt]{article}
+\usepackage[french]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[xindy]{glossaries}
+\usepackage{changepage}  % For adjusting margins
+\usepackage{tcolorbox}
+\usepackage{graphicx}
+\usepackage{hyperref}[hidelinks]
+\usepackage{enumitem} % For itemize customization
+\usepackage{amsmath}
+\usepackage{soul}
+\usepackage{fancyhdr} % For headers and footers
+\usepackage{lipsum} % For dummy text
+\usepackage{tikz} % For diagrams
+\usepackage{float} % For figure placement
+\usepackage{csquotes} % For block quotes
+\usepackage{caption} % For customizing captions
+\usepackage{fontspec}
+\usepackage{microtype} % Improves spacing
+\usepackage{lmodern} % Latin Modern font
+\usepackage{titlesec} % For customizing section titles
+
+% Set up the fonts
+
+\setmainfont{Times New Roman} % Set the main font for the document
+\renewcommand{\familydefault}{\sfdefault}
+\renewcommand{\baselinestretch}{1.5} % Set line spacing
+\renewcommand{\contentsname}{Table des Matières} % Change the name of the TOC
+
+% Define colors
+\definecolor{violet}{RGB}{138,43,226}
+% ...
+
+% Define saveboxes
+\newsavebox{\samplediagram}
+\savebox{\samplediagram}{%
+    \begin{tikzpicture}
+    \node[draw, circle, fill=blue!20] {Diagram};
+    \end{tikzpicture}%
+}
+
+% Define the IdeaBox environment
+\newtcolorbox[auto counter]{IdeaBox}[2][]{%
+    enhanced,
+    breakable,
+    title=Idea \thetcbcounter: #2,
+    colback=yellow!10,
+    colframe=yellow!40!black,
+    fonttitle=\bfseries,
+    #1
+}
+
+% Fancy Header and Footer Settings
+\pagestyle{fancy}
+\fancyhf{} % clear all header and footer fields
+\fancyhead[L]{\slshape \leftmark} % Left header
+\fancyfoot[C]{\thepage} % Center footer
+
+
+% Ensure the first page is styled with fancyhdr
+\fancypagestyle{plain}{
+  \fancyhf{} % clear all header and footer fields
+  \fancyhead[L]{\slshape \leftmark} % Left header
+  \fancyfoot[C]{\thepage} % Center footer
+  \renewcommand{\headrulewidth}{0pt} % Remove the header rule
+  \renewcommand{\footrulewidth}{0pt} % Remove the footer rule
+}
+
+% Slanted Section Titles
+\titleformat{\section}
+  {\Large\bfseries}{\thesection}{1em}{}
+\titleformat{\subsection}
+  {\large\normalfont}{\thesubsection}{1em}{}
+  
+
+% Glossary Entries
+\input{glossary.tex}
+\makeglossaries
+
+% Bibliography
+\usepackage[style=authoryear, backend=biber]{biblatex}
+\addbibresource{references.bib}
