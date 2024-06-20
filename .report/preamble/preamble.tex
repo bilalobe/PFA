@@ -1,7 +1,6 @@
 % !TeX spellcheck = fr_FR
 % !TeX encoding = UTF-8
-% !TeX program = pdflatex
-% !TeX TXS-program:compile = txs:///pdflatex/[--shell-escape]
+
 % !BIB program = biber
 % !TeX root = document.tex
 
@@ -18,8 +17,8 @@
 \usepackage{graphicx}
 \usepackage{hyperref}[hidelinks]
 \usepackage{enumitem} % For itemize customization
-\usepackage{amsmath}
 \usepackage{soul}
+\usepackage{mathenv}
 \usepackage{fancyhdr} % For headers and footers
 \usepackage{lipsum} % For dummy text
 \usepackage{tikz} % For diagrams
@@ -30,11 +29,10 @@
 \usepackage{microtype} % Improves spacing
 \usepackage{lmodern} % Latin Modern font
 \usepackage{titlesec} % For customizing section titles
-
+\usetikzlibrary{positioning, arrows.meta, calc}
+\setlength{\headheight}{14.5pt}
 % Set up the fonts
 
-\setmainfont{Times New Roman} % Set the main font for the document
-\renewcommand{\familydefault}{\sfdefault}
 \renewcommand{\baselinestretch}{1.5} % Set line spacing
 \renewcommand{\contentsname}{Table des Matières} % Change the name of the TOC
 
@@ -82,12 +80,23 @@
   {\Large\bfseries}{\thesection}{1em}{}
 \titleformat{\subsection}
   {\large\normalfont}{\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+  {\large\normalfont\sl }{\thesubsubsection}{1em}{}
   
+\newenvironment{environnement}{%
+    \begin{adjustwidth}{1cm}{1cm}
+}{%
+    \end{adjustwidth}
+}
 
-% Glossary Entries
-\input{glossary.tex}
+%% Glossary Entries
+\input{glossary/glossaries.tex}
 \makeglossaries
-
-% Bibliography
-\usepackage[style=authoryear, backend=biber]{biblatex}
-\addbibresource{references.bib}
+%
+%% Bibliography
+%\usepackage[style=authoryear, backend=biber]{biblatex}
+%\addbibresource{references.bib}
+%% Print the bibliography
+%% For BibTeX
+%\bibliographystyle{plain}
+%\bibliography{your_bib_file}

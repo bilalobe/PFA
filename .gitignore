@@ -28,3 +28,4 @@ node_modules/
 frontend/PFA.code-workspace
 *.env
 keys.env
+/.report
