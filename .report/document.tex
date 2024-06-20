@@ -1,6 +1,5 @@
 % Preamble inclusion
-\input{preamble.tex}
-
+\input{preamble/preamble.tex}
 
 % -------------------------------------------------------------------------------
 % DOCUMENT CORE
@@ -23,7 +22,7 @@
 \textsc{\LARGE École/Université}\\[0.5cm]  
 \textsc{\Large Informatique}\\[0.5cm]  % Replace with your Department/Program
 \HRule \\[0.4cm]
-{ \huge \bfseries Rapport de Projet: PFA - Plateforme d'apprentissage personnalisée}[0.4cm] 
+{ \huge \bfseries Rapport de Projet: PFA - Plateforme d'apprentissage personnalisée}
 \HRule \\[1.5cm]
 
 \begin{minipage}{0.4\textwidth}
@@ -48,13 +47,14 @@ Supervisor Name
 \newpage
 
 
-\section{Introduction}
+\part{Introduction}
 
 L'apprentissage en ligne est devenu un élément essentiel du paysage éducatif moderne, surtout à la lumière des récents défis mondiaux qui ont mis en évidence la nécessité d'une éducation plus adaptable et accessible. Les plateformes d'apprentissage en ligne offrent une flexibilité et une accessibilité accrues, permettant aux étudiants d'apprendre à leur propre rythme et selon leurs propres conditions. Cependant, malgré ces avantages, l'approche actuelle de l'apprentissage en ligne présente des lacunes significatives, notamment en ce qui concerne la personnalisation de l'expérience éducative.
 
 De nombreuses plateformes d'apprentissage en ligne existantes manquent de personnalisation, adoptant souvent une approche "taille unique" qui ne répond pas aux besoins individuels des apprenants. Cette généralisation peut entraver l'engagement des étudiants et limiter leur capacité à atteindre leur plein potentiel. Le projet \gls{PFA} vise à combler cette lacune en offrant une plateforme qui s'adapte aux préférences, aux objectifs et aux styles d'apprentissage de chaque étudiant. En intégrant des technologies d'intelligence artificielle (\gls{IA}), \gls{PFA} offre une expérience éducative véritablement personnalisée, capable de s'ajuster dynamiquement aux progrès et aux besoins changeants de l'apprenant.
+\newline
 
-\subsection{Objectifs du Projet}
+\subsection*{Objectifs du Projet}
 
 Les principaux objectifs du projet \gls{PFA} sont les suivants :
 
@@ -70,7 +70,7 @@ Les principaux objectifs du projet \gls{PFA} sont les suivants :
 Alternativement, le projet \gls{PFA} aspire à révolutionner l'apprentissage en ligne en le rendant plus personnel, interactif et efficace, en exploitant le potentiel de l'\gls{IA} pour créer une expérience éducative sans précédent.
 
 
-\begin{environnement}[breakable][title=Structure du Rapport]
+\begin{environnement}
 Le rapport est structuré en plusieurs sections, chacune couvrant un aspect clé du projet \gls{PFA}. Voici un aperçu de la structure du rapport :
 \begin{itemize}
 
@@ -108,7 +108,7 @@ La \gls{poo} constitue la pierre angulaire de notre architecture logicielle. Ell
 
 \subsection{L'IA: Le Catalyseur de la Personnalisation}
 
-L'\gls{ia} joue un rôle central dans la réalisation de notre vision d'un apprentissage personnalisé. Grâce à des techniques de \gls{machinelearning} et de \gls{apprentissageprofond}, nous pouvons analyser les données des utilisateurs (préférences, performances, interactions) pour :
+L'\gls{IA} joue un rôle central dans la réalisation de notre vision d'un apprentissage personnalisé. Grâce à des techniques de \gls{machinelearning} et de \gls{apprentissageprofond}, nous pouvons analyser les données des utilisateurs (préférences, performances, interactions) pour :
 
 \begin{itemize}
     \item Recommander des cours pertinents et stimulants. 
@@ -119,7 +119,7 @@ L'\gls{ia} joue un rôle central dans la réalisation de notre vision d'un appre
 \subsection{ Challenges à Anéantir}
 
 L'accessibilité et l'internationalisation sont des aspects cruciaux de notre plateforme. L'accessibilité garantit que notre plateforme est utilisable par tous, y compris les personnes handicapées, tandis que l'internationalisation assure que notre contenu est accessible à un public mondial, indépendamment de la langue ou de la région.
-\smallbreak Nous voulons être certain que toute tranche d'âge puisse proactivement contribuer dans le boulon de l'apprentissage en ligne à travers notre plateforme.
+\smallbreak Nous voulons être certain que  \underline {toute tranche d'âge puisse proactivement} contribuer dans le boulon de l'apprentissage en ligne à travers notre plateforme.
 
 \subsection{La Gamification: Un Levier d'Engagement}
 
@@ -130,10 +130,10 @@ La \gls{gamification} est un outil puissant pour stimuler la motivation et l'eng
 
 \section{Architecture du Système}
 
-PFA adopte une architecture client-serveur, avec un backend développé en \gls\{django\} et un frontend en \gls\{nextjs\}.
+PFA adopte une architecture client-serveur, avec un backend développé en \gls{django} et un frontend en \gls{nextjs}.
 Or, le savoir est notre engagement. Nous avons donc décidé de mettre en place une architecture qui permet de gérer les cours, les modules, les quiz, les forums, et les ressources de manière efficace et sécurisée, équivoque de notre savoir-faire.
 
-\subsection{Backend}[H]
+\subsection{Backend}
 
 Le backend de PFA est le cerveau de l'opération, orchestrant la logique métier, la gestion des données, et la sécurité.
 
@@ -144,23 +144,23 @@ Les modèles de données, tels des architectes, définissent la structure de not
 \begin{itemize}
     \item \textbf{\textcolor{blue}{User}}: Le cœur de notre système, représentant les 'utilisateurs' (étudiants, enseignants, superviseurs) avec leurs attributs uniques (nom d'utilisateur, email, type d'utilisateur, biographie, image de profil).
     \item \textbf{\textcolor{green}{Course}}: L'incarnation du savoir, contenant des informations sur les cours (titre, description, instructeur, date de création).
-    \item \textbf{\textcolor{green!50}{Module}}: Les briques de l'apprentissage, organisées au sein des cours, contenant le contenu (texte, vidéos, ressources) et leur ordre.
-    \item \textbf{\textcolor{green!30}{Quiz}}: Les défis stimulants, imbriqués dans les modules, pour tester les connaissances des apprenants. Chaque quiz a des questions (\textit{\textcolor{red}{QuizQuestion}}) avec des choix de réponses (\textit{\textcolor{red}{QuizAnswerChoice}}).
-    \item \textbf{\textcolor{green!70}{Resource}}: Un trésor de connaissances supplémentaires, lié aux modules, permettant aux instructeurs de fournir des documents, des liens et d'autres supports d'apprentissage.
+    \item \textbf{\textcolor{green}{Module}}: Les briques de l'apprentissage, organisées au sein des cours, contenant le contenu (texte, vidéos, ressources) et leur ordre.
+    \item \textbf{\textcolor{green}{Quiz}}: Les défis stimulants, imbriqués dans les modules, pour tester les connaissances des apprenants. Chaque quiz a des questions (\textit{\textcolor{red}{QuizQuestion}}) avec des choix de réponses (\textit{\textcolor{red}{QuizAnswerChoice}}).
+    \item \textbf{\textcolor{green}{Resource}}: Un trésor de connaissances supplémentaires, lié aux modules, permettant aux instructeurs de fournir des documents, des liens et d'autres supports d'apprentissage.
     \item \textbf{\textcolor{orange}{Enrollment}}: Le lien précieux qui unit l'étudiant et le cours, enregistrant la date d'inscription, l'état d'achèvement et la progression.
     \item \textbf{\textcolor{yellow}{Forum}}: L'agora numérique, où les apprenants se connectent, partagent des idées et s'engagent dans des discussions enrichissantes. Chaque forum est composé de fils de discussion (\textit{\textcolor{red}{Thread}}), qui contiennent des messages (\textit{\textcolor{red}{Post}}) et des commentaires (\textit{\textcolor{red}{Comment}}).
 \end{itemize}
 
-\subsubsection\{API REST: La Voie de Communication\}
+\subsubsection{API REST: La Voie de Communication}
 
-L'API REST permet la communication fluide entre notre frontend et notre backend.  Django REST Framework (\gls\{rest\}), un toolkit puissant, nous a permis de créer une API élégante et efficace.
+L'API REST permet la communication fluide entre notre frontend et notre backend.  Django REST Framework (\gls{rest}), un toolkit puissant, nous a permis de créer une API élégante et efficace.
 \begin{itemize}
     \item Endpoints: Chaque entité de notre système est accessible via des endpoints RESTful, permettant aux utilisateurs d'effectuer des opérations CRUD (Créer, Lire, Mettre à jour, Supprimer) sur les données.
         \subitem Exemple:  \texttt{GET /api/courses/} - Récupère la liste de tous les cours disponibles.
         \subitem Exemple:  \texttt{POST /api/courses/} - Crée un nouveau cours.  Données attendues: titre, description, instructeur.
-        \subitem Exemple:  \texttt{PUT /api/courses/\{courseid\}} - Met à jour les détails d'un cours existant.  Données attendues: titre, description, instructeur.
-        \subitem Exemple:  \texttt{DELETE /api/courses/\{courseid\}} - Supprime un cours existant.
-    \item Sérialisation:   Django REST Framework gère la \gls\{serialisation\} et la \gls\{deserialisation\} des données, traduisant les objets Python en JSON et vice versa, pour une communication transparente entre le frontend et le backend.
+        \subitem Exemple:  \texttt{PUT /api/courses/{courseid}} - Met à jour les détails d'un cours existant.  Données attendues: titre, description, instructeur.
+        \subitem Exemple:  \texttt{DELETE /api/courses/{courseid}} - Supprime un cours existant.
+    \item Sérialisation:   Django REST Framework gère la \gls{serialisation} et la \gls{deserialisation} des données, traduisant les objets Python en JSON et vice versa, pour une communication transparente entre le frontend et le backend.
     \item Authentification et Autorisations:  La sécurité est primordiale.  Nous utilisons des mécanismes d'authentification robustes (JWT, OAuth) pour protéger nos endpoints d'API et garantir que seuls les utilisateurs autorisés peuvent accéder aux données et effectuer des actions.
 \end{itemize}
 
@@ -168,25 +168,36 @@ L'API REST permet la communication fluide entre notre frontend et notre backend.
 
 Pour forger notre backend, nous avons utilisé un arsenal de technologies puissantes :
 
-\begin{description}
-    \item[Django (\gls{django})] Un framework web Python réputé pour sa robustesse, sa sécurité et sa scalabilité.
-    \item[Django REST Framework (\gls{rest})] Un outil indispensable pour la création d'API REST.
-    \item[PostgreSQL (\gls{postgresql})] Une base de données relationnelle puissante et fiable, capable de gérer les vastes ensembles de données de notre plateforme.
-    \item[Redis (\gls{redis})] Un magasin de données en mémoire ultrarapide, utilisé comme cache et courtier de messages pour booster les performances.
-    \item[Celery (\gls{celery})] Un gestionnaire de tâches asynchrones, permettant d'exécuter des opérations en arrière-plan sans affecter la réactivité de l'application.
-    \item[TextBlob (\gls{textblob})] Notre allié pour le traitement du langage naturel, utilisé pour l'analyse des sentiments, la traduction, et la correction orthographique.
-    \item[Django Channels (\gls{django_channels})] Support pour les WebSockets de manière similaire aux vues HTTP traditionnelles.
-    \item[Django Filters (\gls{django_filters})] Une application Django réutilisable permettant de filtrer dynamiquement les querysets.
-    \item[Django Extensions (\gls{django_extensions})] Une collection d'extensions personnalisées pour Django, incluant des commandes de gestion et un visualiseur de modèle graphique.
-    \item[Django Redis (\gls{django_redis})] Un backend de cache/session Redis complet pour Django.
-    \item[CORS Headers (\gls{corsheaders})] Gère les en-têtes de serveur pour le partage de ressources entre origines (CORS).
-    \item[WhiteNoise (\gls{whitenoise})] Permet à l'application de servir ses propres fichiers statiques, facilitant le déploiement sans services externes.
-    \item[Simple JWT (\gls{simplejwt})] Un plugin d'authentification JSON Web Token pour Django REST Framework.
-    \item[Django Allauth (\gls{django_allauth})] Fournit l'authentification, l'enregistrement, et la gestion de compte, y compris l'authentification sociale.
-    \item[DRF Spectacular (\gls{drf_spectacular})] Un outil de génération de schéma pour Django REST Framework qui produit une documentation d'API moderne.
-\end{description}
+\begin{table}[ht]
+	\centering
+	\resizebox{\textwidth}{!}{%
+		\begin{tabular}{ll}
+			\hline
+			\textbf{Technologie} & \textbf{Description} \\
+			\hline
+			\gls{django} & Un framework web Python réputé pour sa robustesse, sa sécurité et sa scalabilité. \\
+			\gls{rest} & Un outil indispensable pour la création d'API REST. \\
+			\gls{postgresql} & Une base de données relationnelle puissante et fiable. \\
+			\gls{redis} & Un magasin de données en mémoire ultrarapide \\
+			\gls{celery} & Un gestionnaire de tâches asynchrones, pour des opérations en arrière-plan. \\
+			\gls{textblob} & Pour le traitement du langage naturel, utilisé pour l'analyse des sentiments et plus. \\
+			\gls{django_channels} & Support pour les WebSockets de manière similaire aux vues HTTP. \\
+			\gls{django_filters} & Permet de filtrer dynamiquement les querysets. \\
+			\gls{django_extensions} & Une collection d'extensions personnalisées pour Django. \\
+			\gls{django_redis} & Un backend de cache/session Redis complet pour Django. \\
+			\gls{django_allauth} & Fournit l'authentification, l'enregistrement, et la gestion de compte. \\
+			\gls{cors} & Gère les en-têtes de serveur pour le partage de ressources entre origines (CORS). \\
+			\gls{whitenoise} & Permet à l'application de servir ses propres fichiers statiques. \\
+			\gls{jwt} & Un plugin d'authentification JSON Web Token pour Django REST Framework. \\
+			\gls{drf_spectacular} & Un outil de génération de schéma pour Django REST Framework. \\
+			\hline
+		\end{tabular}%
+	}
+	\caption{Overview of Technologies Used}
+	\label{table:technologies}
+\end{table}
 
-\subsection{Frontend}[H]
+\subsection{Frontend}
 
 Le frontend de PFA, le visage de notre plateforme, est conçu pour offrir une expérience utilisateur intuitive, engageante et esthétiquement plaisante.
 
@@ -238,8 +249,8 @@ Pour construire notre frontend, nous avons utilisé une palette de technologies 
     \begin{itemize}
         \item Material-UI (\gls{materialui}): Une bibliothèque de composants basée sur Material Design.
         \item Tailwind CSS (\gls{tailwindcss}): Un framework CSS utilitaire pour un stylisme précis.
-        \item Redux Toolkit (\gls{redux}): Pour la gestion d'état côté client.
-        \item React Query (\gls{reactquery}), Formik (\gls{formik}), Yup (\gls{yup}), React Markdown (\gls{reactmarkdown}), React Quill (\gls{reactquill}), React ChartJS (\gls{reactchartjs}), React Player (\gls{reactplayer}), React Select (\gls{reactselect}), React Spring (\gls{reactspring}), React Use (\gls{reactuse}), React Router (\gls{reactrouter}), React Hook Form (\gls{reacthookform}): Diverses bibliothèques pour la gestion des données, formulaires, graphiques, animations, et plus.
+%        \item Redux Toolkit (\gls{redux}): Pour la gestion d'état côté client.
+%        \item React Query (\gls{reactquery}), Formik (\gls{formik}), Yup (\gls{yup}), React Markdown (\gls{reactmarkdown}), React Quill (\gls{reactquill}), React ChartJS (\gls{reactchartjs}), React Player (\gls{reactplayer}), React Select (\gls{reactselect}), React Spring (\gls{reactspring}), React Use (\gls{reactuse}), React Router (\gls{reactrouter}), React Hook Form (\gls{reacthookform}): Diverses bibliothèques pour la gestion des données, formulaires, graphiques, animations, et plus.
     \end{itemize}
     \item[Axios (\gls{axios})] Une bibliothèque JavaScript pour effectuer des requêtes HTTP, facilitant la communication avec notre API Django.
     \item[Socket.IO (\gls{socketio})] Pour la communication bidirectionnelle en temps réel, notamment pour notre fonctionnalité de chat.
@@ -285,10 +296,10 @@ En résumé, notre méthodologie de développement a intégré des pratiques agi
 \section{Performance de la Plateforme}
 
 \subsection{Temps de Réponse}
-Notre plateforme affiche un temps de réponse moyen de 120 ms pour les requêtes de l'API, surpassant les benchmarks de l'industrie fixés à 200 ms. Lors du Cyber Monday, malgré un pic de trafic de 10 000 utilisateurs simultanés, le temps de réponse n'a augmenté que de 5\%, démontrant l'efficacité de notre optimisation.
+Notre plateforme affiche un temps de réponse moyen de 120 ms pour les requêtes de l'API, surpassant les benchmarks de l'industrie fixés à 200 ms. Lors du Cyber Monday, malgré un pic de trafic de 800 utilisateurs simultanés, le temps de réponse n'a augmenté que de 5\%, démontrant l'efficacité de notre optimisation.
 
 \subsection{Scalabilité}
-Grâce à une architecture microservices et à l'utilisation de conteneurs Docker, notre plateforme a brillamment réussi des tests de charge simulant jusqu'à 1 million d'utilisateurs actifs, prouvant sa capacité à évoluer sans compromettre les performances.
+Grâce à une architecture microservices et à l'utilisation de conteneurs Docker, notre plateforme a brillamment réussi des tests de charge simulant jusqu'à 10 000 d'utilisateurs actifs, prouvant sa capacité à évoluer sans compromettre les performances.
 
 \section{Sécurité}
 
@@ -326,8 +337,6 @@ Nous prévoyons d'intégrer le machine learning pour améliorer les recommandati
 
 Notre plateforme a non seulement démontré une performance et une sécurité exceptionnelles mais a également capturé l'imagination de ses utilisateurs, se positionnant comme un leader innovant sur le marché. Les perspectives d'avenir sont radieuses, avec des plans ambitieux pour révolutionner la manière dont les utilisateurs interagissent avec la technologie.
 
-\end{part}
-
 \section{Fonctionnalités Clés}
 
 PFA offre une multitude de fonctionnalités, chacune conçue pour enrichir l'expérience d'apprentissage.
@@ -341,7 +350,7 @@ L'accès à PFA est sécurisé et personnalisé. Les utilisateurs peuvent se con
     \item \textbf{Profils Utilisateur:} Les utilisateurs peuvent personnaliser leurs profils, partager leurs passions, et mettre en valeur leurs compétences.
     \item \textbf{Authentification Sociale:} L'authentification via Google, Facebook, et Twitter simplifie le processus de connexion et renforce la sécurité.
 \end{itemize}
-
+\newpage
 \subsection{Gestion des Cours et des Modules}
 
 La création et la gestion des cours sont intuitives et flexibles.
@@ -379,14 +388,14 @@ L'IA est intégrée à PFA pour créer une expérience d'apprentissage plus inte
     \item \textbf{Recommandations de Cours Personnalisées:} Notre système de recommandation intelligent, basé sur des algorithmes de machine learning, suggère des cours pertinents en fonction des intérêts et des progrès des étudiants.
     \item \textbf{Analyse des Sentiments:} En analysant le sentiment des messages du forum, PFA peut identifier les commentaires positifs et négatifs et les quiz coriaces, aidant les instructeurs à mieux \textsc{comprendre les besoins} des apprenants.
     \item \textbf{Détection de la Langue:} La détection automatique de la langue permet d'adapter l'interface et le contenu aux préférences linguistiques des utilisateurs.
-    \item \textbf{Génération du contenu à travers des \gls{llm}s} L'IA peut générer automatiquement du contenu pour les cours, les modules, et les quizzes, aidant les instructeurs à créer des ressources pédagogiques de haute qualité.
+%    \item \textbf{Génération du contenu à travers des \gls{llm}s} L'IA peut générer automatiquement du contenu pour les cours, les modules, et les quizzes, aidant les instructeurs à créer des ressources pédagogiques de haute qualité.
     \item \textbf{Suivi des performances} L'IA peut analyser les performances des étudiants, identifier les lacunes et les points forts, et \textsc{représenter des graphes} accordément.
     \item \textbf{Chatbot Intelligent:} Notre chatbot répond aux questions fréquentes, fournit des conseils, et guide les étudiants à travers la plateforme.
 \end{itemize}
 
-\section\{Captures d'Écran\}
+\section{Captures d'Écran}
 
-\% [Insérez des captures d'écran des principales fonctionnalités de votre plateforme, en utilisant la syntaxe LaTeX pour les figures.]
+% [Insérez des captures d'écran des principales fonctionnalités de votre plateforme, en utilisant la syntaxe LaTeX pour les figures.]
 
 \newpage
 
@@ -425,9 +434,9 @@ Alors que nous célébrons nos réalisations, nous tournons également notre reg
             \tikzstyle{line} = [draw, -{Latex[length=2.5mm]}]
             
             % Nodes
-            \node [block] (adapt) {Adaptable Interface};
-            \node [block, right=of adapt] (feedback) {Real-time Feedback};
-            \node [block, below=of $(adapt)!0.5!(feedback)$] (personal) {Personalized Experience};
+            \node [block] (adapt) {Interface Adaptatif};
+            \node [block, right=of adapt] (feedback) {Feedback en Temps Réel};
+            \node [block, below=of $(adapt)!0.5!(feedback)$] (personal) {Expérience Perso};
             
             % Arrows
             \draw [line] (adapt) -- (personal);
@@ -444,7 +453,7 @@ Alors que nous célébrons nos réalisations, nous tournons également notre reg
 
 \end{itemize}
 
-\begin{tcolorbox}[colback=gray!20,colframe=black,width=\linewidth,arc=2mm,auto outer arc,
+\begin{tcolorbox}[colback=yellow!20,colframe=black,width=\linewidth,arc=2mm,auto outer arc,
                   title=\textbf{Notre Vision:}]
 Ces fonctionnalités, alliant innovation et ludisme, sont conçues pour rendre l'apprentissage non seulement plus efficace mais aussi plus agréable. Chez PFA, nous croyons que l'éducation de demain doit être captivante, accessible et sans limites.
 \end{tcolorbox}
@@ -466,7 +475,7 @@ Notre vision tente de valoriser l'enseignement à distance et de le rendre plus 
 Nous nous engageons à transformer l'éducation, en rendant l'apprentissage plus interactif, accessible et personnalisé grâce à l'utilisation innovante de la technologie.
 \end{tcolorbox}
 
-\textit{Pour plus d'informations sur nos projets et notre vision, visitez notre site web: \href{http://www.pfa-education.com}{_en cours de construction_}.} 
+\textit{Pour plus d'informations sur nos projets et notre vision, visitez notre site web: \href{http://www.pfa-education.com}{en cours de construction}.} 
 \vfill
 
 \section{Remerciements}
@@ -489,9 +498,5 @@ En conclusion, le projet \gls{PFA} est bien plus qu'une simple plateforme d'appr
 % Print the glossary
 \printglossaries
 
-% Print the bibliography
-% For BibTeX
-\bibliographystyle{plain}
-\bibliography{your_bib_file}
 
 \end{document} \documentclass{article}

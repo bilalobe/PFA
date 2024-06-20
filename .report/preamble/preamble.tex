@@ -25,7 +25,6 @@
 \usepackage{float} % For figure placement
 \usepackage{csquotes} % For block quotes
 \usepackage{caption} % For customizing captions
-\usepackage{fontspec}
 \usepackage{microtype} % Improves spacing
 \usepackage{lmodern} % Latin Modern font
 \usepackage{titlesec} % For customizing section titles
@@ -33,6 +32,8 @@
 \setlength{\headheight}{14.5pt}
 % Set up the fonts
 
+%\setmainfont{Times New Roman} % Set the main font for the document
+%\renewcommand{\familydefault}{\sfdefault}
 \renewcommand{\baselinestretch}{1.5} % Set line spacing
 \renewcommand{\contentsname}{Table des Matières} % Change the name of the TOC
 
@@ -50,13 +51,10 @@
 
 % Define the IdeaBox environment
 \newtcolorbox[auto counter]{IdeaBox}[2][]{%
-    enhanced,
-    breakable,
     title=Idea \thetcbcounter: #2,
     colback=yellow!10,
     colframe=yellow!40!black,
     fonttitle=\bfseries,
-    #1
 }
 
 % Fancy Header and Footer Settings
@@ -78,8 +76,6 @@
 % Slanted Section Titles
 \titleformat{\section}
   {\Large\bfseries}{\thesection}{1em}{}
-\titleformat{\subsection}
-  {\large\normalfont}{\thesubsection}{1em}{}
 \titleformat{\subsubsection}
   {\large\normalfont\sl }{\thesubsubsection}{1em}{}
   
