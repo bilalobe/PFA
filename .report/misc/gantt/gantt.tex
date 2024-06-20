@@ -1,0 +1,32 @@
+\documentclass{article}
+\usepackage{pgfgantt}
+\usetikzlibrary{shadows}
+
+\begin{document}
+	
+	\begin{ganttchart}[
+		vgrid, hgrid,
+		title label font=\scriptsize,
+		bar/.style={fill=blue},
+		bar incomplete/.style={fill=gray},
+		group right shift=0,
+		group top shift=.6,
+		group height=.3,
+		% group peaks={}{}{.2}, % Commented out due to error
+		milestone/.style={fill=orange, rounded corners=3pt, drop shadow},
+		milestone inline label node/.append style={left=5mm}
+		]{1}{12}
+		\gantttitle{2024}{4} \\
+		\gantttitlelist{1,...,12}{1} \\
+		\ganttgroup{Phases du Projet}{1}{8} \\
+		\ganttbar{Planning}{1}{3} \\
+		\ganttlinkedbar{Design}{4}{5} \\
+		\ganttlinkedmilestone{Review du Design}{5} \\
+		\ganttlinkedbar{Implémentation}{3}{7} \\
+		\ganttlinkedbar{Création du Rapport}{6}{8} \\
+		\ganttlinkedbar{Testing}{3}{8} \\
+		\ganttlinkedmilestone{Alpha Release}{8} \\
+		\ganttlinkedmilestone{Fin de Cycle}{8}
+	\end{ganttchart}
+	
+\end{document}
