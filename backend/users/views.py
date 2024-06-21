@@ -16,6 +16,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.exceptions import PermissionDenied, NotFound
 
+
 class UserViewSet(viewsets.ModelViewSet):
     """
     A viewset for handling user-related operations.
@@ -89,6 +90,8 @@ class UserViewSet(viewsets.ModelViewSet):
         else:
             permission_classes = [permissions.IsAuthenticated]
         return [permission() for permission in permission_classes]
+
+
 @action(detail=True, methods=["get"], url_path="enrollments", url_name="enrollments")
 def list_enrollments(self, request, pk=None):
     """
@@ -111,6 +114,7 @@ def list_enrollments(self, request, pk=None):
     serializer = EnrollmentSerializer(enrollments, many=True)
     return Response(serializer.data)
 
+
 @action(detail=True, methods=["get"], url_path="courses", url_name="courses")
 def list_courses(self, request, pk=None):
     """
@@ -131,7 +135,7 @@ def list_courses(self, request, pk=None):
     if isinstance(user, AnonymousUser):
         raise PermissionDenied("You must be logged in to view courses.")
 
-    if hasattr(user, 'courses'):
+    if hasattr(user, "courses"):
         courses = user.courses.all()
         if not courses:
             raise NotFound("No courses found for this user.")
