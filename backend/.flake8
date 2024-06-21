@@ -1,4 +1,4 @@
 [flake8]
-max-line-length = 120
-exclude = .git,__pycache__,env
-ignore = E203, E266, E501, W503, F403, F401
+max-line-length = 111
+exclude = .git,__pycache__,env, venv, .venv, .vscode, .idea, .mypy_cache, .pytest_cache, .tox, .github, .gitignore, .gitattributes, .gitmodules, .gitkeep, .gitlab-ci.yml, .dockerignore, .dockerfile, .editorconfig, .flake8, .pre-commit-config.yaml, .pylintrc, .readthedocs.yml, .travis.yml, .coveragerc, .gitignore
+ignore = E203, E266, W503
