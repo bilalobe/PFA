@@ -3,10 +3,12 @@ from django.conf import settings
 from courses.models import Module
 from backend.users.models import User
 
+
 def resource_directory_path(instance, filename):
     # Use a setting from settings.py for base upload path if applicable
-    base_upload_path = getattr(settings, 'RESOURCE_UPLOAD_BASE_PATH', 'uploads/')
+    base_upload_path = getattr(settings, "RESOURCE_UPLOAD_BASE_PATH", "uploads/")
     return f"{base_upload_path}course_{instance.module.course.id}/module_{instance.module.id}/{filename}"
+
 
 class Resource(models.Model):
     """

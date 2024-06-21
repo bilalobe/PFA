@@ -3,6 +3,7 @@ from backend.users.models import User
 from threads.models import Thread
 from textblob import TextBlob, Word
 
+
 class Post(models.Model):
     """
     Represents a post in a thread.
@@ -24,6 +25,7 @@ class Post(models.Model):
         detect_language(): Detects the language of the post.
         correct_spelling(): Corrects the spelling in the post content.
     """
+
     thread = models.ForeignKey(Thread, on_delete=models.CASCADE, related_name="posts")
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     content = models.TextField()

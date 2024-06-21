@@ -34,7 +34,8 @@ def generate_questions(request):
     else:
         return Response({"error": "No text provided."}, status=400)
 
-@api_view(["POST"]) 
+
+@api_view(["POST"])
 def sentiment_analysis(request):
     text = request.data.get("text", "")
     if text:
@@ -42,7 +43,8 @@ def sentiment_analysis(request):
         return Response({"sentiment": sentiment})
     else:
         return Response({"error": "No text provided."}, status=400)
-    
+
+
 @api_view(["POST"])
 def detect_language(request):
     text = request.data.get("text", "")
@@ -51,7 +53,8 @@ def detect_language(request):
         return Response({"language": language})
     else:
         return Response({"error": "No text provided."}, status=400)
-    
+
+
 @api_view(["POST"])
 def translate_text(request):
     text = request.data.get("text", "")

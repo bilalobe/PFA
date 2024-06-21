@@ -1,18 +1,24 @@
 import os
 import logging
-from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
-from django.http import HttpResponse, FileResponse
 from rest_framework import viewsets, permissions, parsers, status, filters
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from azure.storage.blob import BlobServiceClient, generate_blob_sas, BlobSasPermissions
+from rest_framework.exceptions import PermissionDenied
+from boto3.session import Session
+from botocore.exceptions import NoCredentialsError
+from django.http import HttpResponseRedirect
+from django.contrib.auth import get_user_model
+from backend.resources.permissions import IsModerator
 from .models import Resource
 from .serializers import ResourceSerializer
-from .permissions import IsInstructor, IsEnrolledStudent
 
+# Setup logger
 logger = logging.getLogger(__name__)
+
+# Get the custom user model
+User = get_user_model()
 
 
 class ResourceViewSet(viewsets.ModelViewSet):
@@ -38,34 +44,37 @@ class ResourceViewSet(viewsets.ModelViewSet):
         For enrolled students, only resources associated with their enrolled courses are returned.
         """
         queryset = super().get_queryset()
-        module_id = self.request.query_params.get("module")
+        module_id = self.request.GET.get("module")
         if module_id is not None:
             queryset = queryset.filter(module_id=module_id)
 
-        if self.request.user.user_type == "student":
-            enrolled_courses = self.request.user.enrollments.values_list(
-                "course", flat=True
-            )
-            queryset = queryset.filter(module__course__in=enrolled_courses)
+        user = self.request.user
+        if user.is_authenticated:
+            userprofile = getattr(user, "userprofile", None)
+            if userprofile and userprofile.user_type == "student":
+                enrolled_courses = userprofile.enrollments.values_list(
+                    "course", flat=True
+                )
+                queryset = queryset.filter(module__course__in=enrolled_courses)
 
         return queryset
 
     def perform_create(self, serializer):
         """
-        Handles resource creation, including file upload, validation, and saving to Azure.
+        Handles resource creation, including file upload, validation, and saving to AWS.
         Only instructors can create resources.
         """
-        if self.request.user.user_type != "teacher":
+        user = self.request.user
+        userprofile = getattr(user, "userprofile", None)
+        if not userprofile or userprofile.user_type != "teacher":
             raise PermissionDenied("Only instructors can upload resources.")
 
         try:
             file = serializer.validated_data["file"]
             self.validate_file(file)
-            blob_url = self.upload_to_azure(file)
+            blob_url = self.upload_to_s3(file)
             serializer.save(
-                module_id=self.kwargs.get("module_pk"),
-                uploaded_by=self.request.user,
-                file=blob_url,
+                module_id=self.kwargs.get("module_pk"), uploaded_by=user, file=blob_url
             )
         except ValidationError as e:
             logger.error(f"Validation Error: {e}")
@@ -102,61 +111,52 @@ class ResourceViewSet(viewsets.ModelViewSet):
                 f"File size must be less than {max_file_size / (1024 * 1024)}MB."
             )
 
-    def upload_to_azure(self, file):
+    def upload_to_s3(self, file):
         """
-        Uploads the file to Azure Blob Storage and returns the blob URL.
+        Uploads the file to AWS S3 and returns the file URL.
         """
-        blob_service_client = BlobServiceClient.from_connection_string(
-            os.environ.get("AZURE_STORAGE_CONNECTION_STRING")
-        )
-        blob_client = blob_service_client.get_blob_client(
-            container=os.environ.get("AZURE_STORAGE_CONTAINER_NAME"), blob=file.name
-        )
-        blob_client.upload_blob(file, overwrite=True)
-        return blob_client.url
+        try:
+            session = Session(
+                aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
+                aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"),
+                region_name=os.environ.get("AWS_REGION"),
+            )
+            s3 = session.resource("s3")
+            bucket_name = os.environ.get("AWS_STORAGE_BUCKET_NAME")
+            s3.Bucket(bucket_name).upload_fileobj(Fileobj=file, Key=file.name)
+            file_url = f"https://{bucket_name}.s3.{os.environ.get('AWS_REGION')}.amazonaws.com/{file.name}"
+            return file_url
+        except NoCredentialsError as e:
+            logger.error(f"Credentials Error: {e}")
+            raise
 
     def retrieve(self, request, *args, **kwargs):
-        """
-        Retrieves a resource. Ensures enrolled students can only access resources from their courses.
-        Increments download count and handles serving the file securely.
-        """
         instance = self.get_object()
 
-        if self.request.user.user_type == "student":
+        user = request.user
+        userprofile = getattr(user, "userprofile", None)
+        if userprofile and userprofile.user_type == "student":
             self.check_object_permissions(request, instance)
 
         instance.download_count += 1
         instance.save()
 
         if instance.file:
-            # Serve the file securely from Azure
-            sas_token = generate_blob_sas(
-                account_name=os.environ.get("AZURE_STORAGE_ACCOUNT_NAME"),
-                account_key=os.environ.get("AZURE_STORAGE_ACCOUNT_KEY"),
-                container_name=os.environ.get("AZURE_STORAGE_CONTAINER_NAME"),
-                blob_name=instance.file.name,
-                permission=BlobSasPermissions(read=True),
-                expiry=timezone.now()
-                + timezone.timedelta(hours=1),  # SAS token valid for 1 hour
+            session = Session(
+                aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
+                aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"),
+                region_name=os.environ.get("AWS_REGION"),
             )
-            blob_url_with_sas = f"{instance.file.url}?{sas_token}"
-
-            # You can use one of the following options to serve the file:
-            # 1. Redirect the user to the blob URL with SAS token
-            # return redirect(blob_url_with_sas)
-
-            # 2. Stream the file content to the user
-            blob_client = BlobServiceClient.from_connection_string(
-                os.environ.get("AZURE_STORAGE_CONNECTION_STRING")
-            ).get_blob_client(
-                container=os.environ.get("AZURE_STORAGE_CONTAINER_NAME"),
-                blob=instance.file.name,
+            s3 = session.client("s3")
+            presigned_url = s3.generate_presigned_url(
+                "get_object",
+                Params={
+                    "Bucket": os.environ.get("AWS_STORAGE_BUCKET_NAME"),
+                    "Key": instance.file.name,
+                },
+                ExpiresIn=3600,
             )
-            stream = blob_client.download_blob().readall()
-            return HttpResponse(stream, content_type=instance.file_type)
-
-            # 3. Use Django's FileResponse (if the file is locally accessible)
-            # return FileResponse(instance.file.open(), content_type=instance.file.content_type)
+            return HttpResponseRedirect(presigned_url)
         else:
             return Response(
                 {"detail": "Resource file not found."}, status=status.HTTP_404_NOT_FOUND
@@ -184,7 +184,7 @@ class ResourceViewSet(viewsets.ModelViewSet):
             try:
                 file = request.data["file"]
                 self.validate_file(file)
-                blob_url = self.upload_to_azure(file)
+                blob_url = self.upload_to_s3(file)
                 instance.file = blob_url
                 instance.save()
             except ValidationError as e:
@@ -214,3 +214,19 @@ class ResourceViewSet(viewsets.ModelViewSet):
 
         self.perform_destroy(instance)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=True, methods=["post"], permission_classes=[IsModerator])
+    def strike(self, request, *args, **kwargs):
+        """
+        Flags a resource as inappropriate or flagged by users for deletion.
+        Only moderators can perform this action.
+        """
+        resource = self.get_object()
+
+        # Assuming there's a 'status' field in the Resource model.
+        resource.status = "flagged_for_deletion"
+        resource.save()
+
+        # Log the action or notify administrators if necessary.
+
+        return Response({"status": "Resource flagged for deletion successfully"})

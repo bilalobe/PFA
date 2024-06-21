@@ -9,15 +9,12 @@ class Enrollment(models.Model):
     student = models.ForeignKey(
         User, on_delete=models.CASCADE, limit_choices_to={"user_type": "student"}
     )
-    course = models.ForeignKey(
-        Course, on_delete=models.CASCADE, related_name="modules"
-    )
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="modules")
     enrolled_at = models.DateTimeField(auto_now_add=True)
     completions = models.ManyToManyField(ModuleCompletion)
     progress = models.PositiveIntegerField(
         default=0, help_text="Percentage of course completed (0-100)"
     )
-
 
     class Meta:
         unique_together = ("student", "course")

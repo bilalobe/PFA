@@ -5,6 +5,7 @@ from backend.moderation.serializers import ModerationSerializer
 from backend.forums.serializers import PostSerializer
 from backend.comments.serializers import CommentSerializer
 
+
 class ModerationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         """
@@ -26,7 +27,9 @@ class ModerationConsumer(AsyncWebsocketConsumer):
         Disconnects the consumer from the WebSocket.
         """
         if self.channel_layer is not None:
-            await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+            await self.channel_layer.group_discard(
+                self.room_group_name, self.channel_name
+            )
 
     async def receive(self, text_data):
         """
@@ -98,7 +101,8 @@ class ModerationConsumer(AsyncWebsocketConsumer):
         """
         if self.channel_layer is not None:
             await self.channel_layer.group_send(
-                self.room_group_name, {"type": "user_joined", "user": self.user.username}
+                self.room_group_name,
+                {"type": "user_joined", "user": self.user.username},
             )
 
     async def send_leave_notification(self):
@@ -155,7 +159,9 @@ class ForumConsumer(AsyncWebsocketConsumer):
         Disconnects the consumer from the WebSocket.
         """
         if self.channel_layer is not None:
-            await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+            await self.channel_layer.group_discard(
+                self.room_group_name, self.channel_name
+            )
 
         if self.thread_id:
             await self.send_leave_notification()
@@ -256,7 +262,11 @@ class ForumConsumer(AsyncWebsocketConsumer):
         """
         Sends a notification to the group indicating a user has joined.
         """
-        if self.room_group_name is None or self.user.username is None or self.channel_layer is None:
+        if (
+            self.room_group_name is None
+            or self.user.username is None
+            or self.channel_layer is None
+        ):
             return
         await self.channel_layer.group_send(
             self.room_group_name, {"type": "user_joined", "user": self.user.username}
@@ -266,7 +276,11 @@ class ForumConsumer(AsyncWebsocketConsumer):
         """
         Sends a notification to the group indicating a user has left.
         """
-        if self.room_group_name is None or self.user.username is None or self.channel_layer is None:
+        if (
+            self.room_group_name is None
+            or self.user.username is None
+            or self.channel_layer is None
+        ):
             return
         await self.channel_layer.group_send(
             self.room_group_name, {"type": "user_left", "user": self.user.username}

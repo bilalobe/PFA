@@ -40,7 +40,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         channel_layer = get_channel_layer()
         if channel_layer is not None:
             await channel_layer.group_discard(self.room_group_name, self.channel_name)
-    
+
         # Update user presence
         await self.update_user_presence(False)
 
@@ -49,7 +49,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         text_data_json = json.loads(text_data)
         message = text_data_json.get("message")
         action = text_data_json.get("action")
-    
+
         # Ensure channel_layer is initialized
         if self.channel_layer is not None:
             if action == "typing":
@@ -153,7 +153,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
         else:
             print("channel_layer is not initialized.")
-        
 
     async def user_presence_update(self, event):
         """

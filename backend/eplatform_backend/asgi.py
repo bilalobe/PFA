@@ -1,4 +1,3 @@
-
 """
 ASGI config for eplatform_backend project.
 
@@ -32,4 +31,3 @@ application = ProtocolTypeRouter(
         ),
     }
 )
-

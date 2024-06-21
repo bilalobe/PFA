@@ -9,6 +9,7 @@ def send_new_comment_notification(comment, request):
     """
     channel_layer = get_channel_layer()
     if channel_layer is not None:
+
         @async_to_sync()
         async def send_group_message():
             await channel_layer.group_send(
@@ -20,4 +21,5 @@ def send_new_comment_notification(comment, request):
                     ).data,
                 },
             )
+
         send_group_message()

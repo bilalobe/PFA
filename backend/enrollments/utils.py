@@ -9,6 +9,7 @@ from reportlab.lib.units import inch
 
 logger = logging.getLogger(__name__)
 
+
 def draw_certificate(c, enrollment, logo_path):
     """
     Draws the certificate content on the canvas.
@@ -18,7 +19,9 @@ def draw_certificate(c, enrollment, logo_path):
 
     # Certificate Title
     c.setFont("Helvetica-Bold", 24)
-    c.drawCentredString(letter[0] / 2, letter[1] - 1 * inch, "Certificate of Completion")
+    c.drawCentredString(
+        letter[0] / 2, letter[1] - 1 * inch, "Certificate of Completion"
+    )
 
     # Course Title
     c.setFont("Helvetica", 18)
@@ -26,11 +29,17 @@ def draw_certificate(c, enrollment, logo_path):
 
     # Student Name
     c.setFont("Helvetica", 16)
-    c.drawCentredString(letter[0] / 2, letter[1] - 3 * inch, f"Presented to {user.username}")
+    c.drawCentredString(
+        letter[0] / 2, letter[1] - 3 * inch, f"Presented to {user.username}"
+    )
 
     # Issue Date
     c.setFont("Helvetica", 14)
-    c.drawCentredString(letter[0] / 2, letter[1] - 4 * inch, f"Issued on: {enrollment.completed_at.strftime('%Y-%m-%d')}")
+    c.drawCentredString(
+        letter[0] / 2,
+        letter[1] - 4 * inch,
+        f"Issued on: {enrollment.completed_at.strftime('%Y-%m-%d')}",
+    )
 
     # Instructor Signature
     c.setFont("Helvetica", 12)
@@ -38,6 +47,7 @@ def draw_certificate(c, enrollment, logo_path):
 
     # Logo
     c.drawImage(logo_path, inch, inch, width=2 * inch, height=2 * inch)
+
 
 def generate_certificate(enrollment):
     """
@@ -63,8 +73,11 @@ def generate_certificate(enrollment):
 
         return certificate_url
     except Exception as e:
-        logger.error(f"Error generating certificate for enrollment {enrollment.id}: {e}")
+        logger.error(
+            f"Error generating certificate for enrollment {enrollment.id}: {e}"
+        )
         return None
+
 
 def send_email(enrollment, subject, template_name, attachments=None):
     """
@@ -78,12 +91,7 @@ def send_email(enrollment, subject, template_name, attachments=None):
 
         if attachments:
             # Assuming attachments is a list of file paths
-            email = EmailMessage(
-                subject,
-                message,
-                email_from,
-                recipient_list
-            )
+            email = EmailMessage(subject, message, email_from, recipient_list)
             email.content_subtype = "html"
             for attachment in attachments:
                 email.attach_file(attachment)
@@ -99,6 +107,7 @@ def send_email(enrollment, subject, template_name, attachments=None):
             )
     except Exception as e:
         logger.error(f"Error sending email for enrollment {enrollment.id}: {e}")
+
 
 def trigger_follow_up_survey(enrollment):
     """

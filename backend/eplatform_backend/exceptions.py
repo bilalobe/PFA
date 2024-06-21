@@ -11,6 +11,7 @@ from django.http import JsonResponse
 # Initialize the logger
 logger = logging.getLogger(__name__)
 
+
 def custom_exception_handler(exc, context):
     """
     Custom exception handler that logs errors and provides consistent error responses.
@@ -32,7 +33,7 @@ def custom_exception_handler(exc, context):
         response.data = create_custom_response_data(
             error_message=str(exc),
             status_code=response.status_code,
-            details=response.data
+            details=response.data,
         )
     else:
         # Handle different types of exceptions explicitly
@@ -63,9 +64,7 @@ def custom_exception_handler(exc, context):
         logger.error(f"Unhandled exception: {str(exc)}", exc_info=True)
         # Create and return the custom JSON response
         custom_response_data = create_custom_response_data(
-            error_message=error_message,
-            status_code=status_code,
-            details=str(exc)
+            error_message=error_message, status_code=status_code, details=str(exc)
         )
         return JsonResponse(custom_response_data, status=status_code)
 

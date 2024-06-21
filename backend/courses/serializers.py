@@ -13,7 +13,7 @@ class CourseSerializer(serializers.ModelSerializer):
     """
 
     instructor = UserSerializer(read_only=True)  # Use nested UserSerializer
-    created_at = serializers.DateTimeField( read_only=True)
+    created_at = serializers.DateTimeField(read_only=True)
     average_rating = serializers.FloatField(read_only=True)
 
     class Meta:
@@ -45,9 +45,7 @@ class ModuleDetailSerializer(serializers.ModelSerializer):
 
     course = CourseSerializer(read_only=True)
     created_by = serializers.CharField(source="created_by.username", read_only=True)
-    quizzes = QuizSerializer(
-        many=True, read_only=True
-    )  # Include related quizzes
+    quizzes = QuizSerializer(many=True, read_only=True)  # Include related quizzes
     resources = ResourceSerializer(
         many=True, read_only=True
     )  # Include related resources

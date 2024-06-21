@@ -6,10 +6,12 @@ from rest_framework import permissions
 from .models import ChatMessage, ChatRoom, Course
 from .serializers import ChatMessageSerializer
 
+
 class ChatMessageViewSet(viewsets.ModelViewSet):
     """
     A viewset for viewing and editing chat message instances.
     """
+
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = ChatMessage.objects.all()
     serializer_class = ChatMessageSerializer
@@ -26,6 +28,7 @@ class ChatMessageViewSet(viewsets.ModelViewSet):
             serializer.save(sender=self.request.user, course=course)
         else:
             serializer.save(sender=self.request.user)
+
 
 class ChatRoomViewSet(viewsets.ModelViewSet):
     """
@@ -47,6 +50,7 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
         messages: Retrieves chat messages for a specific room.
         send_message: Sends a message to the chat room and simulates a chatbot response.
     """
+
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):
@@ -89,18 +93,26 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
         chat_room = self.get_object()
         user_message_serializer = ChatMessageSerializer(data=request.data)
         if user_message_serializer.is_valid():
-            user_message_instance = user_message_serializer.save(sender=request.user, chat_room=chat_room)
+            user_message_instance = user_message_serializer.save(
+                sender=request.user, chat_room=chat_room
+            )
             # Simulate chatbot response
             bot_response = "This is a response from the chatbot."
-            bot_message_serializer = ChatMessageSerializer(data={
-                'chat_room': chat_room.id,
-                'message': bot_response,
-                'sender': None,  # Assuming your model allows for a bot sender
-            })
+            bot_message_serializer = ChatMessageSerializer(
+                data={
+                    "chat_room": chat_room.id,
+                    "message": bot_response,
+                    "sender": None,  # Assuming your model allows for a bot sender
+                }
+            )
             if bot_message_serializer.is_valid():
                 bot_message_serializer.save()  # Save bot response as a new message
-            return Response(user_message_serializer.data, status=status.HTTP_201_CREATED)
+            return Response(
+                user_message_serializer.data, status=status.HTTP_201_CREATED
+            )
         else:
-            return Response(user_message_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+            return Response(
+                user_message_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
+
     queryset = ChatRoom.objects.all()

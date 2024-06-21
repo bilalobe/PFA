@@ -45,19 +45,21 @@ CSRF_COOKIE_SECURE = True  # Ensure CSRF cookies are sent over HTTPS
 
 # Enforce HTTPS
 SECURE_SSL_REDIRECT = True  # Redirect all non-HTTPS requests to HTTPS
-SECURE_HSTS_SECONDS = 31536000  # Set HTTP Strict Transport Security (HSTS) header for a year
+SECURE_HSTS_SECONDS = (
+    31536000  # Set HTTP Strict Transport Security (HSTS) header for a year
+)
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Include subdomains in the HSTS policy
 SECURE_HSTS_PRELOAD = True  # Allow preloading of the site's HSTS policy
 
 # AWS S3 Settings for secure access
-AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = 'eplatform-media'  # Your S3 bucket name
-AWS_S3_REGION_NAME = 'eu'  # Your AWS region (e.g., 'us-east-1')
-AWS_S3_SIGNATURE_VERSION = 's3v4'  # Use Signature Version 4
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = "eplatform-media"  # Your S3 bucket name
+AWS_S3_REGION_NAME = "eu"  # Your AWS region (e.g., 'us-east-1')
+AWS_S3_SIGNATURE_VERSION = "s3v4"  # Use Signature Version 4
 AWS_S3_FILE_OVERWRITE = False  # Prevent overwriting files with the same name
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-AWS_DEFAULT_ACL = 'private'  # Set default ACL to private to ensure files are not publicly accessible by default
+AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
+AWS_DEFAULT_ACL = "private"  # Set default ACL to private to ensure files are not publicly accessible by default
 
 # Optional: Serve static files from S3 securely
 # STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
@@ -66,34 +68,34 @@ AWS_DEFAULT_ACL = 'private'  # Set default ACL to private to ensure files are no
 VIRUS_TOTAL_API_KEY = config("VIRUS_TOTAL_API_KEY")
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),
-        'PORT': config('DB_PORT'),
-        'OPTIONS': {
-            'sslmode': 'require',  # This is the key part for SSL connection
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": config("DB_NAME"),
+        "USER": config("DB_USER"),
+        "PASSWORD": config("DB_PASSWORD"),
+        "HOST": config("DB_HOST"),
+        "PORT": config("DB_PORT"),
+        "OPTIONS": {
+            "sslmode": "require",  # This is the key part for SSL connection
         },
     }
 }
 
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'file': {
-            'level': 'ERROR',
-            'class': 'logging.FileHandler',
-            'filename': './errors.log',
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "file": {
+            "level": "ERROR",
+            "class": "logging.FileHandler",
+            "filename": "./errors.log",
         },
     },
-    'loggers': {
-        'django': {
-            'handlers': ['file'],
-            'level': 'ERROR',
-            'propagate': True,
+    "loggers": {
+        "django": {
+            "handlers": ["file"],
+            "level": "ERROR",
+            "propagate": True,
         },
     },
 }

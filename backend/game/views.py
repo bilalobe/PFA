@@ -1,3 +1,5 @@
+from .utils import award_points, award_badge
+from rest_framework.decorators import api_view, permission_classes
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions, status
 from rest_framework.response import Response
@@ -19,10 +21,6 @@ class BadgeViewSet(viewsets.ModelViewSet):
 class UserBadgeViewSet(viewsets.ModelViewSet):
     queryset = UserBadge.objects.all()
     serializer_class = UserBadgeSerializer
-
-
-from rest_framework.decorators import api_view, permission_classes
-from .utils import award_points, award_badge
 
 
 @api_view(["POST"])

@@ -19,7 +19,7 @@ app = FastAPI()
 # Initialize Sentry for error monitoring
 sentry_logging = LoggingIntegration(
     level=logging.INFO,  # Capture info and above as breadcrumbs
-    event_level=logging.ERROR  # Send errors as events
+    event_level=logging.ERROR,  # Send errors as events
 )
 sentry_sdk.init(
     dsn="YOUR_SENTRY_DSN",
@@ -134,7 +134,9 @@ async def generate_content(
         # Text Generation
         if content_type == "summary":
             # Using the 'summarization' pipeline directly for summaries
-            output = list(generator(text, max_length=100, min_length=30, do_sample=False))
+            output = list(
+                generator(text, max_length=100, min_length=30, do_sample=False)
+            )
             content = output[0]["summary_text"]
 
         elif content_type == "paraphrase":
@@ -142,20 +144,24 @@ async def generate_content(
             paraphrase_generator = pipeline(
                 "text-generation", model=model, tokenizer=tokenizer
             )
-            output = list(paraphrase_generator(
-                text,
-                max_length=len(text) + 20,
-                do_sample=True,
-                temperature=0.8,
-                top_k=50,
-            ))
+            output = list(
+                paraphrase_generator(
+                    text,
+                    max_length=len(text) + 20,
+                    do_sample=True,
+                    temperature=0.8,
+                    top_k=50,
+                )
+            )
             content = output[0]["generated_text"]
 
         else:
             # Default generation logic
-            output = list(generator(
-                text, max_length=200, do_sample=True, temperature=0.9, top_k=60
-            ))
+            output = list(
+                generator(
+                    text, max_length=200, do_sample=True, temperature=0.9, top_k=60
+                )
+            )
             content = output[0]["generated_text"]
 
         # Post-processing
