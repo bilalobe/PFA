@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from courses.models import Module
-from backend.user.models import User
+from backend.users.models import User
 
 def resource_directory_path(instance, filename):
     # Use a setting from settings.py for base upload path if applicable

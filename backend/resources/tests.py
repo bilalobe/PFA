@@ -2,7 +2,7 @@ from django.test import TestCase
 from rest_framework.test import APIRequestFactory
 from resources.views import ResourceViewSet
 from resources.permissions import IsEnrolledStudent
-from user.models import User
+from users.models import User
 from enrollments.models import Enrollment
 from courses.models import Course, Module
 from .models import Resource

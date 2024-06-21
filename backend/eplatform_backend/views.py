@@ -10,7 +10,7 @@ from rest_framework.exceptions import ValidationError
 
 from backend.eplatform_backend.exceptions import custom_exception_handler
 from .serializers import MyCustomTokenObtainPairSerializer
-from backend.user.serializers import UserCreateSerializer
+from backend.users.serializers import UserCreateSerializer
 import logging
 
 logger = logging.getLogger(__name__)

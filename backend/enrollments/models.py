@@ -1,5 +1,5 @@
 from django.db import models
-from user.models import User
+from users.models import User
 from courses.models import Course, Module
 from .models import ModuleCompletion
 

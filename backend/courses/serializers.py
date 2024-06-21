@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Module, Course, Review
 from quizzes.serializers import QuizQuestionSerializer
-from user.serializers import UserSerializer
+from users.serializers import UserSerializer
 from quizzes.models import Quiz
 from quizzes.serializers import QuizSerializer
 from resources.serializers import ResourceSerializer

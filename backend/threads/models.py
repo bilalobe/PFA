@@ -1,5 +1,5 @@
 from django.db import models
-from backend.user.models import User
+from backend.users.models import User
 from forums.models import Forum
 
 
