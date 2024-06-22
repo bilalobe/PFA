@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Module, Course, Review
+from .models import CourseAnalytics, DynamicContent, InteractiveElement, Module, Course, Review
 from quizzes.serializers import QuizQuestionSerializer
 from users.serializers import UserSerializer
 from quizzes.models import Quiz
@@ -165,3 +165,21 @@ class QuizSerializer(serializers.ModelSerializer):
             "created_at",
             "questions",
         )
+
+
+class DynamicContentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DynamicContent
+        fields = "__all__"
+
+
+class CourseAnalyticsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CourseAnalytics
+        fields = "__all__"
+
+
+class InteractiveElementSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InteractiveElement
+        fields = "__all__"

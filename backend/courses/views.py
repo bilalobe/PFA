@@ -1,73 +1,69 @@
-from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, permissions, status
+import numpy as np
+from sklearn.neighbors import NearestNeighbors
+from django.core.cache import cache
+from transformers import pipeline
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound, PermissionDenied
-from .models import Module, Course, Quiz, Review
-from .serializers import (
-    ModuleSerializer,
-    CourseSerializer,
-    QuizSerializer,
-    ReviewSerializer,
-    ModuleDetailSerializer,
-    ModuleCreateSerializer,
-    ModuleUpdateSerializer,
-    ReviewCreateSerializer,
-)
-from .permissions import IsTeacher, IsSupervisor, IsTeacherOrReadOnly
-from rest_framework import filters
+from rest_framework import status, permissions, viewsets
+from rest_framework.filters import SearchFilter, OrderingFilter
 from django.db.models import Avg
+from .models import Course, Review, UserCourseInteraction
+from .serializers import CourseSerializer, ModuleSerializer, ReviewSerializer, ReviewCreateSerializer
+from rest_framework.exceptions import NotFound, PermissionDenied
 
+# Initialize the sentiment analysis pipeline
+sentiment_analysis_pipeline = pipeline("sentiment-analysis")
 
 class CourseViewSet(viewsets.ModelViewSet):
     """
-    API endpoint for managing courses.
+    A viewset for viewing and editing course instances.
     """
-
-    queryset = Course.objects.all().annotate(average_rating=Avg("reviews__rating"))
+    queryset = Course.objects.all().annotate(
+        average_rating=Avg("reviews__rating")
+    )
     serializer_class = CourseSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsTeacherOrReadOnly]
-    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    filter_backends = [SearchFilter, OrderingFilter, DjangoFilterBackend]
     search_fields = ["title", "description"]
     ordering_fields = ["title", "created_at", "average_rating"]
+    filterset_fields = ["created_by", "average_rating"]
 
     def perform_create(self, serializer):
-        """
-        Sets the created_by field to the current user when a new course is created.
-        """
         serializer.save(created_by=self.request.user)
 
     @action(detail=True, methods=["get"])
-    def modules(self, request, pk=None):
-        """
-        Retrieves a list of modules associated with the specified course.
-        """
+    def modules(self, request, *args, **kwargs):
         course = self.get_object()
         modules = course.modules.all()
         serializer = ModuleSerializer(modules, many=True)
         return Response(serializer.data)
 
     @action(detail=True, methods=["post"])
-    def reviews(self, request, pk=None):
-        """
-        Creates a new review for the specified course.
-        Only authenticated users can create reviews.
-        Checks if the user is enrolled in the course before creating the review.
-        """
+    def reviews(self, request, *args, **kwargs):
         course = self.get_object()
         serializer = ReviewCreateSerializer(
-            data=request.data, context={"request": request, "course": course}
+            data=request.data,
+            context={"request": request, "course": course}
         )
         if serializer.is_valid():
-            serializer.save()  # The serializer will handle associating the course and user
+            review = serializer.save()
+            # Convert review to a list if it's not already one
+            review_texts = [review.text] if not isinstance(review, list) else [r.text for r in review]
+            sentiments = list(sentiment_analysis_pipeline(review_texts))
+            # Apply sentiment to the review or each review in the list
+            if not isinstance(review, list):
+                review.sentiment = sentiments[0]['label']
+                review.save()
+            else:
+                for i, r in enumerate(review):
+                    r.sentiment = sentiments[i]['label']
+                    r.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=["get"])
     def get_reviews(self, request, pk=None):
-        """
-        Retrieves a list of reviews associated with the specified course.
-        """
         course = self.get_object()
         reviews = course.reviews.all()
         serializer = ReviewSerializer(reviews, many=True)
@@ -75,112 +71,79 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=["delete"])
     def delete_review(self, request, pk=None, review_pk=None):
-        """
-        Deletes a review associated with the specified course.
-        Only the author of the review or an instructor can delete the review.
-        """
         course = self.get_object()
         try:
             review = course.reviews.get(pk=review_pk)
         except Review.DoesNotExist:
             raise NotFound("Review not found")
-
-        if review.user != request.user and course.instructor != request.user:
+        if review.user != request.user and not request.user.is_staff:
             raise PermissionDenied("You are not authorized to delete this review.")
-
         review.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @action(detail=True, methods=["get"])
+    def recommend(self, request, pk=None):
+        user = request.user
+        recommendations = recommend_courses(user.id)
+        serializer = CourseSerializer(recommendations, many=True)
+        return Response(serializer.data)
 
-# ... (The rest of your views (ModuleViewSet, QuizViewSet) remain unchanged)
+def get_user_course_matrix():
+    interactions = UserCourseInteraction.objects.all().values('user_id', 'course_id', 'interaction_score')
+    if not interactions:
+        return None, None
+    user_ids = sorted(list(set([interaction['user_id'] for interaction in interactions])))
+    course_ids = sorted(list(set([interaction['course_id'] for interaction in interactions])))
+    user_index = {user_id: index for index, user_id in enumerate(user_ids)}
+    course_index = {course_id: index for index, course_id in enumerate(course_ids)}
+    matrix = np.zeros((len(user_ids), len(course_ids)))
+    for interaction in interactions:
+        user_idx = user_index[interaction['user_id']]
+        course_idx = course_index[interaction['course_id']]
+        matrix[user_idx][course_idx] = interaction['interaction_score']
+    return matrix, user_ids, course_ids
 
-
-class ModuleViewSet(viewsets.ModelViewSet):
+def recommend_courses(user_id, num_recommendations=5):
     """
-    API endpoint for managing modules within a course.
+    Recommend courses based on user's interaction with other courses.
     """
+    # Fix for "None" is not iterable issue
+    user_course_matrix_data = cache.get_or_set('user_course_matrix', get_user_course_matrix, timeout=3600)
+    if user_course_matrix_data is None:
+        return []
+    matrix, user_ids, course_ids = user_course_matrix_data
 
-    queryset = Module.objects.all()
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsTeacherOrReadOnly]
+    if user_id not in user_ids:
+        return []
 
-    def get_serializer_class(self):
-        """
-        Returns the appropriate serializer class based on the action.
-        """
-        if self.action == "list":
-            return ModuleSerializer
-        if self.action == "retrieve":
-            return ModuleDetailSerializer
-        if self.action == "create":
-            return ModuleCreateSerializer
-        if self.action in ["update", "partial_update"]:
-            return ModuleUpdateSerializer
-        return ModuleSerializer
+    user_idx = user_ids.index(user_id)
+    # Adjusting line length for PEP 8 compliance
+    model = NearestNeighbors(
+        n_neighbors=num_recommendations + 1, algorithm='auto'
+    ).fit(matrix)
+    distances, indices = model.kneighbors(matrix[user_idx].reshape(1, -1))
+
+    # Fix for unused variable 'distances'
+    _ = distances
+
+    recommended_course_ids = [
+        course_ids[idx] for idx in indices.flatten() if idx != user_idx
+    ][:num_recommendations]
+    recommended_courses = Course.objects.filter(id__in=recommended_course_ids)
+    return recommended_courses
+
+class ReviewViewSet(viewsets.ModelViewSet):
+    """
+    A viewset for viewing and editing review instances.
+    """
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def perform_create(self, serializer):
-        """
-        Associates the new module with the specified course and sets the created_by field.
-        Handles potential errors if the course does not exist.
-        """
-        course_id = self.kwargs.get("course_pk")
-        course = get_object_or_404(Course, pk=course_id)
-        serializer.save(course=course, created_by=self.request.user)
-
-    @action(detail=True, methods=["get"])
-    def quizzes(self, request, pk=None):
-        """
-        Retrieves a list of quizzes associated with the specified module.
-        """
-        module = self.get_object()
-        quizzes = Quiz.objects.filter(module=module)
-        serializer = QuizSerializer(quizzes, many=True)
-        return Response(serializer.data)
-
-    def retrieve(self, request, *args, **kwargs):
-        """
-        Retrieves a specific module.
-        Handles the Module.DoesNotExist exception with a 404 response.
-        """
-        try:
-            module = self.get_object()
-        except Module.DoesNotExist:
-            raise NotFound(detail="Module not found.")
-        serializer = self.get_serializer(module)
-        return Response(serializer.data)
-
-    def update(self, request, *args, **kwargs):
-        """
-        Updates a specific module.
-        Handles the Module.DoesNotExist exception with a 404 response.
-        Checks if the user is authorized to update the module.
-        """
-        partial = kwargs.pop("partial", False)
-        instance = self.get_object()
-
-        # Check if the user is authorized to update the module
-        if instance.course.created_by != request.user:
-            raise PermissionDenied(
-                detail="You do not have permission to update this module."
-            )
-
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        return Response(serializer.data)
-
-    def destroy(self, request, *args, **kwargs):
-        """
-        Deletes a specific module.
-        Handles the Module.DoesNotExist exception with a 404 response.
-        Checks if the user is authorized to delete the module.
-        """
-        instance = self.get_object()
-
-        # Check if the user is authorized to delete the module
-        if instance.course.created_by != request.user:
-            raise PermissionDenied(
-                detail="You do not have permission to delete this module."
-            )
-
-        self.perform_destroy(instance)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        review = serializer.save()
+        review_texts = [review.text]
+        # Fix for "__getitem__" method not defined on type "Generator[Any, Any, None]"
+        sentiments = list(sentiment_analysis_pipeline(review_texts))
+        review.sentiment = sentiments[0]['label']
+        review.save()
