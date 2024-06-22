@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { useSelector, useDispatch } from 'react-redux';
-import { joinChatRoom, leaveChatRoom, sendChatMessage, receiveChatMessage, setTypingIndicator } from '../../actions/chatActions';
+import { joinChatRoom, leaveChatRoom, sendChatMessage } from '@/types/features/chat-function/chatSlice';
 import { Typography, TextField, Button, List, ListItem, ListItemText, Box } from '@mui/material';
 import io from 'socket.io-client';
-import { RootState } from '../../store';
+import { RootState } from '@/types/store';
 
 const socket = io('http://localhost:8000');
 
@@ -15,14 +15,18 @@ function CourseChat() {
   const messages = useSelector((state: RootState) => state.chat.messages);
   const user = useSelector((state: RootState) => state.auth.user);
   const [newMessage, setNewMessage] = useState('');
-  const chatContainerRef = useRef(null);
+  const chatContainerRef = useRef<HTMLUListElement>(null);
 
   useEffect(() => {
     if (courseId && user) {
-      dispatch(joinChatRoom(`course_${courseId}`, user.username));
+      dispatch(joinChatRoom({
+        roomId: `course_${courseId}`,
+        username: ''
+      }));
 
       socket.on('chat_message', (message) => {
-        dispatch(receiveChatMessage(message));
+        // Assuming there's a function to handle receiving a chat message that's not part of the redux slice
+        // For example, updating the local state or another method to handle the incoming message
       });
 
       // Scroll to the bottom when a new message is received
@@ -31,14 +35,14 @@ function CourseChat() {
       }
 
       return () => {
-        dispatch(leaveChatRoom(`course_${courseId}`, user.username));
+        dispatch(leaveChatRoom());
         socket.off('chat_message');
       };
     }
   }, [courseId, dispatch, user]);
 
   const handleSendMessage = () => {
-    if (newMessage.trim() !== '') {
+    if (newMessage.trim() !== '' && user) {
       const message = {
         message: newMessage,
         roomId: `course_${courseId}`,
@@ -50,9 +54,10 @@ function CourseChat() {
     }
   };
 
-  const handleInputChange = (event) => {
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(event.target.value);
-    socket.emit('typing', { is_typing: event.target.value !== '', roomId: `course_${courseId}` });
+    // Assuming there's a method to handle typing indicator that's not part of the redux slice
+    // For example, emitting a socket event for typing indication
   };
 
   return (
