@@ -1,39 +1,51 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import axios from 'axios';
+import { useQuery } from 'react-query';
 import { List, ListItem, ListItemText, Typography } from '@mui/material';
+import { useSnackbar } from 'notistack';
 
 function RecommendationList() {
-  const [recommendations, setRecommendations] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const { enqueueSnackbar } = useSnackbar();
 
-  useEffect(() => {
-    const fetchRecommendations = async () => {
-      setIsLoading(true);
-      try {
-        const response = await axios.get('/api/recommendations/');
-        setRecommendations(response.data);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // Enhanced error handling with axios interceptors
+  axios.interceptors.response.use(response => response, error => {
+    // Handle different types of errors here (e.g., network error, server error)
+    if (!error.response) {
+      // Network error
+      enqueueSnackbar('Network error, please check your connection.', { variant: 'error' });
+    } else {
+      // Server or other errors
+      enqueueSnackbar(`Error: ${error.response.status} ${error.response.statusText}`, { variant: 'error' });
+    }
+    return Promise.reject(error);
+  });
 
-    fetchRecommendations();
-  }, []);
+  const fetchRecommendations = async () => {
+    const response = await axios.get('/api/recommendations/');
+    return response.data;
+  };
+
+  const { data: recommendations, isLoading, error } = useQuery('recommendations', fetchRecommendations, {
+
+    retry: 2, // Example: retry twice before throwing an error
+    onError: (err: Error) => {
+      // Handle errors specifically from the useQuery hook
+      enqueueSnackbar(`Error fetching recommendations: ${err.message}`, { variant: 'error' });
+    }
+  });
 
   if (isLoading) {
     return <Typography>Loading recommendations...</Typography>;
   }
 
   if (error) {
-    return <Typography color="error">Error: {error}</Typography>;
+    // Error handling is now more comprehensive due to axios interceptors and notistack
+    return <Typography color="error">An error occurred. Please try again later.</Typography>;
   }
 
   return (
     <List>
-      {recommendations.length > 0 ? (
+      {recommendations && recommendations.length > 0 ? (
         recommendations.map((course, index) => (
           <ListItem key={index}>
             <ListItemText primary={course.title} secondary={course.description} />
