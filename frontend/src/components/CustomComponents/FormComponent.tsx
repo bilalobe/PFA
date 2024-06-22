@@ -8,7 +8,6 @@ function FormComponent() {
   const [helperText, setHelperText] = useState('');
 
   const validateInput = (value) => {
-    // Add your validation logic here
     if (value.length < 5) {
       setError(true);
       setHelperText('Input must be at least 5 characters');
@@ -36,8 +35,7 @@ function FormComponent() {
         value={value}
         error={error}
         helperText={helperText}
-        onChange={handleChange}
-      />
+        onChange={handleChange} sx={undefined}      />
       <Button type="submit" variant="contained" color="primary">
         Submit
       </Button>
