@@ -17,7 +17,7 @@ const CourseDetail = ({ course, initialEnrollmentStatus }) => {
       try {
         const res = await axios.get(`http://localhost:8000/api/courses/${course.id}/enrollment`);
         setIsEnrolled(res.data.isEnrolled);
-      } catch (err) {
+      } catch (err: any) {
         setError(err.message);
       } finally {
         setLoading(false);
