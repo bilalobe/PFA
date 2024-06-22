@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { apiUrl } from '../../utils/api';
+import { apiUrl } from '@/utils/api';
 
 interface User {
   id: number;

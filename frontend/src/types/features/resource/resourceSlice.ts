@@ -58,7 +58,7 @@ export const uploadResource = createAsyncThunk<
       const response = await axios.post(`${apiUrl}/resources/`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
-          // Add authorization headers if needed
+
         },
         onUploadProgress,
       });
@@ -71,7 +71,16 @@ export const uploadResource = createAsyncThunk<
 const resourceSlice = createSlice({
   name: 'resource',
   initialState,
-  reducers: {},
+  reducers: {
+    saveResource(state, action: PayloadAction<Resource>) {
+      const existingIndex = state.resources.findIndex((resource) => resource.id === action.payload.id);
+      if (existingIndex !== -1) {
+        state.resources[existingIndex] = action.payload;
+      } else {
+        state.resources.push(action.payload);
+      }
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchResources.pending, (state) => {
