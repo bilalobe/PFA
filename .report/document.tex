@@ -244,16 +244,16 @@ Redux Toolkit, une bibliothèque puissante, orchestre la gestion d'état côté 
 Pour construire notre frontend, nous avons utilisé une palette de technologies modernes :
 
 \begin{description}
-    \item[Next.js (\gls{nextjs})] Un framework React pour la création d'applications web performantes, optimisées pour le référencement, avec des fonctionnalités comme le rendu côté serveur et la génération de sites statiques.
-    \item[React (\gls{react})] La bibliothèque JavaScript pour construire des interfaces utilisateur interactives, soutenue par des bibliothèques complémentaires pour enrichir l'expérience utilisateur :
+    \item[\gls{nextjs}] Un framework React pour la création d'applications web performantes, optimisées pour le référencement, avec des fonctionnalités comme le rendu côté serveur et la génération de sites statiques.
+    \item[\gls{react}] La bibliothèque JavaScript pour construire des interfaces utilisateur interactives, soutenue par des bibliothèques complémentaires pour enrichir l'expérience utilisateur :
     \begin{itemize}
-        \item Material-UI (\gls{materialui}): Une bibliothèque de composants basée sur Material Design.
-        \item Tailwind CSS (\gls{tailwindcss}): Un framework CSS utilitaire pour un stylisme précis.
-%        \item Redux Toolkit (\gls{redux}): Pour la gestion d'état côté client.
-%        \item React Query (\gls{reactquery}), Formik (\gls{formik}), Yup (\gls{yup}), React Markdown (\gls{reactmarkdown}), React Quill (\gls{reactquill}), React ChartJS (\gls{reactchartjs}), React Player (\gls{reactplayer}), React Select (\gls{reactselect}), React Spring (\gls{reactspring}), React Use (\gls{reactuse}), React Router (\gls{reactrouter}), React Hook Form (\gls{reacthookform}): Diverses bibliothèques pour la gestion des données, formulaires, graphiques, animations, et plus.
-    \end{itemize}
-    \item[Axios (\gls{axios})] Une bibliothèque JavaScript pour effectuer des requêtes HTTP, facilitant la communication avec notre API Django.
-    \item[Socket.IO (\gls{socketio})] Pour la communication bidirectionnelle en temps réel, notamment pour notre fonctionnalité de chat.
+        \item \gls{materialui}: Une bibliothèque de composants basée sur Material Design.
+        \item \gls{tailwindcss}: Un framework CSS utilitaire pour un stylisme précis.
+        \item \gls{redux}: Pour la gestion d'état côté client.
+        \item \gls{reactquery}, \gls{formik}, \gls{yup}, \gls{reactmarkdown}, \gls{reactquill}, \gls{reactchartjs}, \gls{reactplayer}, \gls{reactselect}, \gls{reactspring}, \gls{reactuse}, \gls{reactrouter}, \gls{reacthookform}: Diverses bibliothèques pour la gestion des données, formulaires, graphiques, animations, et plus.
+        \end{itemize}
+    \item[\gls{axios}] Une bibliothèque JavaScript pour effectuer des requêtes HTTP, facilitant la communication avec notre API Django.
+    \item[\gls{socketio}] Pour la communication bidirectionnelle en temps réel, notamment pour notre fonctionnalité de chat.
 \end{description}
 
 \subsection{Méthodes de Développement}
@@ -434,7 +434,7 @@ Alors que nous célébrons nos réalisations, nous tournons également notre reg
             \tikzstyle{line} = [draw, -{Latex[length=2.5mm]}]
             
             % Nodes
-            \node [block] (adapt) {Interface Adaptatif};
+            \node [block] (adapt) {Interface Adaptative};
             \node [block, right=of adapt] (feedback) {Feedback en Temps Réel};
             \node [block, below=of $(adapt)!0.5!(feedback)$] (personal) {Expérience Perso};
             
