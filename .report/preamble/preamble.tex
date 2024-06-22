@@ -51,6 +51,7 @@
 
 % Define the IdeaBox environment
 \newtcolorbox[auto counter]{IdeaBox}[2][]{%
+
     title=Idea \thetcbcounter: #2,
     colback=yellow!10,
     colframe=yellow!40!black,
@@ -90,8 +91,8 @@
 \makeglossaries
 %
 %% Bibliography
-%\usepackage[style=authoryear, backend=biber]{biblatex}
-%\addbibresource{references.bib}
+\usepackage[style=authoryear, backend=biber]{biblatex}
+\addbibresource{references.bib}
 %% Print the bibliography
 %% For BibTeX
 %\bibliographystyle{plain}

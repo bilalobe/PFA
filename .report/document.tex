@@ -17,7 +17,7 @@
 \begin{titlepage}
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 \centering
-%\includegraphics[keepaspectratio,scale=0.75]{images/logo.png} 
+\includegraphics[keepaspectratio,scale=0.75]{images/logo.png} 
 \vfill
 \textsc{\LARGE École/Université}\\[0.5cm]  
 \textsc{\Large Informatique}\\[0.5cm]  % Replace with your Department/Program
@@ -169,32 +169,32 @@ L'API REST permet la communication fluide entre notre frontend et notre backend.
 Pour forger notre backend, nous avons utilisé un arsenal de technologies puissantes :
 
 \begin{table}[ht]
-	\centering
-	\resizebox{\textwidth}{!}{%
-		\begin{tabular}{ll}
-			\hline
-			\textbf{Technologie} & \textbf{Description} \\
-			\hline
-			\gls{django} & Un framework web Python réputé pour sa robustesse, sa sécurité et sa scalabilité. \\
-			\gls{rest} & Un outil indispensable pour la création d'API REST. \\
-			\gls{postgresql} & Une base de données relationnelle puissante et fiable. \\
-			\gls{redis} & Un magasin de données en mémoire ultrarapide \\
-			\gls{celery} & Un gestionnaire de tâches asynchrones, pour des opérations en arrière-plan. \\
-			\gls{textblob} & Pour le traitement du langage naturel, utilisé pour l'analyse des sentiments et plus. \\
-			\gls{django_channels} & Support pour les WebSockets de manière similaire aux vues HTTP. \\
-			\gls{django_filters} & Permet de filtrer dynamiquement les querysets. \\
-			\gls{django_extensions} & Une collection d'extensions personnalisées pour Django. \\
-			\gls{django_redis} & Un backend de cache/session Redis complet pour Django. \\
-			\gls{django_allauth} & Fournit l'authentification, l'enregistrement, et la gestion de compte. \\
-			\gls{cors} & Gère les en-têtes de serveur pour le partage de ressources entre origines (CORS). \\
-			\gls{whitenoise} & Permet à l'application de servir ses propres fichiers statiques. \\
-			\gls{jwt} & Un plugin d'authentification JSON Web Token pour Django REST Framework. \\
-			\gls{drf_spectacular} & Un outil de génération de schéma pour Django REST Framework. \\
-			\hline
-		\end{tabular}%
-	}
-	\caption{Overview of Technologies Used}
-	\label{table:technologies}
+    \centering
+    \resizebox{\textwidth}{!}{%
+        \begin{tabular}{ll}
+            \hline
+            \textbf{Technologie} & \textbf{Description} \\
+            \hline
+            Django & Un framework web Python réputé pour sa robustesse, sa sécurité et sa scalabilité. \\
+            REST & Un outil indispensable pour la création d'API REST. \\
+            PostgreSQL & Une base de données relationnelle puissante et fiable. \\
+            Redis & Un magasin de données en mémoire ultrarapide \\
+            Celery & Un gestionnaire de tâches asynchrones, pour des opérations en arrière-plan. \\
+            TextBlob & Pour le traitement du langage naturel, utilisé pour l'analyse des sentiments et plus. \\
+            Django Channels & Support pour les WebSockets de manière similaire aux vues HTTP. \\
+            Django Filters & Permet de filtrer dynamiquement les querysets. \\
+            Django Extensions & Une collection d'extensions personnalisées pour Django. \\
+            Django Redis & Un backend de cache/session Redis complet pour Django. \\
+            Django Allauth & Fournit l'authentification, l'enregistrement, et la gestion de compte. \\
+            CORS & Gère les en-têtes de serveur pour le partage de ressources entre origines (CORS). \\
+            WhiteNoise & Permet à l'application de servir ses propres fichiers statiques. \\
+            JWT & Un plugin d'authentification JSON Web Token pour Django REST Framework. \\
+            DRF Spectacular & Un outil de génération de schéma pour Django REST Framework. \\
+            \hline
+        \end{tabular}%
+    }
+    \caption{Overview of Technologies Used}
+    \label{table:technologies}
 \end{table}
 
 \subsection{Frontend}
@@ -388,14 +388,93 @@ L'IA est intégrée à PFA pour créer une expérience d'apprentissage plus inte
     \item \textbf{Recommandations de Cours Personnalisées:} Notre système de recommandation intelligent, basé sur des algorithmes de machine learning, suggère des cours pertinents en fonction des intérêts et des progrès des étudiants.
     \item \textbf{Analyse des Sentiments:} En analysant le sentiment des messages du forum, PFA peut identifier les commentaires positifs et négatifs et les quiz coriaces, aidant les instructeurs à mieux \textsc{comprendre les besoins} des apprenants.
     \item \textbf{Détection de la Langue:} La détection automatique de la langue permet d'adapter l'interface et le contenu aux préférences linguistiques des utilisateurs.
-%    \item \textbf{Génération du contenu à travers des \gls{llm}s} L'IA peut générer automatiquement du contenu pour les cours, les modules, et les quizzes, aidant les instructeurs à créer des ressources pédagogiques de haute qualité.
+    \item \textbf{Génération du contenu à travers des \gls{llm}s} L'IA peut générer automatiquement du contenu pour les cours, les modules, et les quizzes, aidant les instructeurs à créer des ressources pédagogiques de haute qualité.
     \item \textbf{Suivi des performances} L'IA peut analyser les performances des étudiants, identifier les lacunes et les points forts, et \textsc{représenter des graphes} accordément.
     \item \textbf{Chatbot Intelligent:} Notre chatbot répond aux questions fréquentes, fournit des conseils, et guide les étudiants à travers la plateforme.
 \end{itemize}
 
 \section{Captures d'Écran}
 
-% [Insérez des captures d'écran des principales fonctionnalités de votre plateforme, en utilisant la syntaxe LaTeX pour les figures.]
+\subsection{ Prototype de la Page d'Accueil GUI}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{images/homepage.png}
+    \caption{Prototype de la Page d'Accueil GUI}
+    \label{fig:homepage}
+\end{figure}
+
+\subsection{ Portions de Languages de programmation Utilisés}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{images/languages.png}
+    \caption{Portions de Languages de programmation Utilisés}
+    \label{fig:languages}
+\end{figure}
+
+\subsection{ Comparatif aux normes de communauté}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{images/community.png}
+    \caption{Comparatif aux normes de communauté}
+    \label{fig:community}
+\end{figure}
+
+\subsection{ Contributions journalières intrinsèques}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{images/activity.png}
+    \caption{Contributions journalières intrinsèques}
+    \label{fig:contributions}
+\end{figure}
+
+\subsection{Contributions au Graphique Principal à travers les Commits GitHub}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{images/contributions.png}
+    \caption{Contributions au Graphique Principal à travers les Commits GitHub}
+    \label{fig:contributions}
+\end{figure}
+
+\subsection{ Pull Requests Fusionnées par Jour}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{images/pull_requests.png}
+    \caption{Pull Requests Fusionnées par Jour}
+    \label{fig:pull_requests}
+\end{figure}
+
+\subsection{ Codeflow }
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{images/codeflow.png}
+    \caption{Codeflow}
+    \label{fig:codeflow}
+\end{figure}
+
+\subsection{ Taux de Git Clones mensuels}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{images/git_clones.png}
+    \caption{Git clones mensuels}
+    \label{fig:git_clones}
+\end{figure}
+
+\subsection{ Graphe de Réseaux}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{images/network.png}
+    \caption{Graphe de Réseaux}
+    \label{fig:network}
+\end{figure}
 
 \newpage
 
@@ -478,6 +557,21 @@ Nous nous engageons à transformer l'éducation, en rendant l'apprentissage plus
 \textit{Pour plus d'informations sur nos projets et notre vision, visitez notre site web: \href{http://www.pfa-education.com}{en cours de construction}.} 
 \vfill
 
+\section{Expansion vers les Applications Mobiles}
+Dans le cadre de nos plans d'expansion et pour répondre à la demande croissante de flexibilité dans l'apprentissage, nous envisageons le lancement d'une application mobile pour la plateforme PFA. Cette initiative vise à offrir à nos utilisateurs un accès encore plus facile et plus intuitif à nos ressources éducatives, directement depuis leurs appareils mobiles.
+
+\subsection{Intégration avec Firebase}
+Pour faciliter le développement de notre application mobile, nous prévoyons d'utiliser Firebase, une plateforme de développement d'applications mobiles et web de Google. Firebase offre une multitude de services qui simplifieront le développement, tels que:
+
+\begin{itemize}
+    \item \textbf{Authentification:} Permet une gestion sécurisée des sessions utilisateurs, avec la possibilité de se connecter via des réseaux sociaux.
+    \item \textbf{Firestore Database:} Une base de données NoSQL flexible et évolutive pour stocker et synchroniser les données en temps réel.
+    \item \textbf{Storage:} Pour le stockage et la récupération sécurisés de fichiers et de médias par les utilisateurs.
+    \item \textbf{Analytics:} Fournit des insights sur le comportement des utilisateurs et l'utilisation de l'application.
+\end{itemize}
+
+L'intégration de Firebase dans notre application mobile non seulement accélérera le développement grâce à ses services backend prêts à l'emploi mais nous permettra également de créer une expérience utilisateur cohérente et sécurisée sur toutes les plateformes.
+
 \section{Remerciements}
 
 Nous tenons à exprimer notre gratitude à tous ceux qui ont contribué à la réalisation de ce projet.  Nos remerciements vont à nos enseignants, nos collègues, nos amis et nos familles pour leur soutien et leur encouragement tout au long de ce voyage.  Ensemble, nous avons créé quelque chose de spécial, et nous sommes impatients de voir où l'avenir nous mènera.
@@ -490,10 +584,11 @@ En conclusion, le projet \gls{PFA} est bien plus qu'une simple plateforme d'appr
 
 \part{Annexes}
 
-% [Incluez les annexes que vous jugez nécessaires, comme des exemples de code, des diagrammes de base de données, ou des guides utilisateur. ]
-%\includegraphics[width=\textwidth]{gantt_chart.png}
-%\includegraphics[width=\textwidth]{database_diagram.png}
-%\includegraphics[width=\textwidth]{pert_chart.png}
+% Include Gantt chart
+\input{misc/gantt/gantt.tex}
+
+% Include PERT chart
+\input{misc/pert/pert.tex}
 
 % Print the glossary
 \printglossaries

@@ -1,0 +1,14 @@
+{
+    "hosting": {
+        "public": "out",
+        "rewrites": [
+            {
+                "source": "/api/**",
+                "run": {
+                    "serviceId": "your-django-service",
+                    "region": "your-region"
+                }
+            }
+        ]
+    }
+}
