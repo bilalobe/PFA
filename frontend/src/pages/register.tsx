@@ -7,6 +7,7 @@ import { useRouter } from 'next/router';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/types/store';
 import { registerUser } from '@/types/features/authentification/authSlice';
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth"; // Import Firebase Authentication
 
 const validationSchema = Yup.object().shape({
   username: Yup.string().required('Username is required'),
@@ -34,19 +35,22 @@ const Register = () => {
     resolver: yupResolver(validationSchema)
   });
 
+  const auth = getAuth(); // Initialize Firebase Authentication
+
   const onSubmit = async (values: RegisterFormValues) => {
+    setSuccess(false);
+    setError(null);
     try {
-      await dispatch(registerUser(values)).unwrap(); // Use unwrap to handle the promise
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      await dispatch(registerUser(values)).unwrap(); // Optionally dispatch the Redux action
       setSuccess(true);
-      setError(null);
       router.push('/login'); // Redirect to login after registration
-    } catch (error) {
-      if (error instanceof Error) { // Type guard for error
-        setError(error.message);
+    } catch (firebaseError) {
+      if (firebaseError instanceof Error) {
+        setError(firebaseError.message);
       } else {
         setError('An unexpected error occurred');
       }
-      setSuccess(false);
     }
   };
 
