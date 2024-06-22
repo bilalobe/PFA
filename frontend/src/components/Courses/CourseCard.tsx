@@ -2,11 +2,14 @@ import React from 'react';
 import Link from 'next/link';
 import { useSelector } from 'react-redux';
 import styles from './CourseCard.module.css';
+import Image from 'next/image';
+import { RootState } from '@/types/store';
+import EnrollmentReducer from '@/types/store';
 
 const CourseCard = ({ course }) => {
-  const enrollments = useSelector((state) => state.enrollment.enrollments);
-  const { isAuthenticated, loading } = useSelector((state) => state.auth);
-  const isEnrolled = enrollments.some((enrollment) => enrollment.course.id === course.id);
+  const enrollments = useSelector((state: RootState & { enrollment: typeof EnrollmentReducer }) => state.enrollment.enrollments);
+  const { isAuthenticated, loading } = useSelector((state: RootState) => state.auth);
+  const isEnrolled = enrollments.some((enrollment: { course: { id: string | number }; }) => enrollment.course.id === course.id);
 
   if (loading) {
     return <div className={styles.loading}>Loading...</div>;
@@ -23,7 +26,7 @@ const CourseCard = ({ course }) => {
   return (
     <div className={styles.gridItem}>
       <div className={styles.card}>
-        <img
+        <Image
           className={styles.cardMedia}
           alt={course.name}
           src={course.imageUrl || '/path/to/placeholder.jpg'}

@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Box, Container, Typography, Link, styled } from '@mui/material';
 import logo from '../../assets/logo.png'; // Adjust the path to your logo
+import Image from 'next/image';
 
 const StyledBox = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
@@ -13,7 +14,7 @@ function CustomFooter({ appName = 'MyApp', slogan = 'Enhancing Learning Experien
     <StyledBox>
       <Container maxWidth="lg">
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 3 }}>
-          <img src={logo} alt="logo" style={{ width: '50px', marginRight: '10px' }} />
+          <Image src={logo} alt="logo" style={{ width: '50px', marginRight: '10px' }} />
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             {appName}
           </Typography>

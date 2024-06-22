@@ -1,12 +1,13 @@
 import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchResources } from '../../actions/resourceActions';
-import { Typography, Grid, CircularProgress, Box } from '@mui/material';
-import { RootState } from '../../store';
+import { fetchResources } from '@/types/features/resource/resourceSlice';
+import { Typography, CircularProgress, Box } from '@mui/material';
+import { FixedSizeList as List } from 'react-window';
+import { RootState, AppDispatch } from '@/types/store';
 
 function ResourceList({ moduleId }: { moduleId: string }) {
-  const dispatch = useDispatch();
-  const { resources, loading, error } = useSelector((state) => ({
+  const dispatch: AppDispatch = useDispatch();
+  const { resources, loading, error } = useSelector((state: RootState) => ({
     resources: state.resource.resources,
     loading: state.resource.loading,
     error: state.resource.error,
@@ -15,6 +16,17 @@ function ResourceList({ moduleId }: { moduleId: string }) {
   useEffect(() => {
     dispatch(fetchResources({ moduleId }));
   }, [dispatch, moduleId]);
+
+  const Row = ({ index, style }) => (
+    <Box style={style} key={resources[index].id}>
+      <Typography variant="h6" gutterBottom>
+        {resources[index].title}
+      </Typography>
+      <Typography variant="body2" gutterBottom>
+        {resources[index].description}
+      </Typography>
+    </Box>
+  );
 
   if (loading) {
     return (
@@ -25,27 +37,24 @@ function ResourceList({ moduleId }: { moduleId: string }) {
   }
 
   if (error) {
-    return <Typography>Error: {error}</Typography>;
+    return (
+      <Box display="flex" justifyContent="center" mt={4} aria-label="Error">
+        <Typography variant="body1" color="error">
+          Error: {error?.message || 'Unknown error'}
+        </Typography>
+      </Box>
+    );
   }
 
   return (
-    <Box>
-      <Typography variant="h4" component="div" gutterBottom>
-        Resources
-      </Typography>
-      <Grid container spacing={3} aria-label="Resource list">
-        {resources.map((resource: { id: React.Key | null | undefined; title: string | number | bigint | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<React.AwaitedReactNode> | null | undefined; description: string | number | bigint | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<React.AwaitedReactNode> | null | undefined; }) => (
-          <Grid item xs={12} sm={6} md={4} key={resource.id}>
-            <Typography variant="h6" component="div" gutterBottom>
-              {resource.title}
-            </Typography>
-            <Typography variant="body2" component="div" gutterBottom>
-              {resource.description}
-            </Typography>
-          </Grid>
-        ))}
-      </Grid>
-    </Box>
+    <List
+      height={600}
+      width={'100%'}
+      itemCount={resources.length}
+      itemSize={120}
+    >
+      {Row}
+    </List>
   );
 }
 
