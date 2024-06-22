@@ -697,6 +697,111 @@ export const aiApi = {
     }
   },
 
+  analyzeForumThreadSentiment: async (threadId: any) => {
+    try {
+      const token = getAuthToken();
+      const response = await axios.get(`${apiUrl}/threads/${threadId}/analyze_sentiment/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      return response.data;
+    } catch (error) {
+      handleApiError(error, `Failed to analyze sentiment for thread ${threadId}.`);
+    }
+  },
 };
+
+// Interactive Elements API
+
+export const fetchInteractiveElements = async (dynamicContentId: any) => {
+  try {
+    const response = await axios.get(`${apiUrl}/interactive/${dynamicContentId}/elements/`);
+    return response.data;
+  } catch (error) {
+    handleApiError(error, 'Failed to fetch interactive elements.');
+  }
+};
+
+export const createInteractiveElement = async (dynamicContentId: any, elementData: any) => {
+  try {
+    const token = getAuthToken();
+    const response = await axios.post(
+      `${apiUrl}/interactive/${dynamicContentId}/elements/`,
+      elementData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    handleApiError(error, 'Failed to create interactive element.');
+  }
+};
+
+export const recordElementInteraction = async (elementId: number) => {
+  try {
+    const token = getAuthToken();
+    await axios.post(
+      `${apiUrl}/interactive/elements/${elementId}/record-interaction/`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+  } catch (error) {
+    handleApiError(error, 'Failed to record interaction for interactive element.');
+  }
+};
+
+export const incrementElementViews = async (elementId: number) => {
+  try {
+    const token = getAuthToken();
+    await axios.patch(
+      `${apiUrl}/interactive/elements/${elementId}/increment-views/`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+  } catch (error) {
+    handleApiError(error, 'Failed to increment views for interactive element.');
+  }
+};  
+
+export const updateInteractiveElement = async (dynamicContentId: any, elementId: number, updatedElementData: any) => {
+  try {
+    const token = getAuthToken();
+    const response = await axios.put(
+      `${apiUrl}/interactive/${dynamicContentId}/elements/${elementId}/`,
+      updatedElementData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    handleApiError(error, 'Failed to update interactive element.');
+  }
+};
+
+export const deleteInteractiveElement = async (dynamicContentId: any, elementId: number) => {
+  try {
+    const token = getAuthToken();
+    await axios.delete(`${apiUrl}/interactive/${dynamicContentId}/elements/${elementId}/`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch (error) {
+    handleApiError(error, 'Failed to delete interactive element.');
+  }
+};
+
+
 
 
