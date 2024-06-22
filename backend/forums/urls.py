@@ -1,16 +1,12 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
+
+from backend.moderation.views import ModerationViewSet, moderation_dashboard, moderate_post, moderate_comment
 from .views import (
     ForumViewSet,
     ThreadViewSet,
     PostViewSet,
     CommentViewSet,  # Ensure this is imported
-    ModerationViewSet,
-    take_action,
-    moderate_post,
-    moderate_comment,  # Ensure this is imported
-    moderation_dashboard,
-    translate,  # If you have a translate view
 )
 from forums import consumers
 

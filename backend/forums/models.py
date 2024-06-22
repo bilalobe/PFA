@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from textblob import TextBlob
 
-from backend.courses.models import Course
+from backend.courses.models import Course, Module
 
 
 class Forum(models.Model):
@@ -15,8 +15,8 @@ class Forum(models.Model):
             models.Index(fields=["description"]),
         ]
 
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="forums")
-    description = models.TextField(blank=True)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="forums", null=True, blank=True)
+    module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name="forums", null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -64,9 +64,11 @@ class Post(models.Model):
 
     def analyze_sentiment(self):
         analysis = TextBlob(self.content)
-        if analysis.sentiment.polarity > 0:
+        sentiment = analysis.sentiment
+        polarity = sentiment.polarity
+        if polarity > 0:
             return "positive"
-        elif analysis.sentiment.polarity < 0:
+        elif polarity < 0:
             return "negative"
         else:
             return "neutral"

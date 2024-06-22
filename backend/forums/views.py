@@ -1,35 +1,48 @@
-from django.db.models import Q
-from django.core.cache import cache
-from django.shortcuts import redirect, render
-from django.contrib.auth.decorators import login_required, permission_required
+# Import necessary modules and classes
 from rest_framework import viewsets, permissions, status, filters
-from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
-from textblob import TextBlob, Word
-from django.core.mail import send_mail
+from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.pagination import PageNumberPagination
+
+from django.contrib.auth import get_user_model
+from backend.users.models import User
+from django.core.cache import cache
+from django.contrib.contenttypes.models import ContentType
+
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
+from textblob import TextBlob
+import nltk
+nltk.download('vader_lexicon')
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+
+from backend.comments.serializers import CommentSerializer
 from backend.moderation.models import Moderation
-from backend.moderation.utils import send_moderation_notification
+
 from .tasks import flag_post_for_moderation
 from .models import Forum, Thread, Post, Comment, UserForumPoints
-from .serializers import (
-    ForumSerializer,
-    ThreadSerializer,
-    PostSerializer,
-    CommentSerializer,
-    UserForumPointsSerializer,
-)
-from .utils import (
-    send_forum_update,
-    send_new_post_notification,
-    send_new_comment_notification,
-)
+from .serializers import ForumSerializer, ThreadSerializer, PostSerializer
 from .permissions import IsInstructorOrReadOnly, IsEnrolledStudentOrReadOnly
-from rest_framework.pagination import PageNumberPagination
 from django_elasticsearch_dsl.search import Search
+
+# Ensure User model is correctly referenced
+User = get_user_model()
+if not hasattr(User, 'profile'):
+    User = get_user_model()
+
+# Channel layer initialization
+channel_layer = get_channel_layer()
+
+# New Mixin for awarding points
+class AwardPointsMixin:
+    def award_points(self, user, points):
+        user_points = UserForumPoints.objects.get_or_create(user=user)[0]
+        user_points.points += points
+        user_points.save()
 
 
 class StandardResultsSetPagination(PageNumberPagination):
@@ -43,13 +56,23 @@ class ForumViewSet(viewsets.ModelViewSet):
     API endpoint for managing forums.
     Allows searching by title and description.
     """
-
     queryset = Forum.objects.all()
     serializer_class = ForumSerializer
-    permission_classes = [permissions.IsAuthenticated, IsInstructorOrReadOnly]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsInstructorOrReadOnly]
     filter_backends = [filters.SearchFilter]
     search_fields = ["title", "description"]
     pagination_class = StandardResultsSetPagination
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        course_id = self.request.GET.get('course_id')
+        module_id = self.request.GET.get('module_id')
+        if course_id:
+            queryset = queryset.filter(course_id=course_id)
+        if module_id:
+            queryset = queryset.filter(module_id=module_id)
+        return queryset
 
     def list(self, request):
         """
@@ -70,12 +93,11 @@ class ForumViewSet(viewsets.ModelViewSet):
         return Response(data)
 
 
-class ThreadViewSet(viewsets.ModelViewSet):
+class ThreadViewSet(AwardPointsMixin, viewsets.ModelViewSet):
     """
     API endpoint for managing threads within a forum.
     Allows searching by title.
     """
-
     queryset = Thread.objects.all()
     serializer_class = ThreadSerializer
     permission_classes = [permissions.IsAuthenticated, IsEnrolledStudentOrReadOnly]
@@ -97,18 +119,10 @@ class ThreadViewSet(viewsets.ModelViewSet):
         """
         Sends a notification through the forum_updates channel group.
         """
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            "forum_updates", {"type": "forum_update", "message": message}
-        )
-
-    def award_points(self, user, points):
-        """
-        Awards forum points to a user.
-        """
-        user_points, created = UserForumPoints.objects.get_or_create(user=user)
-        user_points.points += points
-        user_points.save()
+        if channel_layer:
+            async_to_sync(channel_layer.group_send)(
+                "forum_updates", {"type": "forum_update", "message": message}
+            )
 
 
 class PostViewSet(viewsets.ModelViewSet):
@@ -116,14 +130,13 @@ class PostViewSet(viewsets.ModelViewSet):
     API endpoint for managing posts within a thread.
     Allows searching by content.
     """
-
     queryset = Post.objects.all()
     serializer_class = PostSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated, IsEnrolledStudentOrReadOnly]
     filter_backends = [filters.SearchFilter]
     search_fields = ["content"]
     pagination_class = StandardResultsSetPagination
-    send_new_post_notification(post, self.request)
 
     def perform_create(self, serializer):
         """
@@ -132,50 +145,48 @@ class PostViewSet(viewsets.ModelViewSet):
         awards points to the author, and sends a notification.
         Handles PermissionDenied if the user is banned.
         """
-        if self.request.user.banned_from_forum:
-            raise PermissionDenied("You are banned from posting in the forum.")
+        # Check if the user is authenticated to avoid issues with AnonymousUser
+        # and then check if the user has a profile and is banned from the forum.
+        if self.request.user.is_authenticated:
+            user_profile = getattr(self.request.user, 'profile', None)
+            if user_profile and getattr(user_profile, 'banned_from_forum', False):
+                raise PermissionDenied("You are banned from posting in the forum.")
 
         thread = serializer.validated_data["thread"]
         post = serializer.save(author=self.request.user, thread=thread)
 
         self.analyze_and_flag_post(post)
-        self.award_points(self.request.user, 5)
         self.send_new_post_notification(post)
 
     def send_new_post_notification(self, post):
         """
         Sends a new post notification through the thread group.
         """
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            f"thread_{post.thread.id}",
-            {
-                "type": "send_new_post",
-                "post_data": PostSerializer(
-                    post, context={"request": self.request}
-                ).data,
-            },
-        )
+        if channel_layer:
+            async_to_sync(channel_layer.group_send)(
+                f"thread_{post.thread.id}",
+                {
+                    "type": "send_new_post",
+                    "post_data": PostSerializer(
+                        post, context={"request": self.request}
+                    ).data,
+                },
+            )
 
     def analyze_and_flag_post(self, post):
         """
-        Analyzes the sentiment of a post and flags it for moderation if negative.
+        Analyzes the sentiment of a post using VADER and flags it for moderation if necessary.
         """
         corrected_content = self.correct_spelling(post.content)
-        analysis = TextBlob(corrected_content)
-        post.sentiment = self.get_sentiment_label(analysis.sentiment.polarity)
+        analyzer = SentimentIntensityAnalyzer()
+        sentiment_score = analyzer.polarity_scores(corrected_content)['compound']
+        post.sentiment = self.get_sentiment_label(sentiment_score)
         post.save()
 
-        if post.sentiment == "negative":
-            flag_post_for_moderation.delay(post.id)
-
-    def award_points(self, user, points):
-        """
-        Awards forum points to a user.
-        """
-        user_points, created = UserForumPoints.objects.get_or_create(user=user)
-        user_points.points += points
-        user_points.save()
+        # Flag for moderation if the sentiment score is below -0.5 (indicative of a negative sentiment)
+        if sentiment_score < -0.5:
+            flag_post_for_moderation_instance = flag_post_for_moderation()
+            flag_post_for_moderation_instance.delay(post.id)
 
     @action(detail=True, methods=["get"])
     def translate(self, request, pk=None):
@@ -198,26 +209,28 @@ class PostViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 )
 
-        return Response({"translation": translated_content})
+        return Response({"translation": request.body})
 
     def correct_spelling(self, text):
         """
-        Corrects spelling in the given text.
+        Corrects spelling in the given text using pyspellchecker.
         """
-        corrected_text = ""
-        words = text.split(" ")
-        for word in words:
-            corrected_word = Word(word).spellcheck()[0][0]
-            corrected_text += " " + corrected_word
-        return corrected_text.strip()
+        from spellchecker import SpellChecker  # Ensure SpellChecker is imported
 
-    def get_sentiment_label(self, polarity):
+        spell = SpellChecker()
+        words = text.split()
+        # Ensure all elements in the list are strings to satisfy the type requirement of join.
+        corrected_words = [spell.correction(word) if word else '' for word in words if word is not None and isinstance(word, str)]
+        corrected_text = " ".join(word for word in corrected_words if word is not None)
+        return corrected_text
+
+    def get_sentiment_label(self, score):
         """
-        Returns a sentiment label based on the polarity score.
+        Returns a sentiment label based on the sentiment score.
         """
-        if polarity > 0:
+        if score > 0.05:
             return "positive"
-        elif polarity < 0:
+        elif score < -0.05:
             return "negative"
         else:
             return "neutral"
@@ -242,7 +255,9 @@ class PostViewSet(viewsets.ModelViewSet):
             threads = [
                 hit.to_dict() for hit in results.hits if hit.meta.index == "threads"
             ]
-            posts = [hit.to_dict() for hit in results.hits if hit.meta.index == "posts"]
+            posts = [
+                hit.to_dict() for hit in results.hits if hit.meta.index == "posts"
+            ]
 
             return Response({"forums": forums, "threads": threads, "posts": posts})
         else:
@@ -256,99 +271,50 @@ class CommentViewSet(viewsets.ModelViewSet):
     """
     API endpoint for managing comments.
     """
-
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     pagination_class = StandardResultsSetPagination
-    send_new_comment_notification(comment, self.request)
 
     def perform_create(self, serializer):
         """
         Associates the new comment with the post and author.
         Sends a notification about the new comment.
-        Handles NotFound exception if the post doesn't exist.
+        Handles NotFound exception if the post does not exist.
         """
-        post_id = self.kwargs.get("post_pk")
+        post_id = self.request.POST.get("post")
         try:
-            post = Post.objects.get(pk=post_id)
+            post = Post.objects.get(id=post_id)
+            comment = serializer.save(author=self.request.user, post=post)
+            self.send_new_comment_notification(comment)
         except Post.DoesNotExist:
-            raise NotFound(detail="Post not found.")
+            raise NotFound("Post not found.")
 
-        comment = serializer.save(author=self.request.user, post=post)
-        self.notify_forum_updates(f"New comment created on post: {post.id}")
-
-    def notify_forum_updates(self, message):
+    def send_new_comment_notification(self, comment):
         """
-        Sends a notification through the forum_updates channel group.
+        Sends a new comment notification through the post group.
         """
-        channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            "forum_updates", {"type": "forum_update", "message": message}
+        if channel_layer:
+            async_to_sync(channel_layer.group_send)(
+                f"post_{comment.post.id}",
+                {
+                    "type": "send_new_comment",
+                    "comment_data": CommentSerializer(
+                        comment, context={"request": self.request}
+                    ).data,
+                },
+            )
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        Deletes a comment and triggers a moderation review.
+        """
+        instance = self.get_object()
+        content_type = ContentType.objects.get_for_model(instance)
+        Moderation.objects.create(
+            content_type=content_type,
+            object_id=instance.id,
+            user=request.user,
+            action="delete",
         )
-
-
-@api_view(["POST"])
-@permission_classes([permissions.IsAuthenticated])
-def report_content(request):
-    """
-    Endpoint for reporting content for moderation.
-    """
-    content_type_id = request.data.get("content_type")
-    content_id = request.data.get("content_id")
-    reason = request.data.get("reason")
-
-    if not content_type_id or not content_id or not reason:
-        raise ValidationError("Content type, content ID, and reason are required.")
-
-    content_type = content_type.objects.get_for_id(content_type_id)
-    content_object = content_type.get_object_for_this_type(id=content_id)
-
-    moderation = Moderation.objects.create(
-        content_object=content_object, reported_by=request.user, reason=reason
-    )
-
-    send_moderation_notification(moderation, request)
-    return Response(
-        {"message": "Content reported for moderation."}, status=status.HTTP_201_CREATED
-    )
-
-
-@api_view(["GET"])
-@permission_classes([permissions.IsAuthenticated])
-def leaderboard(request):
-    """
-    Returns a paginated list of users with the most forum points.
-    """
-    top_users = UserForumPoints.objects.all().order_by("-points")
-    paginator = PageNumberPagination()
-    paginated_users = paginator.paginate_queryset(top_users, request)
-    serializer = UserForumPointsSerializer(paginated_users, many=True)
-    return paginator.get_paginated_response(serializer.data)
-
-
-@api_view(["GET"])
-@permission_classes([permissions.IsAuthenticated])
-def search(request):
-    """
-    Searches across forums, threads, and posts using Elasticsearch.
-    Handles empty search queries.
-    """
-    query = request.GET.get("q", "")
-
-    if query:
-        s = Search(index=["forums", "threads", "posts"]).query(
-            "multi_match", query=query, fields=["title", "description", "content"]
-        )
-        results = s.execute()
-
-        forums = [hit.to_dict() for hit in results.hits if hit.meta.index == "forums"]
-        threads = [hit.to_dict() for hit in results.hits if hit.meta.index == "threads"]
-        posts = [hit.to_dict() for hit in results.hits if hit.meta.index == "posts"]
-
-        return Response({"forums": forums, "threads": threads, "posts": posts})
-    else:
-        return Response(
-            {"message": "Please provide a search query."},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
+        return super().destroy(request, *args, **kwargs)

@@ -21,8 +21,6 @@ class ThreadSerializer(serializers.ModelSerializer):
 
 
 class ForumSerializer(serializers.ModelSerializer):
-    threads = ThreadSerializer(many=True, read_only=True)
-
     class Meta:
         model = Forum
-        fields = ("id", "title", "course", "description", "created_at", "threads")
+        fields = ['id', 'title', 'description', 'course', 'module', 'created_at']
