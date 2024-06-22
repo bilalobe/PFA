@@ -1,103 +1,82 @@
 import React, { useState } from 'react';
-import { useFormik, useFormikContext } from 'formik';
 import { useRouter } from 'next/router';
 import { useDispatch } from 'react-redux';
-import { loginUser } from '../features/auth/authSlice';
+import { loginUser } from '@/types/features/authentification/authSlice';
+import { useForm, Controller } from 'react-hook-form';
 import { Box, TextField, Button, Typography, Alert } from '@mui/material';
 import * as Yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { AppDispatch } from '@/types/store';
 
-interface FormikTextFieldProps {
-  name: string;
-  label: string;
-  type?: string;
-  autoComplete: string;
-}
-
-const FormikTextField = ({ name, label, type = "text", autoComplete }: FormikTextFieldProps) => {
-  const formik = useFormikContext<{ [key: string]: string }>(); // Explicitly define the type of formik
-
-  return (
-    <TextField
-      variant="outlined"
-      margin="normal"
-      required
-      fullWidth
-      id={name}
-      label={label}
-      name={name}
-      type={type}
-      autoComplete={autoComplete}
-      value={formik.values[name]}
-      onChange={formik.handleChange}
-      error={formik.touched[name] && Boolean(formik.errors[name])}
-      helperText={formik.touched[name] && formik.errors[name]}
-    />
-  );
-};
-
-const validationSchema = Yup.object().shape({
+const schema = Yup.object().shape({
   username: Yup.string().required('Username is required'),
   password: Yup.string().required('Password is required'),
 });
 
-const Login: React.FC = () => {
-  const dispatch = useDispatch();
+export default function Login() {
+  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-
-  const formik = useFormik({
-    initialValues: {
-      username: '',
-      password: '',
-    },
-    validationSchema,
-    onSubmit: async (values, { setSubmitting }) => {
-      try {
-        await dispatch(loginUser(values));
-        setSuccess(true);
-        setError(null);
-        router.push('/dashboard'); // Redirect to dashboard after login
-      } catch (error: any) {
-        setSubmitting(false);
-        setSuccess(false);
-        setError(error.message);
-      } finally {
-        setSubmitting(false);
-      }
-    },
+  const { control, handleSubmit, formState: { errors } } = useForm({
+    resolver: yupResolver(schema),
   });
 
+  const onSubmit = async (data: { username: string; password: string }) => {
+    try {
+      await dispatch(loginUser(data));
+      setSuccess(true);
+      setError(null);
+      router.push('/dashboard');
+    } catch (error: any) {
+      setSuccess(false);
+      setError(error.message);
+    }
+  };
+
   return (
-    <Box component="form" onSubmit={formik.handleSubmit} noValidate>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Login
-      </Typography>
+    <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
+      <Typography variant="h4" component="h1" gutterBottom>Login</Typography>
       {error && <Alert severity="error">{error}</Alert>}
       {success && <Alert severity="success">Login successful!</Alert>}
-      <FormikTextField
+      <Controller
         name="username"
-        label="Username"
-        type="text"
-        autoComplete="username"
+        control={control}
+        defaultValue=""
+        render={({ field }) => (
+          <TextField
+            {...field}
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            label="Username"
+            autoComplete="username"
+            error={!!errors.username}
+            helperText={errors.username ? errors.username.message : ''}
+          />
+        )}
       />
-      <FormikTextField
+      <Controller
         name="password"
-        label="Password"
-        type="password"
-        autoComplete="current-password"
+        control={control}
+        defaultValue=""
+        render={({ field }) => (
+          <TextField
+            {...field}
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            label="Password"
+            type="password"
+            autoComplete="current-password"
+            error={!!errors.password}
+            helperText={errors.password ? errors.password.message : ''}
+          />
+        )}
       />
-      <Button
-        type="submit"
-        fullWidth
-        variant="contained"
-        sx={{ mt: 3, mb: 2 }}
-        disabled={formik.isSubmitting}
-      >
-        Login
-      </Button>
+      <Button type="submit" fullWidth variant="contained" color="primary">Login</Button>
     </Box>
   );
-};
-
-export default Login;
+}

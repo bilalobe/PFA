@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { useFormik } from 'formik';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
 import { TextField, Button, Box, MenuItem, Typography, Alert } from '@mui/material';
 import { useRouter } from 'next/router';
 import { useDispatch } from 'react-redux';
-import { registerUser } from '../features/auth/authSlice';
+import { AppDispatch } from '@/types/store';
+import { registerUser } from '@/types/features/authentification/authSlice';
 
 const validationSchema = Yup.object().shape({
   username: Yup.string().required('Username is required'),
@@ -15,38 +17,41 @@ const validationSchema = Yup.object().shape({
     .required('User type is required'),
 });
 
-function Register() {
-  const dispatch = useDispatch();
+interface RegisterFormValues {
+  username: string;
+  email: string;
+  password: string;
+  userType: 'student' | 'teacher' | 'supervisor';
+}
+
+const Register = () => {
+  const dispatch = useDispatch<AppDispatch>(); // Use AppDispatch type for correct typing
   const router = useRouter();
-  const [error, setError] = useState<string | null>('');
+  const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  const formik = useFormik({
-    initialValues: {
-      username: '',
-      email: '',
-      password: '',
-      userType: 'student', // Default user type
-    },
-    validationSchema,
-    onSubmit: async (values, { setSubmitting }) => {
-      try {
-        await dispatch(registerUser(values));
-        setSuccess(true);
-        setError(null);
-        router.push('/login'); // Redirect to login after registration
-      } catch (error) {
-        setSubmitting(false);
-        setSuccess(false);
-        setError(error.message);
-      } finally {
-        setSubmitting(false);
-      }
-    },
+  const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormValues>({
+    resolver: yupResolver(validationSchema)
   });
 
+  const onSubmit = async (values: RegisterFormValues) => {
+    try {
+      await dispatch(registerUser(values)).unwrap(); // Use unwrap to handle the promise
+      setSuccess(true);
+      setError(null);
+      router.push('/login'); // Redirect to login after registration
+    } catch (error) {
+      if (error instanceof Error) { // Type guard for error
+        setError(error.message);
+      } else {
+        setError('An unexpected error occurred');
+      }
+      setSuccess(false);
+    }
+  };
+
   return (
-    <Box component="form" onSubmit={formik.handleSubmit} noValidate sx={{ mt: 1 }}>
+    <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 1 }}>
       <Typography variant="h4" component="h1" gutterBottom>
         Register
       </Typography>
@@ -59,13 +64,11 @@ function Register() {
         fullWidth
         id="username"
         label="Username"
-        name="username"
         autoComplete="username"
         autoFocus
-        value={formik.values.username}
-        onChange={formik.handleChange}
-        error={formik.touched.username && Boolean(formik.errors.username)}
-        helperText={formik.touched.username && formik.errors.username}
+        {...register('username')}
+        error={Boolean(errors.username)}
+        helperText={errors.username?.message}
       />
       <TextField
         variant="outlined"
@@ -74,12 +77,10 @@ function Register() {
         fullWidth
         id="email"
         label="Email"
-        name="email"
         autoComplete="email"
-        value={formik.values.email}
-        onChange={formik.handleChange}
-        error={formik.touched.email && Boolean(formik.errors.email)}
-        helperText={formik.touched.email && formik.errors.email}
+        {...register('email')}
+        error={Boolean(errors.email)}
+        helperText={errors.email?.message}
       />
       <TextField
         variant="outlined"
@@ -88,13 +89,11 @@ function Register() {
         fullWidth
         id="password"
         label="Password"
-        name="password"
         type="password"
         autoComplete="current-password"
-        value={formik.values.password}
-        onChange={formik.handleChange}
-        error={formik.touched.password && Boolean(formik.errors.password)}
-        helperText={formik.touched.password && formik.errors.password}
+        {...register('password')}
+        error={Boolean(errors.password)}
+        helperText={errors.password?.message}
       />
       <TextField
         variant="outlined"
@@ -103,12 +102,10 @@ function Register() {
         fullWidth
         id="userType"
         label="User Type"
-        name="userType"
         select
-        value={formik.values.userType}
-        onChange={formik.handleChange}
-        error={formik.touched.userType && Boolean(formik.errors.userType)}
-        helperText={formik.touched.userType && formik.errors.userType}
+        {...register('userType')}
+        error={Boolean(errors.userType)}
+        helperText={errors.userType?.message}
       >
         <MenuItem value="student">Student</MenuItem>
         <MenuItem value="teacher">Teacher</MenuItem>
@@ -119,7 +116,6 @@ function Register() {
         fullWidth
         variant="contained"
         sx={{ mt: 3, mb: 2 }}
-        disabled={formik.isSubmitting}
       >
         Register
       </Button>

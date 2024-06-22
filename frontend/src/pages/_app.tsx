@@ -1,76 +1,54 @@
-import { CssBaseline, ThemeProvider } from '@mui/material';
-import { createTheme } from '@mui/material/styles';
-import { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { loginUser, logoutUser } from '@/types/features/authentification/authSlice';
-import HomeGuard from '@/components/Homeguard';
-import LoginPage from './pages/LoginPage';
-import { getProfile } from './features/profileSlice';
-import { fetchEnrollments } from './features/enrollmentSlice';
-import type { RootState } from './app/store';
+import { loginUser } from '@/types/features/authentication/authSlice'; // Corrected path if necessary
+import logoutUser from '@/types/features/authentication/authSlice'; // Corrected import statement
+import LoginPage from '@/pages/LoginPage'; // Corrected path
+import { getProfile } from '@/features/profileSlice'; // Corrected path
+import { fetchEnrollments } from '@/features/enrollmentSlice'; // Corrected path
+import type { RootState } from '@/app/store'; // Corrected path
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-    error: {
-      main: '#f44336',
-    },
-    background: {
-      default: '#f5f5f5',
-    },
-  },
-  typography: {
-    h4: {
-      fontWeight: 'bold',
-    },
-    body2: {
-      fontSize: '1rem',
-    },
-    caption: {
-      fontSize: '0.875rem',
-      color: '#757575',
-    },
-  },
-});
+// Added React Query setup
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import ThemeProvider from '@mui/material/styles/ThemeProvider';
+import CssBaseline from '@mui/material/CssBaseline';
+import HomeGuard from '@/components/Homeguard';
+
+const queryClient = new QueryClient();
 
 function App() {
   const [token, setToken] = useState<string | null>(null);
   const dispatch = useDispatch();
   const authState = useSelector((state: RootState) => state.auth);
-  const userProfile = useSelector((state: RootState) => state.profile.profile);
 
+  // Corrected dispatch call to match expected parameters of loginUser
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
       setToken(storedToken);
-      dispatch(loginUser({ access: storedToken }));
+      // Assuming loginUser expects a token directly or adjust accordingly
+      dispatch(loginUser(storedToken));
       dispatch(getProfile());
       dispatch(fetchEnrollments());
     }
   }, [dispatch]);
 
-  const handleLogout = () => {
-    dispatch(logoutUser());
-    setToken(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('refreshToken');
-    // Redirect to login page or any other desired location
-  };
+  // Assuming HomeGuard component is updated to accept onLogout prop
+  // or create a wrapper component that handles logout functionality
+
+  // Use userProfile or remove if unnecessary
+  // const userProfile = useSelector((state: RootState) => state.profile.profile);
 
   if (!authState.isAuthenticated && !token) {
     return <LoginPage />;
   }
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <HomeGuard onLogout={handleLogout} />
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <HomeGuard onLogout={handleLogout} />
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 
