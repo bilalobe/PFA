@@ -1,6 +1,7 @@
 from django.db import models
 from backend.users.models import User
 from courses.models import Course
+from backend.quizzes.utils import auto_grade_quiz_attempt
 
 
 class Quiz(models.Model):
@@ -19,6 +20,7 @@ class Quiz(models.Model):
 class QuizQuestion(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="questions")
     text = models.TextField()
+    short_answer = models.CharField(max_length=255, blank=True, null=True)
     question_type = models.CharField(
         max_length=20,
         choices=(
@@ -56,7 +58,12 @@ class UserQuizAttempt(models.Model):
         User, on_delete=models.CASCADE, related_name="quiz_attempts"
     )
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="attempts")
+    answered_questions = models.PositiveIntegerField(default=0)
+    correct_answers = models.PositiveIntegerField(default=0)
     score = models.PositiveIntegerField(default=0)
+    answers = models.ManyToManyField(
+        QuizQuestion, through="UserQuizAnswer", related_name="user_attempts"
+    )
     start_time = models.DateTimeField(auto_now_add=True)
     end_time = models.DateTimeField(null=True, blank=True)
     progress = models.PositiveIntegerField(default=0)
