@@ -1,58 +1,106 @@
-import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { fetchUserProfile } from '../features/userSlice';
-import { Box, Container, CircularProgress, Typography, Drawer, List, ListItem, ListItemText, ListItemIcon, IconButton, Toolbar, AppBar, Alert, Divider } from '@mui/material';
-import { Menu as MenuIcon, Home as HomeIcon, School as SchoolIcon, Forum as ForumIcon, AccountCircle as AccountCircleIcon, Logout as LogoutIcon, Chat as ChatIcon } from '@mui/icons-material';
+import React, { useEffect, useState, useCallback, Dispatch } from 'react';
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { logoutUser } from '../features/authSlice';
-import { useAuth } from '../hooks/useAuth';
-import Chatbot from 'react-chatbot-kit';
-import 'react-chatbot-kit/build/main.css';
-import config from '../chatbot/config';
-import MessageParser from '../chatbot/MessageParser';
-import ActionProvider from '../chatbot/ActionProvider';
+import { AppBar, Box, CircularProgress, Container, Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, Alert, Divider } from '@mui/material';
+import { AccountCircle as AccountCircleIcon, Chat as ChatIcon, Forum as ForumIcon, Home as HomeIcon, Logout as LogoutIcon, Menu as MenuIcon, School as SchoolIcon } from '@mui/icons-material';
+import { signOut, onAuthStateChanged, User } from 'firebase/auth';
+import { auth } from '../../firebaseConfig';
+import { fetchUserProfile } from '@/types/features/user/userSlice';
+import Chatbot from '@/components/AI/Chatbot';
 import AutoCorrect from '../components/AI/AutoCorrect';
-import TextSummarization from '../components/AI/TextSummarization';
-import QuestionGeneration from '../components/AI/QuestionGeneration';
+import QuestionGeneration from '@/components/AI/QuestionGeneration';
+import TextSummarization from '@/components/AI/TextSummarization';
+import ActionProvider from '@/components/AI/ActionProvider';
+import MessageParser from '@/components/AI/MessageParser';
+import config from '@/components/AI/chatbotConfig';
 
 const drawerWidth = 240;
 
-function Dashboard() {
-  const { user, isAuthenticated, loading } = useAuth();
+const DrawerContent = ({ navigate, toggleChatbot }) => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
-  const profile = useSelector((state) => state.user.profile);
 
+  const handleLogout = useCallback(() => {
+    signOut(auth).then(() => {
+      navigate('/');
+    }).catch((error) => {
+      console.error("Error signing out: ", error);
+    });
+  }, [navigate]);
+
+  return (
+    <List>
+      {[
+        { text: 'Home', icon: <HomeIcon />, action: () => navigate('/') },
+        { text: 'Courses', icon: <SchoolIcon />, action: () => navigate('/courses') },
+        { text: 'Forum', icon: <ForumIcon />, action: () => navigate('/forum') },
+        { text: 'Profile', icon: <AccountCircleIcon />, action: () => navigate('/profile') },
+        { text: 'Logout', icon: <LogoutIcon />, action: handleLogout },
+        { text: 'Chatbot', icon: <ChatIcon />, action: toggleChatbot }
+      ].map((item, index) => (
+        <ListItemButton key={index} onClick={item.action}>
+          <ListItemIcon>{item.icon}</ListItemIcon>
+          <ListItemText primary={item.text} />
+        </ListItemButton>
+      ))}
+      <Divider />
+    </List>
+  );
+};
+
+interface DashboardProps {
+  messageParser: ({ chatId }: { chatId: any; }) => Element;
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ messageParser }) => {
+  interface CustomUser extends User {
+    role: string;
+  }
+  
+  const [user, setUser] = useState<null | undefined | CustomUser>(null);
+  const [loading, setLoading] = useState(true);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [chatbotVisible, setChatbotVisible] = useState(false);
-  const [openAlert, setOpenAlert] = useState(false);
-  const [alertMessage, setAlertMessage] = useState('');
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      dispatch(fetchUserProfile());
+useEffect(() => {
+  const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    if (firebaseUser) {
+      const fetchAndSetUserProfile = async () => {
+        try {
+          const userProfile = await (dispatch as Dispatch)(fetchUserProfile()).unwrap();
+          const customUser: CustomUser = {
+            ...firebaseUser,
+            role: userProfile.role, // Ensure 'role' is obtained from the userProfile
+          };
+          setUser(customUser);
+        } catch (error) {
+          console.error("Failed to fetch user profile", error);
+          setUser(null);
+        }
+      };
+
+      fetchAndSetUserProfile();
+    } else {
+      setUser(null);
+      navigate('/login');
     }
-  }, [isAuthenticated, dispatch]);
+    setLoading(false);
+  });
 
-  const toggleDrawer = (open) => (event) => {
-    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+  return () => unsubscribe();
+}, [dispatch, navigate]);
+
+  const toggleDrawer = useCallback((open) => (event) => {
+    if (event.type === 'keydown' && ((event).key === 'Tab' || (event).key === 'Shift')) {
       return;
     }
     setDrawerOpen(open);
-  };
+  }, []);
 
-  if (loading) {
-    return (
-      <Container>
-        <CircularProgress />
-      </Container>
-    );
-  }
+  const toggleChatbot = useCallback(() => setChatbotVisible((v) => !v), []);
 
-  if (!isAuthenticated) {
-    navigate('/login');
-    return null;
-  }
+  if (loading) return <Container><CircularProgress /></Container>;
 
   const authorizedRoles = ['admin', 'teacher'];
   if (!user || !authorizedRoles.includes(user.role)) {
@@ -60,111 +108,31 @@ function Dashboard() {
     return null;
   }
 
-  const handleLogout = () => {
-    dispatch(logoutUser()).then(() => {
-      navigate('/');
-    });
-  };
-
-  const drawerContent = (
-    <List>
-      <ListItem button onClick={() => navigate('/')}>
-        <ListItemIcon>
-          <HomeIcon />
-        </ListItemIcon>
-        <ListItemText primary="Home" />
-      </ListItem>
-      <ListItem button onClick={() => navigate('/courses')}>
-        <ListItemIcon>
-          <SchoolIcon />
-        </ListItemIcon>
-        <ListItemText primary="Courses" />
-      </ListItem>
-      <ListItem button onClick={() => navigate('/forum')}>
-        <ListItemIcon>
-          <ForumIcon />
-        </ListItemIcon>
-        <ListItemText primary="Forum" />
-      </ListItem>
-      <ListItem button onClick={() => navigate('/profile')}>
-        <ListItemIcon>
-          <AccountCircleIcon />
-        </ListItemIcon>
-        <ListItemText primary="Profile" />
-      </ListItem>
-      <ListItem button onClick={handleLogout}>
-        <ListItemIcon>
-          <LogoutIcon />
-        </ListItemIcon>
-        <ListItemText primary="Logout" />
-      </ListItem>
-      <Divider />
-      <ListItem button onClick={() => setChatbotVisible(!chatbotVisible)}>
-        <ListItemIcon>
-          <ChatIcon />
-        </ListItemIcon>
-        <ListItemText primary="Chatbot" />
-      </ListItem>
-    </List>
-  );
-
-  const handleAlertClose = () => {
-    setOpenAlert(false);
-  };
-
   return (
     <Box sx={{ display: 'flex' }}>
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            onClick={toggleDrawer(true)}
-            edge="start"
-          >
+          <IconButton color="inherit" aria-label="open drawer" onClick={toggleDrawer(true)} edge="start">
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Dashboard
-          </Typography>
+          <Typography variant="h6" noWrap component="div">Dashboard</Typography>
         </Toolbar>
       </AppBar>
-      <Drawer
-        variant="permanent"
-        open={drawerOpen}
-        sx={{
-          '& .MuiDrawer-paper': {
-            width: drawerWidth,
-            boxSizing: 'border-box',
-          },
-        }}
-      >
+      <Drawer variant="temporary" open={drawerOpen} onClose={toggleDrawer(false)} sx={{ '& .MuiDrawer-paper': { width: drawerWidth, boxSizing: 'border-box' } }}>
         <Toolbar />
         <Box sx={{ overflow: 'auto' }}>
-          {drawerContent}
+          <DrawerContent navigate={navigate} toggleChatbot={toggleChatbot} />
         </Box>
       </Drawer>
       <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
         <Toolbar />
-        {/* Add your AI components here */}
         <AutoCorrect />
         <TextSummarization />
         <QuestionGeneration />
-        {chatbotVisible && (
-          <Chatbot
-            config={config}
-            messageParser={MessageParser}
-            actionProvider={ActionProvider}
-          />
-        )}
+        {chatbotVisible && <Chatbot messageParser={MessageParser} actionProvider={ActionProvider} {...config} />}
       </Box>
-      {openAlert && (
-        <Alert severity="error" onClose={handleAlertClose}>
-          {alertMessage}
-        </Alert>
-      )}
     </Box>
   );
-}
+};
 
 export default Dashboard;
