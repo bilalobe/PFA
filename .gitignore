@@ -29,3 +29,4 @@ frontend/PFA.code-workspace
 *.env
 keys.env
 /.report
+frontend/firebaseConfig.js
