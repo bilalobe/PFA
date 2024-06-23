@@ -11,7 +11,7 @@ For more information on the E-Learning Platform, visit:
 https://example.com/e-learning-platform
 
 Author: bebo
-Date: YYYY-MM-DD
+Date: 202x-xx-xx
 """
 
 import os
