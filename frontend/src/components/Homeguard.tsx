@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, Suspense } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchUserProfile, logoutUser } from '../features/userSlice';
+import { fetchUserProfile, logoutUser } from '@/types/features/user/userSlice';
 import {
   Box, CircularProgress, Drawer, List, ListItemText, ListItemIcon, IconButton,
   Toolbar, AppBar, Typography, CssBaseline, Alert, ListItemButton, Link, Divider, styled
@@ -19,12 +19,17 @@ import AdminIcon from '@mui/icons-material/Security';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ChatIcon from '@mui/icons-material/Chat';
 import dynamic from 'next/dynamic';
-import { RootState } from '../store';
-import Chatbot from 'react-chatbot-kit';
+import { RootState } from '@/types/store';
+import { ChatbotProvider, useChatbotContext } from '@/contexts/ChatbotContext'; // Custom Context API for Chatbot state
+import { NotificationsProvider, useNotifications } from '@/contexts/NotificationsContext'; // Custom Context API for Notifications
 import 'react-chatbot-kit/build/main.css';
-import config from '../chatbot/config';
-import MessageParser from '../chatbot/MessageParser';
-import ActionProvider from '../chatbot/ActionProvider';
+import MessageParser from '@/components/AI/MessageParser';
+import ActionProvider from '@/components/AI/ActionProvider';
+import error from 'next/error';
+
+// Lazy load Dashboard
+const Dashboard = React.lazy(() => import('../pages/dashboard'));
+const Chatbot = dynamic(() => import('@/components/AI/Chatbot'), { ssr: false });
 
 const drawerWidth = 240;
 
@@ -32,7 +37,6 @@ const selectUserAndAuthState = createSelector(
   (state: RootState) => ({
     profile: state.user.profile,
     loading: state.user.loading,
-    error: state.user.error,
     isAuthenticated: state.auth.isAuthenticated,
   }),
   (userAndAuth) => userAndAuth
@@ -40,55 +44,59 @@ const selectUserAndAuthState = createSelector(
 
 const DrawerContent: React.FC<{ handleDrawerClose: () => void; handleLogout: () => void }> = ({
   handleDrawerClose, handleLogout
-}) => (
-  <div>
-    <Toolbar>
-      <IconButton onClick={handleDrawerClose}>
-        <ChevronLeftIcon />
-      </IconButton>
-    </Toolbar>
-    <Divider />
-    <List>
-      <ListItemButton component={Link} href="/">
-        <ListItemIcon>
-          <HomeIcon />
-        </ListItemIcon>
-        <ListItemText primary="Home" />
-      </ListItemButton>
-      <ListItemButton component={Link} href="/courses">
-        <ListItemIcon>
-          <SchoolIcon />
-        </ListItemIcon>
-        <ListItemText primary="Courses" />
-      </ListItemButton>
-      <ListItemButton component={Link} href="/forum">
-        <ListItemIcon>
-          <ForumIcon />
-        </ListItemIcon>
-        <ListItemText primary="Forum" />
-      </ListItemButton>
-      <ListItemButton component={Link} href="/profile">
-        <ListItemIcon>
-          <AccountCircleIcon />
-        </ListItemIcon>
-        <ListItemText primary="Profile" />
-      </ListItemButton>
-      <ListItemButton onClick={handleLogout}>
-        <ListItemIcon>
-          <LogoutIcon />
-        </ListItemIcon>
-        <ListItemText primary="Logout" />
-      </ListItemButton>
+}) => {
+  const { toggleChatbotVisibility } = useChatbotContext();
+
+  return (
+    <div>
+      <Toolbar>
+        <IconButton onClick={handleDrawerClose}>
+          <ChevronLeftIcon />
+        </IconButton>
+      </Toolbar>
       <Divider />
-      <ListItemButton component={Link} href="#" onClick={() => setChatbotVisible(prev => !prev)}>
-        <ListItemIcon>
-          <ChatIcon />
-        </ListItemIcon>
-        <ListItemText primary="Chatbot" />
-      </ListItemButton>
-    </List>
-  </div>
-);
+      <List>
+        <ListItemButton component={Link} href="/">
+          <ListItemIcon>
+            <HomeIcon />
+          </ListItemIcon>
+          <ListItemText primary="Home" />
+        </ListItemButton>
+        <ListItemButton component={Link} href="/courses">
+          <ListItemIcon>
+            <SchoolIcon />
+          </ListItemIcon>
+          <ListItemText primary="Courses" />
+        </ListItemButton>
+        <ListItemButton component={Link} href="/forum">
+          <ListItemIcon>
+            <ForumIcon />
+          </ListItemIcon>
+          <ListItemText primary="Forum" />
+        </ListItemButton>
+        <ListItemButton component={Link} href="/profile">
+          <ListItemIcon>
+            <AccountCircleIcon />
+          </ListItemIcon>
+          <ListItemText primary="Profile" />
+        </ListItemButton>
+        <ListItemButton onClick={handleLogout}>
+          <ListItemIcon>
+            <LogoutIcon />
+          </ListItemIcon>
+          <ListItemText primary="Logout" />
+        </ListItemButton>
+        <Divider />
+        <ListItemButton onClick={toggleChatbotVisibility}>
+          <ListItemIcon>
+            <ChatIcon />
+          </ListItemIcon>
+          <ListItemText primary="Chatbot" />
+        </ListItemButton>
+      </List>
+    </div>
+  );
+};
 
 const StyledDrawer = styled(Drawer)`
   .MuiDrawer-paper {
@@ -97,16 +105,17 @@ const StyledDrawer = styled(Drawer)`
   }
 `;
 
-const Dashboard = dynamic(() => import('../pages/dashboard'));
+type HomeGuardProps = {
+  isAuthenticated: boolean;
+};
 
-const HomeGuard: React.FC = () => {
+const HomeGuard: React.FC<HomeGuardProps> = ({ isAuthenticated }) => {
   const dispatch = useDispatch();
   const router = useRouter();
   const location = useLocation();
-
-  const { profile, loading, error, isAuthenticated } = useSelector(selectUserAndAuthState);
+  const { addNotification } = useNotifications();
+  const { profile, loading, isAuthenticated: authIsAuthenticated } = useSelector(selectUserAndAuthState);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [chatbotVisible, setChatbotVisible] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -117,8 +126,10 @@ const HomeGuard: React.FC = () => {
   const handleLogout = useCallback(() => {
     dispatch(logoutUser()).then(() => {
       router.push('/login');
+    }).catch((err: Error) => {
+      addNotification({ type: 'error', message: err.message });
     });
-  }, [dispatch, router]);
+  }, [dispatch, router, addNotification]);
 
   const handleDrawerOpen = useCallback(() => {
     setDrawerOpen(true);
@@ -136,53 +147,51 @@ const HomeGuard: React.FC = () => {
     profile?.role === 'admin' && { href: '/admin', text: 'Admin Tools', Icon: AdminIcon },
   ].filter(Boolean), [profile]);
 
+  if (loading) return <CircularProgress />;
+  if (error) {
+    const errorMessage = error.toString();
+    return <Alert severity="error">{errorMessage}</Alert>;
+  }
+
   return (
-    <Box sx={{ display: 'flex' }}>
-      <CssBaseline />
-      <AppBar position="fixed">
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerOpen}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            HomeGuard
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <StyledDrawer
-        variant="permanent"
-        open={drawerOpen}
-        sx={{
-          width: drawerWidth,
-          flexShrink: 0,
-          [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
-        }}
-      >
-        <Toolbar />
-        <Divider />
-        <DrawerContent handleDrawerClose={handleDrawerClose} handleLogout={handleLogout} />
-      </StyledDrawer>
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-        <Toolbar />
-        {loading && <CircularProgress />}
-        {error && <Alert severity="error">{error}</Alert>}
-        <PrivateRoute isAuthenticated={isAuthenticated}>
-          <Dashboard />
-          {chatbotVisible && (
-            <Chatbot
-              config={config}
-              messageParser={MessageParser}
-              actionProvider={ActionProvider}
-            />
-          )}
-        </PrivateRoute>
+    <ChatbotProvider>
+      <Box sx={{ display: 'flex' }}>
+        <CssBaseline />
+        <AppBar position="fixed">
+          <Toolbar>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={handleDrawerOpen}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography variant="h6" noWrap component="div">
+              HomeGuard
+            </Typography>
+          </Toolbar>
+        </AppBar>
+        
+        <StyledDrawer
+          variant="temporary"
+          open={drawerOpen}
+          onClose={handleDrawerClose}
+          sx={{ '& .MuiDrawer-paper': { width: drawerWidth, boxSizing: 'border-box' } }}
+        >
+          <DrawerContent handleDrawerClose={handleDrawerClose} handleLogout={handleLogout} />
+        </StyledDrawer>
+
+        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+          <Toolbar />
+          <PrivateRoute isAuthenticated={authIsAuthenticated}>
+            <Suspense fallback={<CircularProgress />}>
+              <Dashboard messageParser={() => { throw new Error('Function not implemented.'); }} />
+            </Suspense>
+          </PrivateRoute>
+        </Box>
       </Box>
-    </Box>
+    </ChatbotProvider>
   );
 };
 
