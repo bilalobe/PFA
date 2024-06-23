@@ -5,6 +5,7 @@ import { joinChatRoom, leaveChatRoom, sendChatMessage } from '@/types/features/c
 import { Typography, TextField, Button, List, ListItem, ListItemText, Box } from '@mui/material';
 import io from 'socket.io-client';
 import { RootState } from '@/types/store';
+import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
 const socket = io('http://localhost:8000');
 
@@ -21,18 +22,32 @@ function CourseChat() {
     if (courseId && user) {
       dispatch(joinChatRoom({
         roomId: `course_${courseId}`,
-        username: ''
+        username: user.username
       }));
 
       socket.on('chat_message', (message) => {
-        // Assuming there's a function to handle receiving a chat message that's not part of the redux slice
-        // For example, updating the local state or another method to handle the incoming message
+        dispatch(sendChatMessage(message));
       });
 
-      // Scroll to the bottom when a new message is received
-      if (chatContainerRef.current) {
-        chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-      }
+      // Request permission and get token for notifications
+      const messaging = getMessaging();
+      Notification.requestPermission().then((permission) => {
+        if (permission === 'granted') {
+          console.log('Notification permission granted.');
+          getToken(messaging, { vapidKey: 'YOUR_VAPID_KEY' }).then((currentToken) => {
+            if (currentToken) {
+              console.log(currentToken);
+            } else {
+              console.log('No registration token available. Request permission to generate one.');
+            }
+          });
+        }
+      });
+
+      onMessage(messaging, (payload) => {
+        console.log('Message received. ', payload);
+        // Handle foreground messages
+      });
 
       return () => {
         dispatch(leaveChatRoom());
@@ -50,14 +65,38 @@ function CourseChat() {
       };
       socket.emit('chat_message', message);
       dispatch(sendChatMessage(message));
+      sendNotification(message);
       setNewMessage('');
     }
   };
 
+ const sendNotification = async (message) => {
+  try {
+    const response = await fetch('https://your-backend.com/api/notifications/send', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: message.message,
+        sender: message.sender,
+        roomId: message.roomId,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    const data = await response.json();
+    console.log('Notification sent successfully:', data);
+  } catch (error) {
+    console.error('Error sending notification:', error);
+  }
+};
+
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(event.target.value);
-    // Assuming there's a method to handle typing indicator that's not part of the redux slice
-    // For example, emitting a socket event for typing indication
   };
 
   return (
