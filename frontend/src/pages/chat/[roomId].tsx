@@ -1,43 +1,47 @@
-import { useEffect, useState } from 'react';
-import { getDatabase, ref, push, onValue, off } from 'firebase/database';
+import React, { ReactNode, useEffect, useState } from 'react';
+import { db } from '../../../firebaseConfig';
+import { collection, query, onSnapshot, addDoc, orderBy } from 'firebase/firestore';
 
-function ChatRoom({ roomId }) {
-  const [messages, setMessages] = useState([]);
+const ChatRoom = () => {
+  const [messages, setMessages] = useState<{
+    text: ReactNode; id: string; 
+}[]>([]);
   const [newMessage, setNewMessage] = useState('');
 
   useEffect(() => {
-    const db = getDatabase();
-    const messagesRef = ref(db, `chatRooms/${roomId}/messages`);
-    const unsubscribe = onValue(messagesRef, (snapshot) => {
-      const messagesData = snapshot.val() || [];
-      setMessages(Object.values(messagesData));
+    const q = query(collection(db, "chats"), orderBy("createdAt"));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const messages = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        text: doc.data().text,
+        ...doc.data()
+      }));
+      setMessages(messages);
     });
 
-    return () => off(messagesRef, 'value', unsubscribe);
-  }, [roomId]);
+    return () => unsubscribe();
+  }, []);
 
-  const sendMessage = () => {
-    const db = getDatabase();
-    const messagesRef = ref(db, `chatRooms/${roomId}/messages`);
-    push(messagesRef, newMessage);
+  const sendMessage = async () => {
+    if (newMessage.trim() === '') return;
+    await addDoc(collection(db, "chats"), {
+      text: newMessage,
+      createdAt: new Date()
+    });
     setNewMessage('');
   };
 
   return (
     <div>
-      <ul>
-        {messages.map((message, index) => (
-          <li key={index}>{message}</li>
+      <div>
+        {messages.map(message => (
+          <p key={message.id}>{message.text}</p>
         ))}
-      </ul>
-      <input
-        type="text"
-        value={newMessage}
-        onChange={(e) => setNewMessage(e.target.value)}
-      />
+      </div>
+      <input value={newMessage} onChange={(e) => setNewMessage(e.target.value)} />
       <button onClick={sendMessage}>Send</button>
     </div>
   );
-}
+};
 
 export default ChatRoom;
