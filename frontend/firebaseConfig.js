@@ -3,6 +3,10 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
 import { getDatabase } from "firebase/database";
+import { getAnalytics } from "firebase/analytics";
+import { getFunctions } from "firebase/functions";
+import { getMessaging } from "firebase/messaging";
+import { getPerformance } from "firebase/performance";
 
 
 
@@ -23,4 +27,4 @@ const performance = getPerformance(app);
 
 
 // Export the services for use in other files
-export { auth, db, storage, database };
+export { auth, db, storage, database, analytics, functions, messaging, performance, app};
