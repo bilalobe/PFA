@@ -19,6 +19,7 @@
 \usepackage{enumitem} % For itemize customization
 \usepackage{soul}
 \usepackage{mathenv}
+\usepackage{pgfgantt}
 \usepackage{fancyhdr} % For headers and footers
 \usepackage{lipsum} % For dummy text
 \usepackage{tikz} % For diagrams
@@ -28,12 +29,16 @@
 \usepackage{microtype} % Improves spacing
 \usepackage{lmodern} % Latin Modern font
 \usepackage{titlesec} % For customizing section titles
-\usetikzlibrary{positioning, arrows.meta, calc}
+\usepackage{fontspec} % For customizing fonts
+\usepackage{color} % For custom colors
+\usepackage{listings} % For code listings
+\usepackage{placeins} % For \FloatBarrier
+\usetikzlibrary{positioning, arrows.meta, calc, shadows}
 \setlength{\headheight}{14.5pt}
 % Set up the fonts
 
-%\setmainfont{Times New Roman} % Set the main font for the document
-%\renewcommand{\familydefault}{\sfdefault}
+\setmainfont{Times New Roman} % Set the main font for the document
+\renewcommand{\familydefault}{\sfdefault}
 \renewcommand{\baselinestretch}{1.5} % Set line spacing
 \renewcommand{\contentsname}{Table des Matières} % Change the name of the TOC
 
@@ -51,11 +56,17 @@
 
 % Define the IdeaBox environment
 \newtcolorbox[auto counter]{IdeaBox}[2][]{%
-
-    title=Idea \thetcbcounter: #2,
-    colback=yellow!10,
-    colframe=yellow!40!black,
-    fonttitle=\bfseries,
+  enhanced,
+  sharp corners,
+  colbacktitle=violet!20,
+  coltitle=violet!80!black,
+  attach boxed title to top left={xshift=5mm,yshift=-\tcboxedtitleheight/2},
+  boxed title style={sharp corners},
+  fonttitle=\bfseries\color{black},
+  colback=yellow!10,
+  colframe=yellow!40!black,
+  fonttitle=\bfseries,
+  #1
 }
 
 % Fancy Header and Footer Settings

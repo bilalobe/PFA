@@ -19,23 +19,23 @@
 \centering
 \includegraphics[keepaspectratio,scale=0.75]{images/logo.png} 
 \vfill
-\textsc{\LARGE École/Université}\\[0.5cm]  
-\textsc{\Large Informatique}\\[0.5cm]  % Replace with your Department/Program
+\textsc{\LARGE Ingénieurie Informatique \& Réseaux}\\[0.5cm]  
+\textsc{\Large Niveau 3}\\[0.5cm] 
 \HRule \\[0.4cm]
-{ \huge \bfseries Rapport de Projet: PFA - Plateforme d'apprentissage personnalisée}
+{ \huge \bfseries Rapport de Projet fin Année  Plateforme d'apprentissage personnalisée}
 \HRule \\[1.5cm]
 
 \begin{minipage}{0.4\textwidth}
 \begin{flushleft} \large
 \emph{Auteur:}\\
-Your Name
+Bilal Elkhatabi
 \end{flushleft}
 \end{minipage}
 ~
 \begin{minipage}{0.4\textwidth}
 \begin{flushright} \large
 \emph{Superviseur:} \\
-Supervisor Name
+Pr. M. Mariame AMINE
 \end{flushright}
 \end{minipage}\\[2cm]
 
@@ -71,7 +71,7 @@ Alternativement, le projet \gls{PFA} aspire à révolutionner l'apprentissage en
 
 
 \begin{environnement}
-Le rapport est structuré en plusieurs sections, chacune couvrant un aspect clé du projet \gls{PFA}. Voici un aperçu de la structure du rapport :
+Le rapport est structuré en plusieurs sections, chacune couvrant un aspect clé du projet \gls{PFA}. Voici un aperçu de la structure du rapport :\newline
 \begin{itemize}
 
 \item \textbf{Contexte et Justification} : Cette section fournit un aperçu du contexte du projet et explique pourquoi une plateforme d'apprentissage personnalisée est nécessaire.
@@ -90,7 +90,7 @@ Le rapport est structuré en plusieurs sections, chacune couvrant un aspect clé
 
 L'apprentissage en ligne a connu une croissance exponentielle ces dernières années, avec une multitude de plateformes éducatives offrant des cours sur une variété de sujets. Des plateformes comme Coursera, Udemy, et edX ont ouvert l'accès à l'éducation à des millions de personnes à travers le monde, offrant des cours de haute qualité dispensés par des universités renommées et des experts de l'industrie. Cependant, malgré ces avancées, les plateformes d'apprentissage en ligne traditionnelles présentent des limites en termes de personnalisation et d'engagement des apprenants.
 
-\vfill \dotfill
+\dotfill
 
 \begin{displayquote}
 L'essor des plateformes d'apprentissage en ligne a conduit à une multitude de solutions, chacune ayant ses forces et ses faiblesses. Des plateformes comme Coursera, Udemy, et edX ont révolutionné l'accès à l'éducation, mais elles peinent souvent à offrir une expérience véritablement personnalisée.
@@ -104,7 +104,7 @@ Ce projet, bien que s'inspirant de certains concepts fondamentaux de la POO, se 
 
 \subsection{La Programmation Orientée Objet : Un Pilier Fondamental}
 
-La \gls{poo} constitue la pierre angulaire de notre architecture logicielle. Elle nous permet de modéliser les entités de notre plateforme (cours, modules, utilisateurs, etc.) sous forme d'objets, encapsulant données et comportements. Cette approche favorise la modularité, la réutilisabilité du code, et l'extensibilité, des qualités essentielles pour un projet évolutif comme PFA.
+La \gls{poo} constitue la pierre angulaire de notre architecture logicielle. Elle nous permet de modéliser les entités de notre plateforme (cours, modules, utilisateurs, etc.) sous forme d'objets, encapsulant données et comportements. Cette approche favorise la modularité, la réutilisabilité du code, et l'extensibilité, des qualités essentielles pour un projet évolutif.
 
 \subsection{L'IA: Le Catalyseur de la Personnalisation}
 
@@ -126,6 +126,20 @@ L'accessibilité et l'internationalisation sont des aspects cruciaux de notre pl
 La \gls{gamification} est un outil puissant pour stimuler la motivation et l'engagement des apprenants. En intégrant des éléments de jeu (points, badges, classements) dans PFA, nous créons une expérience d'apprentissage plus interactive et ludique.
 \newpage
 
+\subsection{Légende des Couleurs}
+
+Avant de plonger plus profondément dans les détails de notre architecture, il est essentiel de comprendre la signification des couleurs utilisées pour représenter les différents éléments de notre système :
+
+\begin{itemize}
+    \item \textbf{\textcolor{blue}{\textbullet}} \textbf{\textcolor{blue}{Bleu}}: Utilisé pour représenter les \textit{Utilisateurs} et leurs interactions au sein de la plateforme.
+    \item \textbf{\textcolor{green}{\textbullet}} \textbf{\textcolor{green}{Vert}}: Désigne les éléments liés aux \textit{Cours}, \textit{Modules}, \textit{Quizzes}, et \textit{Ressources}, soulignant les composants éducatifs de notre plateforme.
+    \item \textbf{\textcolor{red}{\textbullet}} \textbf{\textcolor{red}{Rouge}}: Utilisé pour les \textit{Questions de Quiz} et les \textit{Choix de Réponses}, indiquant les défis et les évaluations pour les apprenants.
+    \item \textbf{\textcolor{orange}{\textbullet}} \textbf{\textcolor{orange}{Orange}}: Représente l'\textit{Inscription} des étudiants aux cours, marquant leur engagement et leur progression.
+    \item \textbf{\textcolor{yellow}{\textbullet}} \textbf{\textcolor{yellow}{Jaune}}: Symbolise les \textit{Forums}, les \textit{Fils de Discussion}, et les \textit{Messages}, facilitant la communication et l'interaction communautaire.
+\end{itemize}
+
+Cette légende des couleurs aide à naviguer dans la description de notre architecture système avec une compréhension claire des rôles et des relations entre les différents composants.
+\newpage
 \part{Méthodologie}
 
 \section{Architecture du Système}
@@ -193,7 +207,7 @@ Pour forger notre backend, nous avons utilisé un arsenal de technologies puissa
             \hline
         \end{tabular}%
     }
-    \caption{Overview of Technologies Used}
+    \caption{Overview des Technologies Backend}
     \label{table:technologies}
 \end{table}
 
@@ -229,15 +243,17 @@ React, une bibliothèque JavaScript populaire, nous a permis de construire notre
 
     \item[\textbf{Chatbot}] \hfill \\
     Notre assistant virtuel, prêt à répondre aux questions, à fournir des conseils et à guider les apprenants à travers la plateforme.
-
+\vfill
 \end{description}
 
 \subsubsection{Redux Toolkit :  Le Maître de l'État}
 
 Redux Toolkit, une bibliothèque puissante, orchestre la gestion d'état côté client, maintenant l'harmonie entre les données et l'interface utilisateur.
 
-* `createSlice`:  Simplifie la création de reducers, ces fonctions qui régissent les changements d'état en réponse aux actions des utilisateurs.
-* `createAsyncThunk`:  Dompte la complexité des actions asynchrones, permettant de gérer les requêtes API et les mises à jour de l'état de manière fluide.
+\begin{itemize}
+    \item \texttt{createSlice}: Simplifies the creation of reducers, which govern state changes in response to user actions.
+    \item \texttt{createAsyncThunk}: Tames the complexity of asynchronous actions, allowing smooth handling of API requests and state updates.
+\end{itemize}
 
 \subsubsection{Technologies Frontend : L'Art de l'Interface}
 
@@ -258,7 +274,7 @@ Pour construire notre frontend, nous avons utilisé une palette de technologies 
 
 \subsection{Méthodes de Développement}
 
-Pour mener à bien ce projet d'envergure, nous avons adopté une approche \textsc{méthodique et collaborative}. Notre processus de développement s'est articulé autour de plusieurs phases clés, chacune contribuant à la réalisation de notre vision.
+Pour mener à bien ce projet d'envergure, nous avons adopté une approche \textit{méthodique et collaborative}. Notre processus de développement s'est articulé autour de plusieurs phases clés, chacune contribuant à la réalisation de notre vision.
 
 \subsubsection{Méthodologie Agile}
 
@@ -274,7 +290,7 @@ L'utilisation de Conda comme gestionnaire d'environnements a simplifié la confi
 
 \subsubsection{Maîtrise de Visual Studio Code}
 
-Visual Studio Code (VS Code) a été notre outil de choix pour le développement, grâce à sa flexibilité et à son écosystème riche en extensions. Nous avons personnalisé notre environnement de développement en utilisant des extensions spécifiques pour la sécurité du code, la gestion des environnements Conda, et le support de Git, améliorant ainsi notre efficacité et notre capacité à répondre aux menaces de sécurité. La maîtrise de VS Code, avec ses paramètres personnalisés et son utilisation modulaire, a renforcé notre workflow de développement et notre collaboration.
+Visual Studio Code a été notre outil de choix pour le développement, grâce à sa flexibilité et à son écosystème riche en extensions. Nous avons personnalisé notre environnement de développement en utilisant des extensions spécifiques pour la sécurité du code, la gestion des environnements Conda, et le support de Git, améliorant ainsi notre efficacité et notre capacité à répondre aux menaces de sécurité. La maîtrise de VS Code, avec ses paramètres personnalisés et son utilisation modulaire, a renforcé notre workflow de développement et notre collaboration.
 
 \subsubsection{Aide de Dependabot}
 
@@ -289,6 +305,12 @@ Le formatage du code source est une pratique essentielle pour garantir la lisibi
 En adoptant une conception modulaire pour notre projet, nous avons pu améliorer la maintenabilité et la scalabilité de notre code. Cette approche nous a permis de développer, tester, et déployer des fonctionnalités de manière indépendante, facilitant les mises à jour de sécurité et de fonctionnalités sans perturber l'ensemble du système. La modularité a également joué un rôle clé dans la gestion des menaces de sécurité, permettant une isolation et une résolution rapides des vulnérabilités identifiées.
 
 En résumé, notre méthodologie de développement a intégré des pratiques agiles, un contrôle de version efficace, une gestion avancée des environnements, une maîtrise approfondie des outils de développement, et une conception modulaire. Ces stratégies nous ont permis de rester réactifs face aux évolutions technologiques et aux menaces de sécurité, tout en favorisant la collaboration et l'innovation au sein de notre équipe.
+
+\subsubsection{Tests et Validation}
+
+Les tests et la validation sont des étapes cruciales de notre processus de développement, garantissant la qualité, la fiabilité et la sécurité de notre plateforme. Nous avons adopté une approche \textit{complète et systématique} pour tester chaque composant de notre système, en utilisant une variété de techniques et d'outils pour identifier et corriger les erreurs.
+PEP 8, Flake8, et MyPy ont été utilisés pour garantir la conformité aux normes de codage, la qualité du code, et la détection des erreurs de typage. Les tests unitaires, les tests d'intégration, et les tests de bout en bout ont été utilisés pour valider le bon fonctionnement de chaque composant, en s'assurant qu'ils répondent aux spécifications et aux exigences du projet. Les tests de performance, les tests de charge, et les tests de sécurité ont été utilisés pour évaluer les performances, la scalabilité, et la robustesse de notre plateforme, en identifiant et en corrigeant les vulnérabilités potentielles. Enfin, les tests d'accessibilité et les tests de compatibilité ont été utilisés pour garantir que notre plateforme est accessible à tous les utilisateurs, indépendamment de leurs besoins ou de leurs appareils.
+
 \newpage
 
 \part{Résultats et Discussion}
@@ -386,16 +408,33 @@ L'IA est intégrée à PFA pour créer une expérience d'apprentissage plus inte
 
 \begin{itemize}
     \item \textbf{Recommandations de Cours Personnalisées:} Notre système de recommandation intelligent, basé sur des algorithmes de machine learning, suggère des cours pertinents en fonction des intérêts et des progrès des étudiants.
-    \item \textbf{Analyse des Sentiments:} En analysant le sentiment des messages du forum, PFA peut identifier les commentaires positifs et négatifs et les quiz coriaces, aidant les instructeurs à mieux \textsc{comprendre les besoins} des apprenants.
+    \item \textbf{Analyse des Sentiments:} En analysant le sentiment des messages du forum, PFA peut identifier les commentaires positifs et négatifs et les quiz coriaces, aidant les instructeurs à mieux \textit{comprendre les besoins} des apprenants.
     \item \textbf{Détection de la Langue:} La détection automatique de la langue permet d'adapter l'interface et le contenu aux préférences linguistiques des utilisateurs.
     \item \textbf{Génération du contenu à travers des \gls{llm}s} L'IA peut générer automatiquement du contenu pour les cours, les modules, et les quizzes, aidant les instructeurs à créer des ressources pédagogiques de haute qualité.
     \item \textbf{Suivi des performances} L'IA peut analyser les performances des étudiants, identifier les lacunes et les points forts, et \textsc{représenter des graphes} accordément.
     \item \textbf{Chatbot Intelligent:} Notre chatbot répond aux questions fréquentes, fournit des conseils, et guide les étudiants à travers la plateforme.
 \end{itemize}
 
-\section{Captures d'Écran}
+\begin{lstlisting}[language=Python, caption={Exemple de Code Python Utilisant TensorFlow}, label={lst:tensorflow_example}, basicstyle=\ttfamily, keywordstyle=\color{blue}, commentstyle=\color{green}, stringstyle=\color{red}]
+import tensorflow as tf
 
-\subsection{ Prototype de la Page d'Accueil GUI}
+# Définir un modèle séquentiel
+model = tf.keras.Sequential([
+    tf.keras.layers.Flatten(input_shape=(28, 28)),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dropout(0.2),
+])
+
+# Compiler le modèle
+model.compile(optimizer='adam',
+              loss=tf.keras.SparseCategoricalCrossentropy,
+              metrics=['accuracy'])
+
+# Résumé du modèle
+model.summary()
+\end{lstlisting}
+
+\section{Captures d'Écran}
 
 \begin{figure}[htbp]
     \centering
@@ -404,16 +443,12 @@ L'IA est intégrée à PFA pour créer une expérience d'apprentissage plus inte
     \label{fig:homepage}
 \end{figure}
 
-\subsection{ Portions de Languages de programmation Utilisés}
-
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]{images/languages.png}
+    \includegraphics[]{images/languages.png}
     \caption{Portions de Languages de programmation Utilisés}
     \label{fig:languages}
 \end{figure}
-
-\subsection{ Comparatif aux normes de communauté}
 
 \begin{figure}[htbp]
     \centering
@@ -422,16 +457,12 @@ L'IA est intégrée à PFA pour créer une expérience d'apprentissage plus inte
     \label{fig:community}
 \end{figure}
 
-\subsection{ Contributions journalières intrinsèques}
-
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]{images/activity.png}
+    \includegraphics[]{images/activity.png}
     \caption{Contributions journalières intrinsèques}
     \label{fig:contributions}
 \end{figure}
-
-\subsection{Contributions au Graphique Principal à travers les Commits GitHub}
 
 \begin{figure}[htbp]
     \centering
@@ -440,16 +471,12 @@ L'IA est intégrée à PFA pour créer une expérience d'apprentissage plus inte
     \label{fig:contributions}
 \end{figure}
 
-\subsection{ Pull Requests Fusionnées par Jour}
-
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{images/pull_requests.png}
     \caption{Pull Requests Fusionnées par Jour}
     \label{fig:pull_requests}
 \end{figure}
-
-\subsection{ Codeflow }
 
 \begin{figure}[htbp]
     \centering
@@ -458,16 +485,12 @@ L'IA est intégrée à PFA pour créer une expérience d'apprentissage plus inte
     \label{fig:codeflow}
 \end{figure}
 
-\subsection{ Taux de Git Clones mensuels}
-
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{images/git_clones.png}
     \caption{Git clones mensuels}
     \label{fig:git_clones}
 \end{figure}
-
-\subsection{ Graphe de Réseaux}
 
 \begin{figure}[htbp]
     \centering
@@ -522,9 +545,8 @@ Alors que nous célébrons nos réalisations, nous tournons également notre reg
             \draw [line] (feedback) -- (personal);
             
             % Annotations
-            \node [above=0.5cm of adapt, align=center] (adaptText) {Interface adapts\\to user's skill level};
-            \node [above=0.5cm of feedback, align=center] (feedbackText) {Feedback on\\progress and suggestions};
-            
+            \node [above=0.5cm of adapt, align=center] (adaptText) {Interface s'adapte\\ niveau compétences};
+            \node [above=0.5cm of feedback, align=center] (feedbackText) {Retour sur\\le progrès et les suggestions};
         \end{tikzpicture}
         \caption{Idées pour l'Amélioration de l'Expérience Utilisateur}
         \label{fig:ideas-tikz}
@@ -536,7 +558,7 @@ Alors que nous célébrons nos réalisations, nous tournons également notre reg
                   title=\textbf{Notre Vision:}]
 Ces fonctionnalités, alliant innovation et ludisme, sont conçues pour rendre l'apprentissage non seulement plus efficace mais aussi plus agréable. Chez PFA, nous croyons que l'éducation de demain doit être captivante, accessible et sans limites.
 \end{tcolorbox}
-
+\vfill
 \section{Perspectives Futures}
 \subsection{\textbf{Impacts et Prévisions}}
 
@@ -584,14 +606,71 @@ En conclusion, le projet \gls{PFA} est bien plus qu'une simple plateforme d'appr
 
 \part{Annexes}
 
-% Include Gantt chart
-\input{misc/gantt/gantt.tex}
+\begin{figure}[htbp]
+    \centering
+    % Include Gantt chart
+    \begin{ganttchart}[
+        vgrid, hgrid,
+        title label font=\scriptsize,
+        bar/.style={fill=blue},
+        bar incomplete/.style={fill=gray},
+        group right shift=0,
+        group top shift=.6,
+        group height=.3,
+        % group peaks={}{}{.2}, % Commented out due to error
+        milestone/.style={fill=orange, rounded corners=3pt, drop shadow},
+        milestone inline label node/.append style={left=5mm}
+        ]{1}{12}
+        \gantttitle{2024}{4} \\
+        \gantttitlelist{1,...,12}{1} \\
+        \ganttgroup{Phases du Projet}{1}{8} \\
+        \ganttbar{Planning}{1}{3} \\
+        \ganttlinkedbar{Design}{4}{5} \\
+        \ganttlinkedmilestone{Review du Design}{5} \\
+        \ganttlinkedbar{Implémentation}{3}{7} \\
+        \ganttlinkedbar{Création du Rapport}{6}{8} \\
+        \ganttlinkedbar{Testing}{3}{8} \\
+        \ganttlinkedmilestone{Alpha Release}{8} \\
+        \ganttlinkedmilestone{Fin de Cycle}{8}
+    \end{ganttchart}
+    \caption{Diagramme de Gantt pour les jalons du projet}
+    \label{fig:gantt-chart}
+\end{figure}
 
+\dotfill
 % Include PERT chart
-\input{misc/pert/pert.tex}
-
+\begin{figure}[htbp]
+    \centering
+    \begin{tikzpicture}[
+        node distance=2cm and 3cm,
+        milestone/.style={rectangle, draw, fill=blue!20, text width=3cm, align=center},
+        arrow/.style={-Stealth, thick}
+        ]
+        
+        % Milestones
+        \node[milestone] (planning) {Planification et Conceptualisation};
+        \node[milestone, right=of planning] (design) {Conception et Prototypage};
+        \node[milestone, right=of design] (development) {Développement et Intégration};
+        \node[milestone, below=of development] (testing) {Tests et Assurance Qualité};
+        \node[milestone, left=of testing] (launch) {Lancement et Évaluation};
+        
+        % Arrows
+        \draw[arrow] (planning) -- (design);
+        \draw[arrow] (design) -- (development);
+        \draw[arrow] (development) -- (testing);
+        \draw[arrow] (testing) -- (launch);
+        \draw[arrow] (planning) edge[bend right] (launch);
+        
+    \end{tikzpicture}
+    \caption{charte PERT pour les étapes du projet}
+    \label{fig:pert-chart}
+\end{figure}
+\vfill
+\newpage
 % Print the glossary
 \printglossaries
+
+\printbibliography
 
 
 \end{document} \documentclass{article}
