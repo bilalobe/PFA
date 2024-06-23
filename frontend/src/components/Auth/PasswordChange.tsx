@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import firebase from '../../../firebaseConfig'; // Adjust the import path
 import { TextField, Button, Alert } from '@mui/material';
+import { getAuth, updatePassword } from "firebase/auth";
 
 const PasswordChange = () => {
   const [newPassword, setNewPassword] = useState('');
@@ -11,18 +11,25 @@ const PasswordChange = () => {
     e.preventDefault();
     setMessage('');
     setError('');
-    const user = firebase.auth().currentUser;
+
+    const auth = getAuth();
+    const user = auth.currentUser;
+
     if (user) {
       try {
-        await user.updatePassword(newPassword);
+        await updatePassword(user, newPassword);
         setMessage('Your password has been changed successfully.');
       } catch (error) {
-        setError('Failed to change password. ' + error.message);
+        if (error instanceof Error) {
+          setError('Failed to change password. ' + error.message);
+        } else {
+          setError('Failed to change password. An unknown error occurred.');
+        }
       }
     } else {
       setError('No user is currently signed in.');
     }
-  };
+  }
 
   return (
     <div>

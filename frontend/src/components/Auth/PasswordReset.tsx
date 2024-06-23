@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import firebase from '../../../firebaseConfig'; // Adjust the import path
+import { getAuth, sendPasswordResetEmail } from 'firebase/auth';
 import { TextField, Button, Alert } from '@mui/material';
 
 const PasswordReset = () => {
@@ -7,12 +7,13 @@ const PasswordReset = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setMessage('');
     setError('');
+    const auth = getAuth();
     try {
-      await firebase.auth().sendPasswordResetEmail(email);
+      await sendPasswordResetEmail(auth, email);
       setMessage('Check your email for the password reset link.');
     } catch (error) {
       setError('Failed to send password reset email. Make sure the email is correct.');
