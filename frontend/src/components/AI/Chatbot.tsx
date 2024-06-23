@@ -1,14 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
 import { TextField, Button, List, ListItem, ListItemText } from '@mui/material';
 
-function Chatbot() {
-  const [userInput, setUserInput] = useState('');
-  const [conversation, setConversation] = useState([]);
+interface ChatMessage {
+  uid?: string;
+  sender: 'user' | 'bot';
+  message: string;
+}
+
+const Chatbot: React.FC = () => {
+  const [userInput, setUserInput] = useState<string>('');
+  const [conversation, setConversation] = useState<ChatMessage[]>([]);
 
   const sendMessage = async () => {
     if (userInput.trim()) {
-      const newConversation = [...conversation, { sender: 'user', message: userInput }];
+      const newConversation: ChatMessage[] = [...conversation, { sender: 'user', message: userInput }];
       setConversation(newConversation);
       setUserInput('');
 
@@ -21,10 +27,16 @@ function Chatbot() {
     }
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Enter') {
+      sendMessage();
+    }
+  };
+
   return (
     <div>
       <List>
-        {conversation.map((chat: { message: any; sender: string; }, index: any) => (
+        {conversation.map((chat, index) => (
           <ListItem key={index}>
             <ListItemText
               primary={chat.message}
@@ -36,8 +48,8 @@ function Chatbot() {
       <TextField
         label="Type your message..."
         value={userInput}
-        onChange={(e: { target: { value: any; }; }) => setUserInput(e.target.value)}
-        onKeyPress={(e: { key: string; }) => e.key === 'Enter' && sendMessage()}
+        onChange={(e) => setUserInput(e.target.value)}
+        onKeyDown={handleKeyPress}
         fullWidth
       />
       <Button variant="contained" color="primary" onClick={sendMessage}>
@@ -45,6 +57,6 @@ function Chatbot() {
       </Button>
     </div>
   );
-}
+};
 
 export default Chatbot;
