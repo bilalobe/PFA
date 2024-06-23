@@ -1,6 +1,18 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { userApi } from '@/utils/api';
 
+export const updateUserProfile = createAsyncThunk(
+  'user/updateUserProfile',
+  async (userData: User, { rejectWithValue }) => {
+    try {
+      const response = await userApi.updateProfile(userData);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 export const fetchUserProfile = createAsyncThunk(
   'user/fetchUserProfile',
   async (_, { rejectWithValue }) => {
@@ -28,7 +40,6 @@ interface Sort {
   field: string;
   direction: 'asc' | 'desc';
 }
-
 
 interface UserState {
   profile: User | null;
@@ -66,6 +77,16 @@ const userSlice = createSlice({
         state.loading = false;
       })
       .addCase(fetchUserProfile.rejected, (state) => {
+        state.loading = false;
+      })
+      .addCase(updateUserProfile.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(updateUserProfile.fulfilled, (state, action) => {
+        state.profile = action.payload;
+        state.loading = false;
+      })
+      .addCase(updateUserProfile.rejected, (state) => {
         state.loading = false;
       });
   },
