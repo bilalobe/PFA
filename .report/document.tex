@@ -10,7 +10,7 @@
 % Header and Footer
 \pagestyle{fancy}
 \fancyhf{}
-\rhead{Report}
+\rhead{Projet Fin Année}
 \lhead{PFA - Plateforme d'apprentissage personnalisée}
 \rfoot{Page \thepage}
 
@@ -19,16 +19,17 @@
 \centering
 \includegraphics[keepaspectratio,scale=0.75]{images/logo.png} 
 \vfill
-\textsc{\LARGE Ingénieurie Informatique \& Réseaux}\\[0.5cm]  
+\textsc{\LARGE Ingénierie Informatique \& Réseaux}\\[0.5cm]  
 \textsc{\Large Niveau 3}\\[0.5cm] 
 \HRule \\[0.4cm]
-{ \huge \bfseries Rapport de Projet fin Année  Plateforme d'apprentissage personnalisée}
-\HRule \\[1.5cm]
+{ \huge \bfseries Rapport de PFA  \\
+	 Plateforme d'apprentissage personnalisée}
+\HRule \\[2cm]
 
-\begin{minipage}{0.4\textwidth}
+\begin{minipage}{0.4\textwidth}	
 \begin{flushleft} \large
 \emph{Auteur:}\\
-Bilal Elkhatabi
+Bilal ELKHATABI
 \end{flushleft}
 \end{minipage}
 ~
@@ -51,7 +52,7 @@ Pr. M. Mariame AMINE
 
 L'apprentissage en ligne est devenu un élément essentiel du paysage éducatif moderne, surtout à la lumière des récents défis mondiaux qui ont mis en évidence la nécessité d'une éducation plus adaptable et accessible. Les plateformes d'apprentissage en ligne offrent une flexibilité et une accessibilité accrues, permettant aux étudiants d'apprendre à leur propre rythme et selon leurs propres conditions. Cependant, malgré ces avantages, l'approche actuelle de l'apprentissage en ligne présente des lacunes significatives, notamment en ce qui concerne la personnalisation de l'expérience éducative.
 
-De nombreuses plateformes d'apprentissage en ligne existantes manquent de personnalisation, adoptant souvent une approche "taille unique" qui ne répond pas aux besoins individuels des apprenants. Cette généralisation peut entraver l'engagement des étudiants et limiter leur capacité à atteindre leur plein potentiel. Le projet \gls{PFA} vise à combler cette lacune en offrant une plateforme qui s'adapte aux préférences, aux objectifs et aux styles d'apprentissage de chaque étudiant. En intégrant des technologies d'intelligence artificielle (\gls{IA}), \gls{PFA} offre une expérience éducative véritablement personnalisée, capable de s'ajuster dynamiquement aux progrès et aux besoins changeants de l'apprenant.
+De nombreuses plateformes d'apprentissage en ligne existantes manquent de personnalisation, adoptant souvent une approche "taille unique" qui ne répond pas aux besoins individuels des apprenants. Cette généralisation peut entraver l'engagement des étudiants et limiter leur capacité à atteindre leur plein potentiel. Le projet \gls{PFA} vise à combler cette lacune en offrant une plateforme qui s'adapte aux préférences, aux objectifs et aux styles d'apprentissage de chaque étudiant. En intégrant des technologies d'\gls{IA}, \gls{PFA} offre une expérience éducative véritablement personnalisée, capable de s'ajuster dynamiquement aux progrès et aux besoins changeants de l'apprenant.
 \newline
 
 \subsection*{Objectifs du Projet}
@@ -124,7 +125,7 @@ L'accessibilité et l'internationalisation sont des aspects cruciaux de notre pl
 \subsection{La Gamification: Un Levier d'Engagement}
 
 La \gls{gamification} est un outil puissant pour stimuler la motivation et l'engagement des apprenants. En intégrant des éléments de jeu (points, badges, classements) dans PFA, nous créons une expérience d'apprentissage plus interactive et ludique.
-\newpage
+
 
 \subsection{Légende des Couleurs}
 
@@ -243,7 +244,7 @@ React, une bibliothèque JavaScript populaire, nous a permis de construire notre
 
     \item[\textbf{Chatbot}] \hfill \\
     Notre assistant virtuel, prêt à répondre aux questions, à fournir des conseils et à guider les apprenants à travers la plateforme.
-\vfill
+
 \end{description}
 
 \subsubsection{Redux Toolkit :  Le Maître de l'État}
@@ -294,7 +295,7 @@ Visual Studio Code a été notre outil de choix pour le développement, grâce �
 
 \subsubsection{Aide de Dependabot}
 
-Dependabot, notre assistant de sécurité, a surveillé en permanence les dépendances de notre projet, identifiant les vulnérabilités et proposant des mises à jour pour les corriger. Grâce à Dependabot, nous avons pu maintenir un niveau élevé de sécurité, en appliquant rapidement les correctifs nécessaires pour protéger notre
+Dependabot, notre assistant de sécurité, a surveillé en permanence les dépendances de notre projet, identifiant les vulnérabilités et proposant des mises à jour pour les corriger. Grâce à Dependabot, nous avons pu maintenir un niveau élevé de sécurité, en appliquant rapidement les correctifs nécessaires pour protéger notre plateforme contre les menaces de sécurité.
 
 \subsubsection{Organisation code-source}
 
@@ -415,7 +416,7 @@ L'IA est intégrée à PFA pour créer une expérience d'apprentissage plus inte
     \item \textbf{Chatbot Intelligent:} Notre chatbot répond aux questions fréquentes, fournit des conseils, et guide les étudiants à travers la plateforme.
 \end{itemize}
 
-\begin{lstlisting}[language=Python, caption={Exemple de Code Python Utilisant TensorFlow}, label={lst:tensorflow_example}, basicstyle=\ttfamily, keywordstyle=\color{blue}, commentstyle=\color{green}, stringstyle=\color{red}]
+\begin{lstlisting}[language=Python, caption={Exemple de Code Python Utilisant TensorFlow}, label={lst:tensorflowexample}, basicstyle=\ttfamily, keywordstyle=\color{blue}, commentstyle=\color{green}, stringstyle=\color{red}]
 import tensorflow as tf
 
 # Définir un modèle séquentiel
@@ -424,12 +425,10 @@ model = tf.keras.Sequential([
     tf.keras.layers.Dense(128, activation='relu'),
     tf.keras.layers.Dropout(0.2),
 ])
-
 # Compiler le modèle
 model.compile(optimizer='adam',
               loss=tf.keras.SparseCategoricalCrossentropy,
               metrics=['accuracy'])
-
 # Résumé du modèle
 model.summary()
 \end{lstlisting}
@@ -667,10 +666,71 @@ En conclusion, le projet \gls{PFA} est bien plus qu'une simple plateforme d'appr
 \end{figure}
 \vfill
 \newpage
+
+
 % Print the glossary
 \printglossaries
 
-\printbibliography
+\newpage
+\begin{thebibliography}{9}
+
+\bibitem{knuth1984texbook}
+Donald E. Knuth.
+\textit{The TeXbook}.
+Addison-Wesley, Reading, MA, 1984.
+
+\bibitem{lamport1986latex}
+Leslie Lamport.
+\textit{\LaTeX: A document preparation system}.
+Addison-Wesley, 1986.
+
+\bibitem{conda}
+Conda: Open Source Package Management System and Environment Management System.
+\url{https://docs.conda.io/}.
+Accessed: 2023-04-01.
+
+\bibitem{texmaker}
+Texmaker: Free Cross-Platform LaTeX Editor.
+\url{http://www.xm1math.net/texmaker/}.
+Accessed: 2023-04-01.
+
+\bibitem{tlmanager}
+TeX Live Manager: Managing TeX Live Installation.
+\url{https://www.tug.org/texlive/tlmgr.html}.
+Accessed: 2023-04-01.
+
+\bibitem{mittelbach2004latex}
+Frank Mittelbach and Michel Goossens.
+\textit{The LaTeX companion}.
+Proceedings of the 2004 Annual Meeting of the TeX Users Group, 2004.
+
+\bibitem{gitDocumentation}
+Git Documentation.
+\url{https://git-scm.com/doc}.
+Accessed: 2023-04-01.
+
+\bibitem{dockerDocs}
+Docker Documentation.
+\url{https://docs.docker.com/}.
+Accessed: 2023-04-01.
+
+\bibitem{reactNative}
+React Native.
+\url{https://reactnative.dev/}.
+Accessed: 2023-04-01.
+
+\bibitem{nodejs}
+Node.js.
+\url{https://nodejs.org/en/}.
+Accessed: 2023-04-01.
+
+\bibitem{materialDesign}
+Material Design.
+\url{https://material.io/design}.
+Accessed: 2023-04-01.
+
+\end{thebibliography}
+
 
 
 \end{document} \documentclass{article}
