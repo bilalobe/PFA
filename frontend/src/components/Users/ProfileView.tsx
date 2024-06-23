@@ -1,15 +1,24 @@
-// frontend2/src/components/ProfileView.tsx
-
 import { useState } from 'react';
-import { User } from '../interfaces/User'; // import the User interface
+import { TextField, Button, CircularProgress, Alert } from '@mui/material';
+
+interface User {
+  uid: string;
+  email: string | null;
+  displayName: string;
+  photoURL: string;
+  emailVerified: boolean;
+}
 
 interface ProfileViewProps {
   user: User;
   isEditing: boolean;
+  onSave: (userData: User) => void;
+  isLoading: boolean;
+  error: string | null;
 }
 
-const ProfileView: React.FC<ProfileViewProps> = ({ user, isEditing }) => {
-  const [userData, setUserData] = useState(user);
+const ProfileView: React.FC<ProfileViewProps> = ({ user, isEditing, onSave, isLoading, error }) => {
+  const [userData, setUserData] = useState<User>(user);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setUserData({
@@ -18,21 +27,49 @@ const ProfileView: React.FC<ProfileViewProps> = ({ user, isEditing }) => {
     });
   };
 
+  const handleSubmit = () => {
+    onSave(userData);
+  };
+
+  if (isLoading) {
+    return <CircularProgress />;
+  }
+
+  if (error) {
+    return <Alert severity="error">{error}</Alert>;
+  }
+
   return (
     <div>
       {isEditing ? (
-        <div>
-          <input
+        <form onSubmit={handleSubmit}>
+          <TextField
+            label="Name"
             type="text"
-            name="name"
-            value={userData.name}
+            name="displayName"
+            value={userData.displayName}
             onChange={handleInputChange}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Email"
+            type="email"
+            name="email"
+            value={userData.email || ''}
+            onChange={handleInputChange}
+            fullWidth
+            margin="normal"
           />
           {/* Add more fields as needed */}
-        </div>
+          <Button type="submit" variant="contained" color="primary">
+            Save
+          </Button>
+        </form>
       ) : (
         <div>
-          <p>{userData.name}</p>
+          <p>Name: {userData.displayName}</p>
+          <p>Email: {userData.email}</p>
           {/* Display more fields as needed */}
         </div>
       )}
