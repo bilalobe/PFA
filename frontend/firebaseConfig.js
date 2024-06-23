@@ -7,7 +7,6 @@ import { getDatabase } from "firebase/database";
 
 
 
-  
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -17,6 +16,11 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
 const database = getDatabase(app);
+const analytics = getAnalytics(app);
+const functions = getFunctions(app);
+const messaging = getMessaging(app);
+const performance = getPerformance(app);
+
 
 // Export the services for use in other files
 export { auth, db, storage, database };
