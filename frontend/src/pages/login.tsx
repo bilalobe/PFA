@@ -1,77 +1,73 @@
-// Import necessary libraries and components
 import React, { useState } from 'react';
-import { useRouter } from 'next/router';
-import { useForm, Controller } from 'react-hook-form';
-import { Box, TextField, Button, Typography, Alert } from '@mui/material';
-import * as Yup from 'yup';
-import { yupResolver } from '@hookform/resolvers/yup';
-import '../../firebaseConfig';
+import { getAuth, signInWithEmailAndPassword, setPersistence, browserSessionPersistence } from "firebase/auth";
+import { Alert } from '@mui/material';
+import { FirebaseError } from 'firebase/app';
+import { toast } from 'react-toastify';
+import { Navigate } from 'react-router';
 
-// Define the validation schema
-const schema = Yup.object().shape({
-  username: Yup.string().required('Username is required'),
-  password: Yup.string().required('Password is required'),
-});
+const SignInForm = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false); // Track submission state
 
-// LoginForm component for handling the login form UI and validation
-const LoginForm = ({ onSubmit, errors }) => (
-  <Box component="form" onSubmit={onSubmit} noValidate>
-    <Typography variant="h4" component="h1" gutterBottom>Login</Typography>
-    <Controller
-      name="username"
-      defaultValue=""
-      render={({ field }) => (
-        <TextField
-          {...field}
-          variant="outlined"
-          margin="normal"
-          required
-          fullWidth
-          label="Username"
-          autoComplete="username"
-          error={!!errors.username}
-          helperText={errors.username ? errors.username.message : ''}
-        />
-      )}
-    />
-    <Controller
-      name="password"
-      defaultValue=""
-      render={({ field }) => (
-        <TextField
-          {...field}
-          variant="outlined"
-          margin="normal"
-          required
-          fullWidth
-          label="Password"
-          type="password"
-          autoComplete="current-password"
-          error={!!errors.password}
-          helperText={errors.password ? errors.password.message : ''}
-        />
-      )}
-    />
-    <Button type="submit" fullWidth variant="contained" color="primary">Login</Button>
-  </Box>
-);
+  const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+    const auth = getAuth();
+    try {
+      await setPersistence(auth, browserSessionPersistence);
+      await signInWithEmailAndPassword(auth, email, password);
+      toast.success('You are now signed in! Welcome back.');
+      Navigate({ to: '/dashboard' });
+    } catch (error) {
+      if (error instanceof FirebaseError) {
+        console.error('Authentication error:', error.message);
+        switch (error.code) {
+          case 'auth/user-not-found':
+            setError('No user found with this email.');
+            break;
+          case 'auth/wrong-password':
+            setError('Incorrect password. Please try again.');
+            break;
+          default:
+            setError('Failed to sign in. Please try again later.');
+        }
+      } else {
+        console.error('An unexpected error occurred:', error);
+        setError('An unexpected error occurred. Please try again later.');
+      }
+    } finally {
+      setIsSubmitting(false); // Reset submission state regardless of outcome
+    }
+  };
 
-// Main Login component
-function Login() {
-  const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-  const { control, handleSubmit, formState: { errors } } = useForm({
-    resolver: yupResolver(schema),
-  });
-
-  const onSubmit = async (data: { username: string; password: string }) => {/*...*/};
+  // Clear error when user starts typing again
+  const handleChange = (setter: React.Dispatch<React.SetStateAction<string>>) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (error) setError('');
+    setter(event.target.value);
+  };
 
   return (
-    <>
+    <form onSubmit={handleSignIn}>
+      <input
+        type="email"
+        value={email}
+        onChange={handleChange(setEmail)}
+        placeholder="Email"
+        required
+      />
+      <input
+        type="password"
+        value={password}
+        onChange={handleChange(setPassword)}
+        placeholder="Password"
+        required
+      />
+      <button type="submit" disabled={isSubmitting}>Sign In</button>
       {error && <Alert severity="error">{error}</Alert>}
-      {success && <Alert severity="success">Login successful!</Alert>}
-      <LoginForm onSubmit={handleSubmit(onSubmit)} errors={errors} />
-    </>
+    </form>
   );
-}
+};
+
+export default SignInForm;
