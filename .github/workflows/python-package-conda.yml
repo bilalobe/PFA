@@ -14,7 +14,7 @@ jobs:
     
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Set up Miniconda
       uses: conda-incubator/setup-miniconda@v2
@@ -22,14 +22,14 @@ jobs:
         auto-update-conda: true
         python-version: 3.11
         environment-file: environment.yml  # Path to your environment.yml
-        activate-environment: my_django_project
+        activate-environment: new  # Name of your conda environment
 
     - name: Build Conda
       uses: cascode-labs/build-conda-action@v0.1.4
       with:
         recipe_path: conda-recipe  # Update this if your recipe is in a different directory
         conda_build_env_filepath: environment.yml  # Path to your environment.yml file
-        conda_build_env_name: my_django_project  # Name of your conda environment
+        conda_build_env_name: new  # Name of your conda environment
         base_env_prefix: /usr/share/miniconda
         package_artifact_name: conda_package
         test_results_artifact_name: test_results

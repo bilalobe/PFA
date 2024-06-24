@@ -13,6 +13,7 @@ dist/
   
 # Ignore database  
 *.sqlite3  
+*.db
   
 # Ignore environment variables file  
 .env  
@@ -20,6 +21,9 @@ keys.env
 
 # Ignore VS Code build
 .vscode/
+
+# Ignore logs
+*.log
 
 # Node modules  
 node_modules/  
