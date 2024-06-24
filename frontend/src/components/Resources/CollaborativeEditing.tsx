@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { db } from '../../../firebaseConfig';
+import { db } from '../../../../firebaseConfig';
 import { doc, onSnapshot, updateDoc } from 'firebase/firestore';
 
 const CollaborativeDocument = ({ documentId }) => {

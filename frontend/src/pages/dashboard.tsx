@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { AppBar, Box, CircularProgress, Container, Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, Alert, Divider } from '@mui/material';
 import { AccountCircle as AccountCircleIcon, Chat as ChatIcon, Forum as ForumIcon, Home as HomeIcon, Logout as LogoutIcon, Menu as MenuIcon, School as SchoolIcon } from '@mui/icons-material';
 import { signOut, onAuthStateChanged, User } from 'firebase/auth';
-import { auth } from '../../firebaseConfig';
+import { auth } from '../../../firebaseConfig';
 import { fetchUserProfile } from '@/types/features/user/userSlice';
 import Chatbot from '@/components/AI/Chatbot';
 import AutoCorrect from '../components/AI/AutoCorrect';
