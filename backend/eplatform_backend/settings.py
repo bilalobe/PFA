@@ -15,6 +15,10 @@ Date: 202x-xx-xx
 """
 
 import os
+import environ
+import firebase_admin
+from dotenv import load_dotenv
+from firebase_admin import credentials, firestore
 from pathlib import Path
 from datetime import timedelta
 
@@ -23,7 +27,11 @@ from celery.schedules import crontab
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
+env = environ.Env()
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+env_path = BASE_DIR.parent / 'keys.env'
+load_dotenv(dotenv_path=str(env_path))
 
 LOCALE_PATHS = [
     os.path.join(BASE_DIR, "locale"),
@@ -51,7 +59,7 @@ SECURE_HSTS_SECONDS = (
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Include subdomains in the HSTS policy
 SECURE_HSTS_PRELOAD = True  # Allow preloading of the site's HSTS policy
 
-# AWS S3 Settings for secure access
+""" # AWS S3 Settings for secure access
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
 AWS_STORAGE_BUCKET_NAME = "eplatform-media"  # Your S3 bucket name
@@ -59,7 +67,7 @@ AWS_S3_REGION_NAME = "eu"  # Your AWS region (e.g., 'us-east-1')
 AWS_S3_SIGNATURE_VERSION = "s3v4"  # Use Signature Version 4
 AWS_S3_FILE_OVERWRITE = False  # Prevent overwriting files with the same name
 AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
-AWS_DEFAULT_ACL = "private"  # Set default ACL to private to ensure files are not publicly accessible by default
+AWS_DEFAULT_ACL = "private"  # Set default ACL to private to ensure files are not publicly accessible by default """
 
 # Optional: Serve static files from S3 securely
 # STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
@@ -67,14 +75,20 @@ AWS_DEFAULT_ACL = "private"  # Set default ACL to private to ensure files are no
 
 VIRUS_TOTAL_API_KEY = config("VIRUS_TOTAL_API_KEY")
 
+cred = credentials.Certificate('path/to/your/serviceAccountKey.json')
+
+firebase_admin.initialize_app(cred)
+
+db = firestore.client()
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": config("DB_NAME"),
-        "USER": config("DB_USER"),
-        "PASSWORD": config("DB_PASSWORD"),
-        "HOST": config("DB_HOST"),
-        "PORT": config("DB_PORT"),
+        "NAME": env("DB_NAME"),
+        "USER": env("DB_USER"),
+        "PASSWORD": env("DB_PASSWORD"),
+        "HOST": env("DB_HOST"),
+        "PORT": env("DB_PORT"),
         "OPTIONS": {
             "sslmode": "require",  # This is the key part for SSL connection
         },
@@ -126,12 +140,14 @@ INSTALLED_APPS = [
     "dj_rest_auth.registration",
     "drf_spectacular",  # API documentation
     "chat",  # Chat application
-    "user",
+    "users",
     "courses",
     "moderation",
     "quizzes",
     "comments",
     "enrollments",
+    "posts",
+    "modules",
     "game",
     "posts",
     "reviews",
