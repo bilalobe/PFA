@@ -63,6 +63,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     profile_picture = models.ImageField(
         upload_to="profile_pics/", blank=True, null=True
     )
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    is_superuser = models.BooleanField(default=False)
 
     # New fields
     facebook_link = models.URLField(max_length=255, blank=True, null=True)
