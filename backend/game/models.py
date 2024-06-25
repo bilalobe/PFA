@@ -1,6 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+class UserLevel(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="level")
+    level = models.IntegerField(default=1)
+    experience = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"{self.user.username} - Level {self.level}"
 
 class UserForumPoints(models.Model):
     user = models.OneToOneField(
@@ -16,6 +23,7 @@ class Badge(models.Model):
     name = models.CharField(max_length=50, unique=True)
     description = models.CharField(max_length=255)
     image = models.ImageField(upload_to="badges/", blank=True, null=True)
+    criteria = models.JSONField(default=dict)  # Example: {"action": "post_created", "count": 10}
 
     def __str__(self):
         return self.name

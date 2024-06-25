@@ -4,7 +4,7 @@ from .views import (
     UserForumPointsViewSet,
     BadgeViewSet,
     UserBadgeViewSet,
-    award_user_points,
+    award_points,
     award_user_badge,
 )
 
@@ -17,7 +17,7 @@ router.register(r"user_badges", UserBadgeViewSet, basename="user-badge")
 
 urlpatterns = [
     path("", include(router.urls)),
-    path("users/<int:user_id>/points/", award_user_points, name="award_user_points"),
+    path("users/<int:user_id>/points/", award_points, name="award_user_points"),
     path(
         "users/<int:user_id>/badges/<str:badge_name>/",
         award_user_badge,
