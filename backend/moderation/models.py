@@ -3,6 +3,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 from django.db import models
 
+from backend.users import permissions
+
 
 class Moderation(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
@@ -42,6 +44,14 @@ class Moderation(models.Model):
     )
     action_taken_at = models.DateTimeField(null=True, blank=True)
     action_description = models.CharField(max_length=255, blank=True)
+
+    class Meta:
+        verbose_name = "Moderation Report"
+        verbose_name_plural = "Moderation Reports"
+        permissions = (
+            ("view_moderation", "Can view moderation reports"),
+            ("change_moderation", "Can change moderation reports"),
+        )
 
     def __str__(self):
         return f"Moderation Report: {self.reason} on {self.content_object} by {self.reported_by.username}"
