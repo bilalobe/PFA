@@ -1,9 +1,26 @@
 from django.db import models
 from django.contrib.auth.models import User
-import uuid
+from backend.modules.models import Module
 
 
 class Course(models.Model):
+    """
+    Represents a course in the application.
+
+    Attributes:
+        title (str): The title of the course.
+        description (str): The description of the course.
+        category (str): The category of the course.
+        difficulty (str): The difficulty level of the course.
+        thumbnail (ImageField): The thumbnail image of the course.
+        instructor (ForeignKey): The instructor of the course.
+        created_at (DateTimeField): The date and time when the course was created.
+        enrollment_count (PositiveIntegerField): The number of enrollments for the course.
+        completion_rate (FloatField): The completion rate of the course.
+        average_rating (FloatField): The average rating of the course.
+        module_set (ManyToManyField): The modules associated with the course.
+    """
+
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     category = models.CharField(max_length=100, blank=True)  # New field
@@ -33,7 +50,8 @@ class CourseVersion(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.course.title} - Version {self.version_number}"
+        return str(f"{self.course.title} - Version {self.version_number}")
+
 
 
 class CourseAnalytics(models.Model):
@@ -50,42 +68,6 @@ class CourseAnalytics(models.Model):
 
     def __str__(self):
         return f"Analytics for {self.course.title}"
-
-class Module(models.Model):
-    """
-    Represents a module within a course.
-
-    Attributes:
-        id (UUIDField): The unique identifier for the module.
-        course (ForeignKey): The course that the module belongs to.
-        course_version (ForeignKey): The course version that the module belongs to.
-        quizzes (ManyToManyField): The quizzes associated with the module.
-        title (CharField): The title of the module.
-        content (TextField): The content of the module.
-        order (PositiveIntegerField): The order of the module within the course.
-        created_at (DateTimeField): The date and time when the module was created.
-        updated_at (DateTimeField): The date and time when the module was last updated.
-        created_by (ForeignKey): The user who created the module.
-    """
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="modules")
-    course_version = models.ForeignKey(CourseVersion, on_delete=models.CASCADE, related_name="modules")
-    quizzes = models.ManyToManyField("Quiz", related_name="modules", blank=True)
-    title = models.CharField(max_length=255)
-    content = models.TextField(blank=True)
-    order = models.PositiveIntegerField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="modules_created"
-    )
-
-    class Meta:
-        unique_together = ("course", "order")
-
-    def __str__(self):
-        return self.title
 
 
 class DynamicContent(models.Model):
@@ -118,22 +100,3 @@ class UserCourseInteraction(models.Model):
 
     def __str__(self):
         return f"{self.user.username} {self.interaction_type} {self.course.title}"
-
-
-class Review(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="reviews")
-    rating = models.PositiveIntegerField(
-        choices=[
-            (1, "1 Star"),
-            (2, "2 Stars"),
-            (3, "3 Stars"),
-            (4, "4 Stars"),
-            (5, "5 Stars"),
-        ]
-    )
-    comment = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.user.username} reviewed {self.course.title}"
