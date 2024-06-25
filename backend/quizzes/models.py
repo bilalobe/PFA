@@ -1,7 +1,6 @@
 from django.db import models
 from backend.users.models import User
 from courses.models import Course
-from backend.quizzes.utils import auto_grade_quiz_attempt
 
 
 class Quiz(models.Model):
@@ -44,6 +43,7 @@ class QuizAnswerChoice(models.Model):
     question = models.ForeignKey(
         QuizQuestion, on_delete=models.CASCADE, related_name="choices"
     )
+    id = models.AutoField(primary_key=True)
     text = models.CharField(max_length=255)
     is_correct = models.BooleanField(default=False)
     order = models.PositiveIntegerField()
@@ -54,6 +54,7 @@ class QuizAnswerChoice(models.Model):
 
 
 class UserQuizAttempt(models.Model):
+    id = models.AutoField(primary_key=True)
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="quiz_attempts"
     )
@@ -71,3 +72,4 @@ class UserQuizAttempt(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.quiz.title} - Score: {self.score}"
+
