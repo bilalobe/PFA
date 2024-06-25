@@ -1,8 +1,13 @@
 {
   "projects": {
-    "dev": "eleanor-80b46"
+    "dev": "eleanor-80b46",
+    "default": "eleanor-80b46"
   },
   "targets": {},
   "etags": {},
-  "dataconnectEmulatorConfig": {}
+  "dataconnectEmulatorConfig": {
+    "postgres": {
+      "localConnectionString": "postgresql://localhost:5432?sslmode=disable"
+    }
+  }
 }
