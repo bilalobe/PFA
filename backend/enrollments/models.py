@@ -1,14 +1,37 @@
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.contrib.auth import get_user_model
 from users.models import User
 from courses.models import Course, CourseVersion, Module
 
 
 class Enrollment(models.Model):
+    """
+    Represents an enrollment of a student in a course.
+
+    Attributes:
+        id (AutoField): The primary key for the enrollment.
+        user (ForeignKey): The user who is enrolled in the course.
+        course (ForeignKey): The course that the user is enrolled in.
+        student (ForeignKey): The student who is enrolled in the course.
+        course_version (ForeignKey): The version of the course that the student is enrolled in.
+        enrolled_at (DateTimeField): The date and time when the student enrolled in the course.
+        progress (PositiveIntegerField): The percentage of the course completed by the student (0-100).
+        completed (BooleanField): Indicates whether the student has completed the course or not.
+
+    Meta:
+        unique_together (tuple): Specifies that the combination of student and course should be unique.
+
+    Methods:
+        __str__(): Returns a string representation of the enrollment.
+        update_progress(): Updates the progress and completion status of the enrollment based on the completed modules.
+    """
+
     id = models.AutoField(primary_key=True)
-    student = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={"user_type": "student"})
+    user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='enrollments')
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    student = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={"user_type": "student"})
     course_version = models.ForeignKey(CourseVersion, on_delete=models.CASCADE, related_name="enrollments")
     enrolled_at = models.DateTimeField(auto_now_add=True)
     progress = models.PositiveIntegerField(default=0, help_text="Percentage of course completed (0-100)")
