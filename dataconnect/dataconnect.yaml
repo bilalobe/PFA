@@ -1,0 +1,10 @@
+specVersion: "v1alpha"
+serviceId: "sa-23-203"
+schema:
+  source: "./schema"
+  datasource:
+    postgresql:
+      database: "postgres"
+      cloudSql:
+        instanceId: "tricks"
+connectorDirs: ["./default-connector"]
