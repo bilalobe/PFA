@@ -175,7 +175,7 @@ L'API REST permet la communication fluide entre notre frontend et notre backend.
         \subitem Exemple:  \texttt{POST /api/courses/} - Crée un nouveau cours.  Données attendues: titre, description, instructeur.
         \subitem Exemple:  \texttt{PUT /api/courses/{courseid}} - Met à jour les détails d'un cours existant.  Données attendues: titre, description, instructeur.
         \subitem Exemple:  \texttt{DELETE /api/courses/{courseid}} - Supprime un cours existant.
-    \item Sérialisation:   Django REST Framework gère la \gls{serialisation} et la \gls{deserialisation} des données, traduisant les objets Python en JSON et vice versa, pour une communication transparente entre le frontend et le backend.
+    \item Sérialisation:   Django REST Framework gère la \gls{serialisation} et la désérialisation des données, traduisant les objets Python en JSON et vice versa, pour une communication transparente entre le frontend et le backend.
     \item Authentification et Autorisations:  La sécurité est primordiale.  Nous utilisons des mécanismes d'authentification robustes (JWT, OAuth) pour protéger nos endpoints d'API et garantir que seuls les utilisateurs autorisés peuvent accéder aux données et effectuer des actions.
 \end{itemize}
 
@@ -265,12 +265,12 @@ Pour construire notre frontend, nous avons utilisé une palette de technologies 
     \item[\gls{react}] La bibliothèque JavaScript pour construire des interfaces utilisateur interactives, soutenue par des bibliothèques complémentaires pour enrichir l'expérience utilisateur :
     \begin{itemize}
         \item \gls{materialui}: Une bibliothèque de composants basée sur Material Design.
-        \item \gls{tailwindcss}: Un framework CSS utilitaire pour un stylisme précis.
+        \item Tailwind CSS: Un framework CSS utilitaire pour un stylisme précis.
         \item \gls{redux}: Pour la gestion d'état côté client.
         \item \gls{reactquery}, \gls{formik}, \gls{yup}, \gls{reactmarkdown}, \gls{reactquill}, \gls{reactchartjs}, \gls{reactplayer}, \gls{reactselect}, \gls{reactspring}, \gls{reactuse}, \gls{reactrouter}, \gls{reacthookform}: Diverses bibliothèques pour la gestion des données, formulaires, graphiques, animations, et plus.
         \end{itemize}
-    \item[\gls{axios}] Une bibliothèque JavaScript pour effectuer des requêtes HTTP, facilitant la communication avec notre API Django.
-    \item[\gls{socketio}] Pour la communication bidirectionnelle en temps réel, notamment pour notre fonctionnalité de chat.
+    \item[Axios] Une bibliothèque JavaScript pour effectuer des requêtes HTTP, facilitant la communication avec notre API Django.
+    \item[Socket IO] Pour la communication bidirectionnelle en temps réel, notamment pour notre fonctionnalité de chat.
 \end{description}
 
 \subsection{Méthodes de Développement}
@@ -371,7 +371,7 @@ L'accès à PFA est sécurisé et personnalisé. Les utilisateurs peuvent se con
 \begin{itemize}
     \item \textbf{Système de Rôles:} Des rôles distincts (étudiant, enseignant, superviseur) garantissent que chaque utilisateur a accès aux fonctionnalités appropriées.
     \item \textbf{Profils Utilisateur:} Les utilisateurs peuvent personnaliser leurs profils, partager leurs passions, et mettre en valeur leurs compétences.
-    \item \textbf{Authentification Sociale:} L'authentification via Google, Facebook, et Twitter simplifie le processus de connexion et renforce la sécurité.
+    \item \textbf{Authentification Sociale:} L'authentification via Google, Facebook, et GitHub simplifie le processus de connexion et renforce la sécurité.
 \end{itemize}
 \newpage
 \subsection{Gestion des Cours et des Modules}
@@ -426,11 +426,8 @@ model = tf.keras.Sequential([
     tf.keras.layers.Dropout(0.2),
 ])
 # Compiler le modèle
-model.compile(optimizer='adam',
-              loss=tf.keras.SparseCategoricalCrossentropy,
-              metrics=['accuracy'])
-# Résumé du modèle
-model.summary()
+model.compile(optimizer='adam'[...])
+
 \end{lstlisting}
 
 \section{Captures d'Écran}
@@ -460,7 +457,7 @@ model.summary()
     \centering
     \includegraphics[]{images/activity.png}
     \caption{Contributions journalières intrinsèques}
-    \label{fig:contributions}
+    \label{fig:activity}
 \end{figure}
 
 \begin{figure}[htbp]
@@ -544,8 +541,8 @@ Alors que nous célébrons nos réalisations, nous tournons également notre reg
             \draw [line] (feedback) -- (personal);
             
             % Annotations
-            \node [above=0.5cm of adapt, align=center] (adaptText) {Interface s'adapte\\ niveau compétences};
-            \node [above=0.5cm of feedback, align=center] (feedbackText) {Retour sur\\le progrès et les suggestions};
+            \node [above=0.5cm of adapt, align=center] (adaptText) {};
+            \node [above=0.5cm of feedback, align=center] (feedbackText) {};
         \end{tikzpicture}
         \caption{Idées pour l'Amélioration de l'Expérience Utilisateur}
         \label{fig:ideas-tikz}
@@ -639,35 +636,57 @@ En conclusion, le projet \gls{PFA} est bien plus qu'une simple plateforme d'appr
 \dotfill
 % Include PERT chart
 \begin{figure}[htbp]
-    \centering
-    \begin{tikzpicture}[
-        node distance=2cm and 3cm,
-        milestone/.style={rectangle, draw, fill=blue!20, text width=3cm, align=center},
-        arrow/.style={-Stealth, thick}
-        ]
-        
-        % Milestones
-        \node[milestone] (planning) {Planification et Conceptualisation};
-        \node[milestone, right=of planning] (design) {Conception et Prototypage};
-        \node[milestone, right=of design] (development) {Développement et Intégration};
-        \node[milestone, below=of development] (testing) {Tests et Assurance Qualité};
-        \node[milestone, left=of testing] (launch) {Lancement et Évaluation};
-        
-        % Arrows
-        \draw[arrow] (planning) -- (design);
-        \draw[arrow] (design) -- (development);
-        \draw[arrow] (development) -- (testing);
-        \draw[arrow] (testing) -- (launch);
-        \draw[arrow] (planning) edge[bend right] (launch);
-        
-    \end{tikzpicture}
-    \caption{charte PERT pour les étapes du projet}
-    \label{fig:pert-chart}
+	\centering
+	\begin{tikzpicture}[
+		node distance=2.5cm and 3.5cm,
+		milestone/.style={rectangle, draw, fill=blue!20, text width=3cm, align=center},
+		arrow/.style={-Stealth, thick}
+		]
+		
+		% Original Milestones
+		\node[milestone] (planning) {Planification et Conceptualisation};
+		\node[milestone, right=of planning] (design) {Conception et Prototypage};
+		\node[milestone, right=of design] (development) {Développement et Intégration};
+		\node[milestone, below=of development] (testing) {Tests et Assurance Qualité};
+		\node[milestone, left=of testing] (launch) {Lancement et Évaluation};
+		
+		% Updated Milestones for Fictional Scenario
+		\node[milestone, below=of planning, yshift=-1.5cm] (idea) {Idéation et Étude de Faisabilité};
+		\node[milestone, right=of idea] (funding) {Financement et Partenariats};
+		\node[milestone, right=of funding] (prototype) {Création de Prototype et Premiers Tests};
+		\node[milestone, below=of prototype, yshift=-1cm] (market) {Introduction sur le Marché et Premières Ventes};
+		\node[milestone, left=of market] (expansion) {Expansion et Diversification};
+		
+		% Arrows - Reflecting the Project Flow for Original Milestones
+		\draw[arrow] (planning) -- (design);
+		\draw[arrow] (design) -- (development);
+		\draw[arrow] (development) -- (testing);
+		\draw[arrow] (testing) -- (launch);
+		\draw[arrow] (planning) edge[bend right] (launch);
+		
+		% Arrows - Reflecting the Project Flow for Updated Milestones
+		\draw[arrow] (idea) -- (funding);
+		\draw[arrow] (funding) -- (prototype);
+		\draw[arrow] (prototype) -- (market);
+		\draw[arrow] (market) -- (expansion);
+		\draw[arrow] (idea) edge[bend right] (expansion);
+		
+		% Linking the two sets of milestones
+		\draw[arrow, dashed] (planning) -- (idea);
+		\draw[arrow, dashed] (design) -- (funding);
+		\draw[arrow, dashed] (development) -- (prototype);
+		\draw[arrow, dashed] (testing) -- (market);
+		\draw[arrow, dashed] (launch) -- (expansion);
+		
+	\end{tikzpicture}
+	\caption{Charte de PERT pour les étapes du projet}
+	\label{fig:pert-chart}
 \end{figure}
 \vfill
+
 \newpage
 
-
+\newpage
 % Print the glossary
 \printglossaries
 
@@ -728,6 +747,12 @@ Accessed: 2023-04-01.
 Material Design.
 \url{https://material.io/design}.
 Accessed: 2023-04-01.
+
+\bibitem{Firebase}
+Firebase.
+\url{https://firebase.google.com/}.
+Accessed: 2023-04-01.
+
 
 \end{thebibliography}
 
