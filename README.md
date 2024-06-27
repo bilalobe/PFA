@@ -17,7 +17,7 @@ PFA is an open-source e-learning platform built with Django (backend) and Next.j
     - **Personalized Recommendations:**  Uncover hidden gems of learning with personalized course suggestions, curated just for you.
     - **Translator:**  Unlock a universe of knowledge with our live translation facility, expanding your horizons beyond language boundaries. 
 
-## 🔥 Now with Firebase: Elevating the Learning Experience
+## 🔥 Now with Firebase: Elevating the Learning Experience 
 
 PFA now harnesses the power of Firebase to deliver an even more seamless, engaging, and scalable learning platform. Here's how Firebase elevates the PFA experience:
 
@@ -26,7 +26,7 @@ PFA now harnesses the power of Firebase to deliver an even more seamless, engagi
 * **Simplified Login and Registration:**  Users can effortlessly create accounts and log in using their preferred social media or email credentials.
 * **Secure Authentication:** Firebase handles the complexities of user authentication, ensuring your platform remains secure.
 
-**Real-time Collaboration with Firebase Firestore**
+**Real-time Collaboration with Firebase Firestore** soon =)
 
 * **Instant Updates:**  Experience real-time updates in forums, chat, and progress tracking, fostering a dynamic and connected learning environment.
 * **Scalable Database:** Firebase Firestore effortlessly scales to accommodate your growing community of learners.
