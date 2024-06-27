@@ -2,7 +2,7 @@ from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 
 from backend.courses.models import Course
-from .models import Forum, Thread, Post
+from backend.forums.models import Forum, Thread, Post
 
 
 @registry.register_document
