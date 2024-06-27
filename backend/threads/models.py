@@ -1,61 +1,59 @@
-from django.db import models
-from backend.users.models import User
-from forums.models import Forum
+import firebase_admin
+from firebase_admin import credentials, firestore
+from google.cloud.firestore import SERVER_TIMESTAMP
 
+# Initialize Firestore
+cred = credentials.Certificate('path/to/your/serviceAccountKey.json')
+firebase_admin.initialize_app(cred)
+db = firestore.client()
 
-class Thread(models.Model):
-    """
-    Represents a thread in a forum.
+class ThreadFirestore:
+    def __init__(self, title, forum_path, created_by_path, **kwargs):
+        self.title = title
+        self.forum_path = forum_path  # Path to the Forum document
+        self.created_by_path = created_by_path  # Path to the User document who created the thread
+        self.created_at = SERVER_TIMESTAMP  # Use Firestore server timestamp
+        self.is_closed = kwargs.get('is_closed', False)
+        self.closed_by_path = kwargs.get('closed_by_path', None)  # Path to the User document who closed the thread
+        self.closed_at = kwargs.get('closed_at', None)
+        self.is_solved = kwargs.get('is_solved', False)
+        self.solved_by_path = kwargs.get('solved_by_path', None)  # Path to the User document who solved the thread
+        self.solved_at = kwargs.get('solved_at', None)
+        self.is_pinned = kwargs.get('is_pinned', False)
+        self.pinned_by_path = kwargs.get('pinned_by_path', None)  # Path to the User document who pinned the thread
+        self.pinned_at = kwargs.get('pinned_at', None)
 
-    Attributes:
-        forum (Forum): The forum to which the thread belongs.
-        title (str): The title of the thread.
-        created_by (User): The user who created the thread.
-        created_at (datetime): The timestamp when the thread was created.
-        is_closed (bool): Indicates whether the thread is closed or not.
-        closed_by (User): The user who closed the thread.
-        closed_at (datetime): The timestamp when the thread was closed.
-        is_solved (bool): Indicates whether the thread is solved or not.
-        solved_by (User): The user who solved the thread.
-        solved_at (datetime): The timestamp when the thread was solved.
-        is_pinned (bool): Indicates whether the thread is pinned or not.
-        pinned_by (User): The user who pinned the thread.
-        pinned_at (datetime): The timestamp when the thread was pinned.
-    """
+    def to_dict(self):
+        """Converts the thread object to a dictionary suitable for Firestore."""
+        return {
+            "title": self.title,
+            "forum_path": self.forum_path,
+            "created_by_path": self.created_by_path,
+            "created_at": self.created_at,
+            "is_closed": self.is_closed,
+            "closed_by_path": self.closed_by_path,
+            "closed_at": self.closed_at,
+            "is_solved": self.is_solved,
+            "solved_by_path": self.solved_by_path,
+            "solved_at": self.solved_at,
+            "is_pinned": self.is_pinned,
+            "pinned_by_path": self.pinned_by_path,
+            "pinned_at": self.pinned_at,
+        }
 
-    forum = models.ForeignKey(Forum, on_delete=models.CASCADE, related_name="threads")
-    title = models.CharField(max_length=255)
-    created_by = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="threads_created"
-    )
-    created_at = models.DateTimeField(auto_now_add=True)
-    is_closed = models.BooleanField(default=False)
-    closed_by = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="closed_threads",
-    )
-    closed_at = models.DateTimeField(null=True, blank=True)
-    is_solved = models.BooleanField(default=False)
-    solved_by = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="solved_threads",
-    )
-    solved_at = models.DateTimeField(null=True, blank=True)
-    is_pinned = models.BooleanField(default=False)
-    pinned_by = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name="pinned_threads",
-    )
-    pinned_at = models.DateTimeField(null=True, blank=True)
+    @staticmethod
+    def from_dict(data):
+        """Creates a ThreadFirestore object from a dictionary."""
+        return ThreadFirestore(**data)
 
-    def __str__(self):
-        return self.title
+    def save(self):
+        """Saves the thread to Firestore, auto-generating an ID."""
+        db.collection('threads').add(self.to_dict())
+
+# Example usage
+thread = ThreadFirestore(
+    title="Example Thread",
+    forum_path="forums/exampleForumID",
+    created_by_path="users/exampleUserID"
+)
+thread.save()

@@ -1,145 +1,218 @@
-from django.db import models
-from django.contrib.auth.models import (
-    AbstractBaseUser,
-    BaseUserManager,
-    PermissionsMixin,
-)
-from django.utils.translation import gettext_lazy as _
-from PIL import Image
+import re
+from datetime import datetime
+from enum import Enum
+import logging
 
-from backend.courses.models import Course
+from backend.users.tasks import resize_profile_picture
+from backend.common.firebase_admin_init import db
+import logging
+from enum import Enum
 
 
-class UserManager(BaseUserManager):
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+
+
+class UserType(Enum):
+    STUDENT = "student"
+    TEACHER = "teacher"
+    SUPERVISOR = "supervisor"
+
+class UserStatus(Enum):
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+
+class UserRole(Enum):
+    STUDENT = "student"
+    STAFF = "staff"
+    SUPERUSER = "superuser"
+
+class Permissions(Enum):
+    VIEW_COURSE = "view_course"
+    EDIT_COURSE = "edit_course"
+    CREATE_COURSE = "create_course"
+    DELETE_COURSE = "delete_course"
+
+class User:
     """
-    Custom user manager to handle user creation and superuser creation.
+    Represents a user in the system.
+
+    Attributes:
+        username (str): The username of the user.
+        email (str): The email address of the user.
+        user_type (UserType): The type of the user (e.g., STUDENT, TEACHER, SUPERVISOR).
+        bio (str): The bio of the user.
+        profile_picture (str): The path to the user's profile picture.
+        role (UserRole): The role of the user (e.g., STUDENT, STAFF, SUPERUSER).
+        facebook_link (str): The Facebook profile link of the user.
+        twitter_link (str): The Twitter profile link of the user.
+        linkedin_link (str): The LinkedIn profile link of the user.
+        instagram_link (str): The Instagram profile link of the user.
+        status (UserStatus): The status of the user (e.g., ACTIVE, INACTIVE).
+        last_login (datetime): The timestamp of the user's last login.
+        courses (list): The list of courses the user is enrolled in.
+        enrollments (list): The list of enrollments the user has.
+        user_id (str): The unique identifier of the user.
     """
 
-    def create_user(self, email, username, password=None, **extra_fields):
+    def __init__(self, username, email, user_type=UserType.STUDENT, bio="", profile_picture=None,
+                 role=UserRole.STUDENT, facebook_link=None, twitter_link=None, linkedin_link=None, instagram_link=None,
+                 status=UserStatus.ACTIVE, last_login=None, courses=None, enrollments=None, user_id=None):
+        try:
+            self.username = self.validate_username(username)
+            self.email = self.validate_email(email)
+            self.user_type = user_type
+            self.bio = bio
+            self.profile_picture = profile_picture
+            self.set_role(role)
+            self.facebook_link = facebook_link
+            self.twitter_link = twitter_link
+            self.linkedin_link = linkedin_link
+            self.instagram_link = instagram_link
+            self.status = status
+            self.last_login = last_login or datetime.utcnow()
+            self.courses = courses or []
+            self.enrollments = enrollments or []
+            self.user_id = user_id
+        except ValueError as e:
+            logging.error(f"Error initializing user: {e}")
+            raise
+
+    def set_role(self, role):
         """
-        Creates and saves a User with the given email, username, and password.
+        Sets the role of the user.
+
+        Args:
+            role (UserRole): The role to set for the user.
+
+        Raises:
+            ValueError: If an invalid role is provided.
         """
-        if not email:
-            raise ValueError(_("The Email field is required."))
-        email = self.normalize_email(email)
-        user = self.model(username=username, email=email, **extra_fields)
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
+        try:
+            if role == UserRole.STAFF:
+                self.is_staff = True
+            elif role == UserRole.SUPERUSER:
+                self.is_superuser = True
+            elif role == UserRole.STUDENT:
+                self.is_staff = False
+                self.is_superuser = False
+            else:
+                raise ValueError("Invalid role")
+        except ValueError as e:
+            logging.error(f"Error setting role: {e}")
+            raise
 
-    def create_superuser(self, email, username, password=None, **extra_fields):
+    @classmethod
+    def from_dict(cls, doc):
         """
-        Creates and saves a superuser with the given email, username and passwd
+        Creates a User object from a dictionary.
+
+        Args:
+            doc (dict): The dictionary containing the user data.
+
+        Returns:
+            User: The User object created from the dictionary.
         """
-        extra_fields.setdefault("is_staff", True)
-        extra_fields.setdefault("is_superuser", True)
+        return cls(**doc)
 
-        if extra_fields.get("is_staff") is not True:
-            raise ValueError("Superuser must have is_staff=True.")
-        if extra_fields.get("is_superuser") is not True:
-            raise ValueError("Superuser must have is_superuser=True.")
-
-        return self.create_user(email, username, password, **extra_fields)
-
-
-class User(AbstractBaseUser, PermissionsMixin):
-    """
-    Custom user model that uses email as the username field.
-    """
-
-    user_type_choices = (
-        ("student", "Student"),
-        ("teacher", "Teacher"),
-        ("supervisor", "Supervisor"),
-    )
-
-    # Existing fields
-    username = models.CharField(max_length=32, unique=True)
-    email = models.EmailField(max_length=254, unique=True)
-    user_type = models.CharField(
-        max_length=10, choices=user_type_choices, default="student"
-    )
-    bio = models.TextField(blank=True)
-    profile_picture = models.ImageField(
-        upload_to="profile_pics/", blank=True, null=True
-    )
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-    is_superuser = models.BooleanField(default=False)
-
-    # New fields
-    facebook_link = models.URLField(max_length=255, blank=True, null=True)
-    twitter_link = models.URLField(max_length=255, blank=True, null=True)
-    linkedin_link = models.URLField(max_length=255, blank=True, null=True)
-    instagram_link = models.URLField(max_length=255, blank=True, null=True)
-
-    STATUS_CHOICES = (
-        ("active", "Active"),
-        ("banned", "Banned"),
-        ("inactive", "Inactive"),
-    )
-    status = models.CharField(max_length=10,
-                              choices=STATUS_CHOICES, default="active")
-
-    last_login = models.DateTimeField(auto_now=True)
-
-    USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["username"]
-
-    objects = UserManager()
-    courses = models.ManyToManyField(Course, related_name="students")
-    enrollments = models.ManyToManyField(
-        Course, through="Enrollment", related_name="enrollments"
-    )
-
-    def __str__(self):
-        return self.username
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        if self.profile_picture:
-            self.resize_profile_picture()
-
-    def resize_profile_picture(self):
+    def to_dict(self):
         """
-        Resizes the profile picture to a smaller size (e.g., 200x200)
-        while preserving aspect ratio.
+        Returns a dictionary representation of the User object, excluding sensitive information.
+
+        Returns:
+            dict: The dictionary representation of the User object.
         """
-        if self.profile_picture:
-            try:
-                img = Image.open(self.profile_picture.path)
-                if img.width > 200 or img.height > 200:
-                    img.thumbnail((200, 200))
-                    img.save(self.profile_picture.path)
-            except IOError as e:
-                print(f"Error resizing profile picture: {e}")
+        user_dict = self.__dict__.copy()
+        # Exclude sensitive information
+        user_dict.pop('password_hash', None)
+        return user_dict
+    
+    def save(self):
+        """
+        Saves the User object to Firestore, including resizing the profile picture if present.
+        """
+        try:
+            # Check if the User object has an image field that needs resizing
+            if hasattr(self, 'profile_picture') and self.profile_picture:
+                new_image_path = resize_profile_picture(self.user_id, 'profile_picture')
+                # Update the User object with the new image path
+                self.profile_picture = new_image_path
+    
+            user_data = self.to_dict()
+            db.collection("users").document(self.email).set(user_data)
+        except Exception as e:
+            logging.error(f"Error saving user to Firestore: {e}")
+            raise
+
 
     def profile_completeness(self):
+        """
+        Calculates the profile completeness percentage based on filled fields.
+
+        Returns:
+            str: The profile completeness percentage.
+        """
         fields = ["username", "email", "bio", "profile_picture"]
         filled_fields = sum(bool(getattr(self, field)) for field in fields)
         total_fields = len(fields)
         completeness = (filled_fields / total_fields) * 100
         return f"{completeness}%"
 
-    def has_permission(self, action):
-        permissions = {
-            "student": ["view_course"],
-            "teacher": ["view_course", "edit_course", "create_course"],
-            "supervisor": [
-                "view_course",
-                "edit_course",
-                "create_course",
-                "delete_course",
-            ],
+    @staticmethod
+    def validate_username(username):
+        """
+        Validates the username.
+
+        Args:
+            username (str): The username to validate.
+
+        Returns:
+            str: The validated username.
+
+        Raises:
+            ValueError: If the username is invalid.
+        """
+        try:
+            if not 3 <= len(username) <= 20:
+                raise ValueError("Username must be between 3 and 20 characters")
+            return username
+        except ValueError as e:
+            logging.error(f"Error validating username: {e}")
+            raise
+
+    @staticmethod
+    def validate_email(email):
+        """
+        Validates the email address.
+
+        Args:
+            email (str): The email address to validate.
+
+        Returns:
+            str: The validated email address.
+
+        Raises:
+            ValueError: If the email address is invalid.
+        """
+        try:
+            if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+                raise ValueError("Invalid email format")
+            return email
+        except ValueError as e:
+            logging.error(f"Error validating email: {e}")
+            raise
+
+    @property
+    def permissions(self):
+        """
+        Returns a list of permissions based on the user's type.
+
+        Returns:
+            list: The list of permissions.
+        """
+        permissions_map = {
+            UserType.STUDENT: [Permissions.VIEW_COURSE],
+            UserType.TEACHER: [Permissions.VIEW_COURSE, Permissions.EDIT_COURSE, Permissions.CREATE_COURSE],
+            UserType.SUPERVISOR: [Permissions.VIEW_COURSE, Permissions.EDIT_COURSE, Permissions.CREATE_COURSE, Permissions.DELETE_COURSE],
         }
-        return action in permissions.get(self.user_type, [])
-
-
-class UserActivity(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    activity_type = models.CharField(max_length=50)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    details = models.TextField(blank=True)
-
-    def __str__(self):
-        return f"{self.user.username} - {self.activity_type} at {self.timestamp}"
+        return permissions_map.get(self.user_type, [])
