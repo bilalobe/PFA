@@ -3,23 +3,29 @@ import firebase_admin
 from firebase_admin import credentials, firestore, auth, storage
 import logging
 
-# Configure logging
 logging.basicConfig(level=logging.INFO)
 
 def initialize_firebase_admin():
     """
     Initializes the Firebase Admin SDK, handling potential errors.
+
+    This function attempts to get the already initialized app. If the app has not been initialized yet,
+    it checks if a service account file is available. If the file is found, it uses the service account
+    credentials to initialize the app. If the file is not found, it falls back to using environment variables
+    to retrieve the necessary credentials.
+
+    Returns:
+        firebase_admin.App: The initialized Firebase Admin app.
+
+    Raises:
+        FileNotFoundError: If the service account file is not found.
     """
     try:
-        # Attempt to get the already initialized app
         return firebase_admin.get_app() 
     except ValueError:
-        # Initialize the app if it hasn't been initialized yet
         try:
-            # Using a service account file (if available)
             cred = credentials.Certificate('path/to/your/serviceAccountKey.json') 
         except FileNotFoundError:
-            # Using environment variables 
             cred = credentials.Certificate({
                 "type": os.environ.get("FIREBASE_TYPE", ""),
                 "project_id": os.environ.get("FIREBASE_PROJECT_ID", ""),
