@@ -2,6 +2,9 @@ from django.db import models
 from common.firebase_admin_init import db
 
 class FirestoreDocumentMixin(models.Model):
+    """
+    Mixin for models that sync data to Firestore.
+    """
     class Meta:
         abstract = True
 
@@ -27,3 +30,22 @@ class FirestoreDocumentMixin(models.Model):
 
     def _get_collection_name(self):
         return f'{self.__class__.__name__.lower()}s'
+    
+class TimestampMixin(models.Model):
+    """
+    Mixin for adding created_at and updated_at timestamps to models.
+    """
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        abstract = True
+
+class UserRelatedMixin(models.Model):
+    """
+    Mixin for models that are related to a User.
+    """
+    user = models.ForeignKey('User', on_delete=models.CASCADE)
+
+    class Meta:
+        abstract = True
