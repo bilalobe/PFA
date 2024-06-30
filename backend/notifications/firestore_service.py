@@ -5,6 +5,7 @@ db = firestore.Client()
 class FirestoreNotificationService:
     @staticmethod
     def save_notification(user_id, message, notification_type):
+        """Saves a new notification to the Firestore database."""
         notification_ref = db.collection('notifications').document()
         notification_ref.set({
             'user_id': user_id,
@@ -15,7 +16,7 @@ class FirestoreNotificationService:
 
     @staticmethod
     def get_user_preferences(user_id):
-        # Fetch user preferences from Firestore
+        """Retrieves user preferences from the Firestore database."""
         preferences_ref = db.collection('user_preferences').document(user_id)
         doc = preferences_ref.get()
         if doc.exists:
@@ -24,38 +25,32 @@ class FirestoreNotificationService:
     
     @staticmethod
     def update_notification(notification_id, updates):
-        """
-        Updates a notification document in the Firestore database.
-
-        Args:
-            notification_id (str): The ID of the notification document to update.
-            updates (dict): A dictionary of fields to update.
-        """
+        """Updates a notification document in the Firestore database."""
         notification_ref = db.collection('notifications').document(notification_id)
         notification_ref.update(updates)
 
-
 class FirestoreReviewService:
-    db = firestore.Client()
-
     @staticmethod
     def is_user_enrolled_in_course(user_id, course_id):
-        user_ref = FirestoreReviewService.db.collection('users').document(user_id)
+        """Checks if a user is enrolled in a specific course."""
+        user_ref = db.collection('users').document(user_id)
         user_doc = user_ref.get()
         if user_doc.exists:
             user_data = user_doc.to_dict()
-            if user_data:  # Ensure user_data is not None
-                return course_id in user_data.get('enrollments', [])
+            enrollments = user_data.get('enrollments') if user_data else []
+            return course_id in enrollments
         return False
 
     @staticmethod
     def has_user_liked_review(user_id, review_id):
-        likes_ref = FirestoreReviewService.db.collection('review_likes').document(f'{user_id}_{review_id}')
+        """Checks if a user has liked a specific review."""
+        likes_ref = db.collection('review_likes').document(f'{user_id}_{review_id}')
         return likes_ref.get().exists
 
     @staticmethod
     def like_review(user_id, review_id):
-        likes_ref = FirestoreReviewService.db.collection('review_likes').document(f'{user_id}_{review_id}')
+        """Records a user's like for a specific review."""
+        likes_ref = db.collection('review_likes').document(f'{user_id}_{review_id}')
         likes_ref.set({
             'user_id': user_id,
             'review_id': review_id
@@ -63,5 +58,6 @@ class FirestoreReviewService:
 
     @staticmethod
     def dislike_review(user_id, review_id):
-        likes_ref = FirestoreReviewService.db.collection('review_likes').document(f'{user_id}_{review_id}')
+        """Removes a user's like for a specific review."""
+        likes_ref = db.collection('review_likes').document(f'{user_id}_{review_id}')
         likes_ref.delete()
