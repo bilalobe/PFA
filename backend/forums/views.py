@@ -1,4 +1,6 @@
-# Import necessary modules and classes
+import logging
+from django.db.models import Sum
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, permissions, status, filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -8,10 +10,8 @@ from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.pagination import PageNumberPagination
 
 from django.contrib.auth import get_user_model
-from backend.users.models import User
 from django.core.cache import cache
 from django.contrib.contenttypes.models import ContentType
-
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
@@ -22,17 +22,18 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 from backend.comments.serializers import CommentSerializer
 from backend.moderation.models import Moderation
-
+from backend.threads.serializers import ThreadSerializer
+from backend.posts.serializers import PostSerializer
 from .tasks import flag_post_for_moderation
 from .models import Forum, Thread, Post, Comment, UserForumPoints
-from .serializers import ForumSerializer, ThreadSerializer, PostSerializer
+from .serializers import ForumSerializer
 from .permissions import IsInstructorOrReadOnly, IsEnrolledStudentOrReadOnly
 from django_elasticsearch_dsl.search import Search
 
+logger = logging.getLogger(__name__)
+
 # Ensure User model is correctly referenced
 User = get_user_model()
-if not hasattr(User, 'profile'):
-    User = get_user_model()
 
 # Channel layer initialization
 channel_layer = get_channel_layer()
@@ -44,27 +45,30 @@ class AwardPointsMixin:
         user_points.points += points
         user_points.save()
 
-
 class StandardResultsSetPagination(PageNumberPagination):
+    """
+    Standard pagination settings for viewsets.
+    """
     page_size = 10
     page_size_query_param = "page_size"
     max_page_size = 100
-
 
 class ForumViewSet(viewsets.ModelViewSet):
     """
     API endpoint for managing forums.
     Allows searching by title and description.
     """
-    queryset = Forum.objects.all()
+    queryset = Forum.objects.all().prefetch_related('threads').select_related('created_by')
     serializer_class = ForumSerializer
-    authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated, IsInstructorOrReadOnly]
+    permission_classes = [permissions.IsAuthenticated, IsInstructorOrReadOnly]
     filter_backends = [filters.SearchFilter]
     search_fields = ["title", "description"]
     pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
+        """
+        Customize the queryset to filter by course_id and module_id if provided.
+        """
         queryset = super().get_queryset()
         course_id = self.request.GET.get('course_id')
         module_id = self.request.GET.get('module_id')
@@ -91,7 +95,6 @@ class ForumViewSet(viewsets.ModelViewSet):
         # Cache the data for 1 hour
         cache.set(cache_key, data, 60 * 60)
         return Response(data)
-
 
 class ThreadViewSet(AwardPointsMixin, viewsets.ModelViewSet):
     """
@@ -123,7 +126,6 @@ class ThreadViewSet(AwardPointsMixin, viewsets.ModelViewSet):
             async_to_sync(channel_layer.group_send)(
                 "forum_updates", {"type": "forum_update", "message": message}
             )
-
 
 class PostViewSet(viewsets.ModelViewSet):
     """
@@ -219,7 +221,6 @@ class PostViewSet(viewsets.ModelViewSet):
 
         spell = SpellChecker()
         words = text.split()
-        # Ensure all elements in the list are strings to satisfy the type requirement of join.
         corrected_words = [spell.correction(word) if word else '' for word in words if word is not None and isinstance(word, str)]
         corrected_text = " ".join(word for word in corrected_words if word is not None)
         return corrected_text
@@ -265,7 +266,6 @@ class PostViewSet(viewsets.ModelViewSet):
                 {"message": "Please provide a search query."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-
 
 class CommentViewSet(viewsets.ModelViewSet):
     """
