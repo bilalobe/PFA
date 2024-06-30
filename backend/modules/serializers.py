@@ -3,6 +3,7 @@ from .models import Module
 from quizzes.serializers import QuizSerializer
 from resources.serializers import ResourceSerializer
 from courses.serializers import CourseSerializer
+from common.validators import validate_order
 
 
 class ModuleSerializer(serializers.ModelSerializer):
@@ -64,13 +65,4 @@ class ModuleUpdateSerializer(serializers.ModelSerializer):
         """
         module_id = self.instance.id if self.instance else None
         course_id = self.context["request"].data.get("course")
-
-        if (
-            Module.objects.filter(course_id=course_id, order=value)
-            .exclude(id=module_id)
-            .exists()
-        ):
-            raise serializers.ValidationError(
-                "Module order must be unique within a course."
-            )
-        return value
+        return validate_order(value, course_id, module_id)
