@@ -1,26 +1,19 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import (
-    UserForumPointsViewSet,
-    BadgeViewSet,
-    UserBadgeViewSet,
-    award_points,
-    award_user_badge,
-)
+from . import views
 
 router = DefaultRouter()
-router.register(
-    r"user_forum_points", UserForumPointsViewSet, basename="user-forum-points"
-)
-router.register(r"badges", BadgeViewSet, basename="badge")
-router.register(r"user_badges", UserBadgeViewSet, basename="user-badge")
+
+router.register(r'userlevels', views.UserLevelViewSet)
+router.register(r'userforumpoints', views.UserForumPointsViewSet)
+router.register(r'badges', views.BadgeViewSet)
+router.register(r'userbadges', views.UserBadgeViewSet)
+router.register(r'challenges', views.ChallengeViewSet)
+router.register(r'userchallenges', views.UserChallengeViewSet)
+router.register(r'quests', views.QuestViewSet)
+router.register(r'userquests', views.UserQuestViewSet)
+router.register(r'userachievements', views.UserAchievementViewSet)
 
 urlpatterns = [
-    path("", include(router.urls)),
-    path("users/<int:user_id>/points/", award_points, name="award_user_points"),
-    path(
-        "users/<int:user_id>/badges/<str:badge_name>/",
-        award_user_badge,
-        name="award_user_badge",
-    ),
+    path('', include(router.urls)),
 ]
