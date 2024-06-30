@@ -24,6 +24,34 @@ Functions:
 Each function utilizes Firestore's SERVER_TIMESTAMP for date fields to ensure consistency with server time.
 """
 
+def award_points(user_id: str, points: int) -> None:
+    """
+    Awards points to a user.
+    
+    Args:
+        user_id (str): The ID of the user.
+        points (int): The number of points to award.
+    
+    Raises:
+        ValueError: If points is not a positive integer.
+    """
+    if points <= 0:
+        raise ValueError("Points must be a positive integer.")
+    
+    user_ref = db.collection('Users').document(user_id)
+
+    def update_points(transaction):
+        snapshot = transaction.get(user_ref)
+        if not snapshot.exists:
+            raise ValueError("User not found.")
+        
+        new_points = snapshot.get('forum_points', 0) + points
+        transaction.update(user_ref, {'forum_points': new_points})
+
+    transaction = db.transaction()
+    update_points(transaction)
+
+
 def add_user(user_id: str, username: str, level: int = 1, experience: int = 0, forum_points: int = 100) -> None:
     """
     Adds a new user to the 'Users' collection.
