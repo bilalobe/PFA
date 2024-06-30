@@ -1,8 +1,11 @@
+import logging
 from rest_framework import serializers
 from .models import User
 from firebase_admin import auth, storage
 from backend.common.firebase_admin_init import db
+from google.cloud.firestore import DocumentReference
 
+logger = logging.getLogger(__name__)
 
 class UserSerializer(serializers.ModelSerializer):
     """
@@ -20,12 +23,13 @@ class UserDetailSerializer(serializers.ModelSerializer):
     additional_info = serializers.SerializerMethodField()
 
     def get_additional_info(self, obj):
-        # Retrieve additional user info from Firestore
-        doc_ref = db.collection('users').document(obj.firebase_uid)
-        doc = doc_ref.get()
-        if doc.exists:
-            return doc.to_dict()
-        return {}
+        try:
+            doc_ref = db.collection('users').document(obj.firebase_uid)
+            doc = doc_ref.get()
+            return doc.to_dict() if doc.exists else {}
+        except Exception as e:
+            logger.error(f"Error retrieving additional info from Firestore: {e}")
+            return {}
 
     class Meta:
         model = User
@@ -44,19 +48,18 @@ class UserCreateSerializer(serializers.Serializer):
                 password=validated_data['password'],
                 display_name=validated_data['username']
             )
-            # Store additional data in Firestore
             doc_ref = db.collection('users').document(user_record.uid)
             doc_ref.set({'user_type': validated_data['user_type']})
             return {'firebase_uid': user_record.uid, **validated_data}
         except Exception as e:
+            logger.error(f"Error creating user: {e}")
             raise serializers.ValidationError({"firebase": str(e)})
 
 class UserUpdateSerializer(serializers.Serializer):
     """
-    Serializer for updating user data.
+    Serializer for updating user information.
 
-    This serializer is used to update user data in the backend.
-    It provides fields for updating the username, email, user type, bio, and profile picture.
+    This serializer is used to update user information in the database and Firebase authentication.
 
     Attributes:
         username (CharField): The username of the user. Optional.
@@ -66,10 +69,10 @@ class UserUpdateSerializer(serializers.Serializer):
         profile_picture (ImageField): The profile picture of the user. Optional.
 
     Methods:
-        update(instance, validated_data): Updates the user data in the backend.
+        update(instance, validated_data): Updates the user information in the database and Firebase authentication.
 
     Raises:
-        serializers.ValidationError: If there is an error during the update process.
+        serializers.ValidationError: If there is an error updating the user information.
 
     """
 
@@ -80,17 +83,29 @@ class UserUpdateSerializer(serializers.Serializer):
     profile_picture = serializers.ImageField(required=False)
 
     def update(self, instance, validated_data):
+        """
+        Updates the user information in the database and Firebase authentication.
+
+        Args:
+            instance: The instance of the user to be updated.
+            validated_data: The validated data containing the updated user information.
+
+        Returns:
+            dict: The validated data containing the updated user information.
+
+        Raises:
+            serializers.ValidationError: If there is an error updating the user information.
+
+        """
         try:
             user = auth.update_user(
                 instance.firebase_uid,
                 email=validated_data.get('email', None),
                 display_name=validated_data.get('username', None)
             )
-            # Update Firestore data
             doc_ref = db.collection('users').document(instance.firebase_uid)
             update_data = {k: v for k, v in validated_data.items() if k != 'profile_picture'}
             if 'profile_picture' in validated_data:
-                # Handle profile picture upload to Firebase Storage and store URL in Firestore
                 picture = validated_data['profile_picture']
                 bucket = storage.bucket()
                 blob = bucket.blob(f'user_profiles/{instance.firebase_uid}/profile_picture')
@@ -100,4 +115,5 @@ class UserUpdateSerializer(serializers.Serializer):
             doc_ref.update(update_data)
             return validated_data
         except Exception as e:
+            logger.error(f"Error updating user: {e}")
             raise serializers.ValidationError({"firebase": str(e)})
