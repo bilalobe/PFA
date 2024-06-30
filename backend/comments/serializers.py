@@ -1,6 +1,8 @@
+import logging
 from rest_framework import serializers
-from .models import Comment  # Ensure this import points to the correct Comment model
+from .models import Comment
 
+logger = logging.getLogger(__name__)
 
 class CommentSerializer(serializers.ModelSerializer):
     author_username = serializers.CharField(source="author.username", read_only=True)
