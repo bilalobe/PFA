@@ -3,13 +3,14 @@ from django.contrib.auth import get_user_model
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from google.cloud.firestore import Client, Transaction
+from backend.common.firebase_admin_init import db
 
 from backend.courses.models import Course
 from backend.quizzes.utils import auto_grade_quiz_attempt
-from .models import Quiz, QuizQuestion, QuizAnswerChoice, UserQuizAttempt
+from .models import Quiz, QuizQuestion, QuizAnswerChoice
 from .serializers import (
     QuizSerializer, QuizQuestionSerializer, QuizAnswerChoiceSerializer,
-    UserQuizAttemptSerializer, UserQuizAttemptCreateSerializer, UserQuizAttemptUpdateSerializer,
 )
 from .permissions import IsTeacherOrReadOnly
 
@@ -64,39 +65,86 @@ class QuizAnswerChoiceViewSet(BaseViewSet):
     def perform_create(self, serializer):
         self.perform_create_with_user(serializer, QuizQuestion, "question_pk")
 
-class UserQuizAttemptViewSet(viewsets.ModelViewSet):
-    queryset = UserQuizAttempt.objects.all()
+class UserQuizAttemptViewSet(viewsets.ViewSet):
+    """
+    A viewset for handling user quiz attempts.
+
+    Methods:
+    - list: Get a list of user quiz attempts.
+    - create: Create a new user quiz attempt.
+    - update: Update an existing user quiz attempt.
+    """
+
     permission_classes = [permissions.IsAuthenticated]
 
-    def get_serializer_class(self):
-        if self.action == "create":
-            return UserQuizAttemptCreateSerializer
-        elif self.action in ["update", "partial_update"]:
-            return UserQuizAttemptUpdateSerializer
-        return UserQuizAttemptSerializer
+    def list(self, request):
+        """
+        Get a list of user quiz attempts.
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        If the user is a staff member, all quiz attempts are returned.
+        Otherwise, only the quiz attempts of the authenticated user are returned.
 
-    def get_queryset(self):
-        # Use getattr to safely access is_staff with a default of False
-        if getattr(self.request.user, 'is_staff', False):
-            return UserQuizAttempt.objects.all()
-        return UserQuizAttempt.objects.filter(user=self.request.user)
+        Returns:
+        - Response: A response containing the list of quiz attempts.
+        """
+        user = request.user
+        if user.is_staff:
+            query = db.collection('UserQuizAttempts').stream()
+        else:
+            query = db.collection('UserQuizAttempts').where('user_id', '==', user.id).stream()
+        attempts = [doc.to_dict() for doc in query]
+        return Response(attempts)
 
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()
-        if instance.completed:
-            return Response({"detail": "This quiz attempt has already been completed."}, status=status.HTTP_400_BAD_REQUEST)
-        return super().update(request, *args, **kwargs)
+    def create(self, request):
+        """
+        Create a new user quiz attempt.
 
-    def update_attempt(self, request, pk, **kwargs):
-        # Use get_object_or_404 directly from django.shortcuts
-        instance = get_object_or_404(UserQuizAttempt, pk=pk)
-        if instance.completed:
-            return Response({"detail": "This quiz attempt has already been completed."}, status=status.HTTP_400_BAD_REQUEST)
-        serializer = self.get_serializer(instance, data=request.data, partial=kwargs.get("partial", False))
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        auto_grade_quiz_attempt(instance.id)
-        return Response(serializer.data)
+        The user ID is added to the request data before creating the attempt.
+
+        Returns:
+        - Response: A response containing the created quiz attempt data.
+        """
+        data = request.data.copy()
+        data['user_id'] = request.user.id
+
+        # Start a transaction
+        with db.transaction() as transaction:
+            # Add the new quiz attempt data
+            ref = db.collection('UserQuizAttempts').document()
+            transaction.set(ref, data)
+
+        return Response(data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, pk=None):
+        """
+        Update an existing user quiz attempt.
+
+        The attempt is updated within a transaction. If the attempt is already completed,
+        an error is raised. After the update, the attempt is graded.
+
+        Args:
+        - pk (str): The ID of the quiz attempt to update.
+
+        Returns:
+        - Response: A response containing the updated quiz attempt data.
+        """
+        def transaction_update(transaction, doc_ref):
+            doc = doc_ref.get(transaction=transaction)
+            if not doc.exists:
+                raise ValueError(f"Document {pk} not found.")
+            data = doc.to_dict()
+            if data['completed']:
+                raise ValueError("This quiz attempt has already been completed.")
+            updated_data = request.data.copy()
+            transaction.update(doc_ref, updated_data)
+            return updated_data
+
+        doc_ref = db.collection('UserQuizAttempts').document(pk)
+
+        try:
+            # Corrected transaction usage
+            updated_data = db.transaction(lambda transaction: transaction_update(transaction, doc_ref)) # type: ignore
+            auto_grade_quiz_attempt(pk)  # Grade the attempt
+            return Response(updated_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response({"detail": str(e)}, status=status.HTTP_404_NOT_FOUND)
