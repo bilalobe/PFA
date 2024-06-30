@@ -6,9 +6,9 @@ from django.core.cache import cache
 from django.core.mail import send_mail
 from django.conf import settings
 from posts.serializers import PostSerializer
-from backend.game.views import award_points
 from backend.notifications.tasks import send_notification
 from backend.AI.views import sentiment_analysis, correct_text, translate_text
+from backend.game.utils import award_points
 from backend.common.firebase_admin_init import db
 import logging
 
@@ -36,7 +36,7 @@ class PostViewSet(viewsets.ModelViewSet):
         if post:
             send_notification(post, self.request, "New post created")
             self.analyze_and_flag_post(post_ref)
-            award_points(self.request.user, 5)
+            award_points(str(self.request.user.pk), 5)
         else:
             logging.error("Failed to create post reference in Firestore")
 
