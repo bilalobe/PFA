@@ -1,10 +1,10 @@
-import re
 from datetime import datetime
 from enum import Enum
 import logging
 
 from backend.users.tasks import resize_profile_picture
 from backend.common.firebase_admin_init import db
+from backend.common.validators import validate_email, validate_username
 import logging
 from enum import Enum
 
@@ -59,8 +59,8 @@ class User:
                  role=UserRole.STUDENT, facebook_link=None, twitter_link=None, linkedin_link=None, instagram_link=None,
                  status=UserStatus.ACTIVE, last_login=None, courses=None, enrollments=None, user_id=None):
         try:
-            self.username = self.validate_username(username)
-            self.email = self.validate_email(email)
+            self.username = validate_username(username)
+            self.email = validate_email(email)
             self.user_type = user_type
             self.bio = bio
             self.profile_picture = profile_picture
@@ -157,50 +157,6 @@ class User:
         total_fields = len(fields)
         completeness = (filled_fields / total_fields) * 100
         return f"{completeness}%"
-
-    @staticmethod
-    def validate_username(username):
-        """
-        Validates the username.
-
-        Args:
-            username (str): The username to validate.
-
-        Returns:
-            str: The validated username.
-
-        Raises:
-            ValueError: If the username is invalid.
-        """
-        try:
-            if not 3 <= len(username) <= 20:
-                raise ValueError("Username must be between 3 and 20 characters")
-            return username
-        except ValueError as e:
-            logging.error(f"Error validating username: {e}")
-            raise
-
-    @staticmethod
-    def validate_email(email):
-        """
-        Validates the email address.
-
-        Args:
-            email (str): The email address to validate.
-
-        Returns:
-            str: The validated email address.
-
-        Raises:
-            ValueError: If the email address is invalid.
-        """
-        try:
-            if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-                raise ValueError("Invalid email format")
-            return email
-        except ValueError as e:
-            logging.error(f"Error validating email: {e}")
-            raise
 
     @property
     def permissions(self):

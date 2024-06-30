@@ -63,26 +63,6 @@ def test_profile_completeness(user):
     completeness = user.profile_completeness()
     assert completeness == "100%"
 
-def test_validate_username_valid():
-    username = User.validate_username("testuser")
-    assert username == "testuser"
-
-def test_validate_username_too_short():
-    with pytest.raises(ValueError):
-        User.validate_username("us")
-
-def test_validate_username_too_long():
-    with pytest.raises(ValueError):
-        User.validate_username("thisusernameistoolongtobevalid")
-
-def test_validate_email_valid():
-    email = User.validate_email("testuser@example.com")
-    assert email == "testuser@example.com"
-
-def test_validate_email_invalid():
-    with pytest.raises(ValueError):
-        User.validate_email("invalid_email")
-
 def test_permissions_student():
     user = User(username="testuser", email="testuser@example.com", user_type=UserType.STUDENT)
     permissions = user.permissions
