@@ -1,13 +1,14 @@
 import os
+from firebase_admin import storage
 from celery import shared_task
 from vt import Client
 from .models import Resource
 from PIL import Image
-from django.conf import settings
+import io
 import logging
+from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
-
 
 @shared_task(bind=True)
 def process_uploaded_resource(self, resource_id):
@@ -15,50 +16,58 @@ def process_uploaded_resource(self, resource_id):
     Processes an uploaded resource: scans for viruses and generates a thumbnail (if applicable).
     """
     resource = Resource.objects.get(pk=resource_id)
+    bucket = storage.bucket()
 
     # 1. Virus Scan with VirusTotal
     virustotal_api_key = os.environ.get("VIRUSTOTAL_API_KEY")
     if not virustotal_api_key:
         raise ValueError("VIRUSTOTAL_API_KEY environment variable is not set.")
-    with Client(virustotal_api_key) as client:
+    
+    # Check cache for previous scan results
+    cache_key = f"virus_scan_{resource_id}"
+    results = cache.get(cache_key)
+    
+    if not results:
         try:
-            with open(resource.file.path, "rb") as file:
-                analysis = client.scan_file(file, wait_for_completion=True)
+            blob = bucket.blob(resource.file.name)
+            # Process file directly in memory
+            file_bytes = blob.download_as_bytes()
+            with Client(virustotal_api_key) as client:
+                analysis = client.scan_file(io.BytesIO(file_bytes), wait_for_completion=True)
             results = analysis.last_analysis_results
-            # Handle VirusTotal results (e.g., log, store in database, take action)
-            # Example logging
-            logger.info(
-                f"VirusTotal scan results for resource {resource.id}: {results}"
-            )
+            cache.set(cache_key, results, timeout=86400)  # Cache results for 24 hours
+            logger.info(f"VirusTotal scan results for resource {resource.id}: {results}")
         except Exception as e:
             logger.error(f"Error scanning file with VirusTotal: {e}")
             self.retry(exc=e, countdown=60)  # Retry after 60 seconds
 
     # 2. Thumbnail Generation (if applicable)
-    if resource.file_type.startswith("image/"):
+    if resource.file_type.startswith("image/") and not resource.thumbnail:
         generate_thumbnail(resource_id)
-
 
 def generate_thumbnail(resource_id):
     """
-    Generates a thumbnail for an image resource.
+    Generates a thumbnail for an image resource and uploads it to Firebase Storage.
     """
     resource = Resource.objects.get(pk=resource_id)
+    bucket = storage.bucket()
 
     try:
-        image = Image.open(resource.file.path)
+        blob = bucket.blob(resource.file.name)
+        # Process image directly in memory
+        image_bytes = blob.download_as_bytes()
+        image = Image.open(io.BytesIO(image_bytes))
         image.thumbnail((200, 200))
-        thumbnail_path = os.path.join(
-            settings.MEDIA_ROOT, "thumbnails", f"{resource.id}.jpg"
-        )
 
-        # Ensure the 'thumbnails' directory exists
-        os.makedirs(os.path.dirname(thumbnail_path), exist_ok=True)
+        # Convert PIL image to bytes for upload
+        thumb_io = io.BytesIO()
+        image.save(thumb_io, 'JPEG', quality=85)
+        thumb_io.seek(0)
 
-        image.save(thumbnail_path, "JPEG")
-
-        # Update the Resource model with the thumbnail path (relative to MEDIA_ROOT)
-        resource.thumbnail.name = os.path.join("thumbnails", f"{resource.id}.jpg")
+        # Upload thumbnail to Firebase Storage
+        thumbnail_blob = bucket.blob(f'thumbnails/{resource.id}.jpg')
+        thumbnail_blob.upload_from_file(thumb_io, content_type='image/jpeg')
+        resource.thumbnail_url = thumbnail_blob.public_url
         resource.save()
 
     except Exception as e:

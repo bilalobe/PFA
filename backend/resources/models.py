@@ -1,8 +1,7 @@
 from django.db import models
 from django.conf import settings
 from courses.models import Module
-from backend.users.models import User
-
+from google.cloud import firestore
 
 def resource_directory_path(instance, filename):
     # Use a setting from settings.py for base upload path if applicable
@@ -33,7 +32,7 @@ class Resource(models.Model):
         Module, on_delete=models.CASCADE, related_name="resources"
     )
     uploaded_by = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="resources_uploaded"
+        "users.User", on_delete=models.CASCADE, related_name="resources_uploaded"
     )
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
@@ -43,14 +42,35 @@ class Resource(models.Model):
     upload_date = models.DateTimeField(auto_now_add=True)
     download_count = models.PositiveIntegerField(default=0)
     thumbnail = models.ImageField(upload_to="thumbnails/", blank=True, null=True)
+    thumbnail_url = models.URLField(blank=True, null=True)
 
     def __str__(self):
         return self.title
 
+    
     def save(self, *args, **kwargs):
         # Calculate and store file size on save
         if self.file:
             self.file_size = self.file.size
             # Ensure file_type is determined correctly; might need manual handling
             self.file_type = self.file.file.content_type
-        super().save(*args, **kwargs)
+    
+        super().save(*args, **kwargs)  # Call the original save method
+    
+        # Update Firestore document in a transaction
+        db = firestore.Client()
+        doc_ref = db.collection("resources").document(str(self.id))
+    
+        @firestore.transactional
+        def update_in_transaction(transaction, doc_ref, data):
+            transaction.set(doc_ref, data)
+    
+        transaction = db.transaction()
+        update_in_transaction(transaction, doc_ref, {
+            "title": self.title,
+            "description": self.description,
+            "file_type": self.file_type,
+            "file_size": self.file_size,
+            "upload_date": self.upload_date.strftime("%Y-%m-%d %H:%M:%S"),
+            "download_count": self.download_count,
+        })
