@@ -1,6 +1,8 @@
+import logging
 from rest_framework import serializers
 from .models import Resource
 
+logger = logging.getLogger(__name__)
 
 class ResourceSerializer(serializers.ModelSerializer):
     uploaded_by = serializers.CharField(source="uploaded_by.username", read_only=True)
@@ -34,17 +36,10 @@ class ResourceSerializer(serializers.ModelSerializer):
         )
 
     def get_file_url(self, obj):
-        """
-        Provides the full URL for file access.
-        """
         if obj.file:
             request = self.context.get("request")
-            if request is not None:
-                return request.build_absolute_uri(obj.file.url)
+            return request.build_absolute_uri(obj.file.url) if request else None
         return None
 
     def get_file_size_kb(self, obj):
-        """
-        Returns file size in KB.
-        """
         return obj.file_size / 1024 if obj.file_size else 0
