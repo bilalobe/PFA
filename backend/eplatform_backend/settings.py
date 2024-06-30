@@ -59,6 +59,10 @@ SECURE_HSTS_SECONDS = (
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Include subdomains in the HSTS policy
 SECURE_HSTS_PRELOAD = True  # Allow preloading of the site's HSTS policy
 
+FCM_SERVER_KEY = os.environ.get("FCM_SERVER_KEY")
+FCM_SENDER_ID = os.environ.get("FCM_SENDER_ID")
+
+
 """ # AWS S3 Settings for secure access
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")
