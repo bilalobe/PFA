@@ -1,25 +1,19 @@
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-from .serializers import CommentSerializer
 
 
-def send_new_comment_notification(comment, request):
+def send_new_comment_notification(comment_data, request):
     """
     Sends a new comment notification through the corresponding thread group.
     """
     channel_layer = get_channel_layer()
     if channel_layer is not None:
-
-        @async_to_sync()
-        async def send_group_message():
-            await channel_layer.group_send(
-                f"thread_{comment.post.thread.id}",
+        post_id = comment_data.get('post_id')
+        if post_id:
+            async_to_sync(channel_layer.group_send)(
+                f"thread_{post_id}",
                 {
                     "type": "new_comment",
-                    "comment_data": CommentSerializer(
-                        comment, context={"request": request}
-                    ).data,
+                    "comment_data": comment_data,
                 },
             )
-
-        send_group_message()
