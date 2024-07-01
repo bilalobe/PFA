@@ -1,12 +1,10 @@
-from django.db import models
+""" from django.db import models
 from backend.users.models import User
 from courses.models import Course
 
 
 class ChatRoom(models.Model):
-    """
     Represents a chat room.
-    """
 
     name = models.CharField(max_length=255)
     type = models.CharField(
@@ -27,7 +25,6 @@ class ChatRoom(models.Model):
 
 
 class ChatMessage(models.Model):
-    """
     Represents a single message in a chat room.
 
     Attributes:
@@ -36,7 +33,6 @@ class ChatMessage(models.Model):
         receiver (User): The user who received the message.
         message (str): The content of the message.
         timestamp (datetime): The timestamp when the message was created.
-    """
 
     chat_room = models.ForeignKey(
         ChatRoom, on_delete=models.CASCADE, related_name="messages"
@@ -53,3 +49,4 @@ class ChatMessage(models.Model):
 
     class Meta:
         ordering = ["timestamp"]
+ """
