@@ -1,12 +1,10 @@
-import logging
 from rest_framework import serializers
+from common.firestore_mixins import TimestampMixin
 
-logger = logging.getLogger(__name__)
 
-class CommentSerializer(serializers.ModelSerializer):
-    author_username = serializers.CharField(source="author.username", read_only=True)
-    created_at = serializers.DateTimeField(read_only=True)
-
-    class Meta:
-        fields = ("id", "post", "author", "author_username", "content", "created_at")
-        read_only_fields = ("id", "author", "created_at")
+class CommentSerializer(serializers.Serializer):
+    id = serializers.CharField(read_only=True) 
+    post_id = serializers.CharField()
+    author = serializers.CharField(max_length=255)
+    content = serializers.CharField()
+    created_at = TimestampMixin()

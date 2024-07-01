@@ -1,6 +1,7 @@
 """ from django.db import models
 from django.contrib.auth.models import User
 from posts.models import Post
+from google.cloud.firestore import Client
 
 
 class Comment(models.Model):
@@ -14,4 +15,15 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"{self.author} commented on {self.post}"
- """
+
+            # Existing fields...
+        
+    def to_firestore_doc(self):
+        {#}Converts the comment instance into a Firestore document format.
+        return {
+            "author": self.author.username,
+            "post_id": self.post.id,
+            "content": self.content,
+            "created_at": self.created_at,
+        }
+"""
