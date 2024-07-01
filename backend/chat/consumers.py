@@ -1,58 +1,93 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
-from .models import ChatMessage, ChatRoom
 from channels.db import database_sync_to_async
-from channels.layers import get_channel_layer
-from courses.models import Course
 from django.utils import timezone
-
+from backend.common.firebase_admin_init import db
+from google.cloud.firestore import SERVER_TIMESTAMP, ArrayUnion, Query
+from courses.models import Course
 
 class ChatConsumer(AsyncWebsocketConsumer):
+    """
+    ChatConsumer handles the WebSocket connections for the chat feature.
+
+    Attributes:
+        room_type (str): The type of the chat room ('private' or 'course').
+        room_id (str): The ID of the chat room.
+        user (User): The user associated with the WebSocket connection.
+        room_name (str): The name of the chat room.
+        room_group_name (str): The name of the channel group for the chat room.
+
+    Methods:
+        connect(): Called when the WebSocket is handshaking as part of the connection process.
+        disconnect(): Called when the WebSocket closes for any reason.
+        receive(text_data): Called when the WebSocket receives a message from the client.
+        chat_message(event): Sends a chat message to the WebSocket client.
+        typing_indicator(event): Sends a typing indicator to the WebSocket client.
+        save_message(message): Saves a chat message to the database.
+        get_recent_messages(): Retrieves the most recent chat messages from the database.
+        send_recent_messages(): Sends the most recent chat messages to the WebSocket client.
+        get_course(course_id): Retrieves a course object from the database.
+        is_user_enrolled(user, course): Checks if a user is enrolled in a course.
+        update_user_presence(is_online): Updates the user's presence status.
+        user_presence_update(event): Sends a user presence update to the WebSocket client.
+    """
+    
     async def connect(self):
-        self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
-        self.room_group_name = f"chat_{self.room_name}"
-        self.user = self.scope["user"]
+        self.room_type = self.scope['url_route']['kwargs']['room_type']
+        self.room_id = self.scope['url_route']['kwargs']['room_id']
+        self.user = self.scope['user']
 
-        # Join the room group
-        channel_layer = get_channel_layer()
-        if channel_layer is not None:
-            await channel_layer.group_add(self.room_group_name, self.channel_name)
-            if hasattr(channel_layer, "group_send"):
-                await channel_layer.group_send(
-                    self.room_group_name,
-                    {
-                        "type": "user_presence_update",
-                        "user": self.user.username,
-                        "is_online": True,
-                    },
-                )
+        if self.room_type not in ['private', 'course']:
+            await self.close(code=4003)
+            return
+
+        if self.room_type == 'private':
+            other_user_id = self.room_id
+            if self.user.id == int(other_user_id):
+                await self.close(code=4003)
+                return
+
+            user_ids = sorted([str(self.user.id), other_user_id])
+            self.room_name = f'private_chat_{user_ids[0]}_{user_ids[1]}'
         else:
-            return await self.close()
+            self.course_id = self.room_id
+            try:
+                self.course = await self.get_course(self.course_id)
+            except Course.DoesNotExist:
+                await self.close(code=4004)
+                return
 
-        # Update user presence
-        await self.update_user_presence(True)
+            if not await self.is_user_enrolled(self.user, self.course):
+                await self.close(code=4003)
+                return
+
+            self.room_name = f'course_chat_{self.course.id}'
+
+        self.room_group_name = f'chat_{self.room_name}'
+
+        if self.channel_layer is not None:
+            await self.channel_layer.group_add(
+                self.room_group_name,
+                self.channel_name
+            )
+        await self.accept()
         await self.send_recent_messages()
 
-        await self.accept()
-
     async def disconnect(self, _):
-        # Leave room group
-        channel_layer = get_channel_layer()
-        if channel_layer is not None:
-            await channel_layer.group_discard(self.room_group_name, self.channel_name)
-
-        # Update user presence
+        if self.channel_layer is not None:
+            await self.channel_layer.group_discard(
+                self.room_group_name,
+                self.channel_name
+            )
         await self.update_user_presence(False)
 
-    # Receive message from WebSocket
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         message = text_data_json.get("message")
         action = text_data_json.get("action")
 
-        # Ensure channel_layer is initialized
-        if self.channel_layer is not None:
-            if action == "typing":
+        if action == "typing":
+            if self.channel_layer is not None:
                 await self.channel_layer.group_send(
                     self.room_group_name,
                     {
@@ -61,8 +96,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         "is_typing": text_data_json.get("is_typing", False),
                     },
                 )
-            elif action == "message":
-                await self.save_message(message)
+        elif action == "message":
+            await self.save_message(message)
+            if self.channel_layer is not None:
                 await self.channel_layer.group_send(
                     self.room_group_name,
                     {
@@ -71,10 +107,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         "user": self.user.username,
                     },
                 )
-        else:
-            print("channel_layer is not initialized.")
 
-    # Send message to WebSocket
     async def chat_message(self, event):
         message = event["message"]
         user = event["user"]
@@ -90,7 +123,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         )
 
     async def typing_indicator(self, event):
-        # Send typing indicator event to client
         await self.send(
             text_data=json.dumps(
                 {
@@ -103,31 +135,33 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def save_message(self, message):
-        ChatMessage.objects.create(
-            chat_room=ChatRoom.objects.get(name=self.room_name),
-            sender=self.user,
-            message=message,
-        )
+        chat_room_ref = db.collection('chatRooms').document(self.room_name)
+        chat_room_ref.update({
+            'messages': ArrayUnion([{
+                'sender': self.user.username,
+                'message': message,
+                'timestamp': SERVER_TIMESTAMP
+            }])
+        })
 
+    
     @database_sync_to_async
     def get_recent_messages(self):
-        return ChatMessage.objects.filter(chat_room__name=self.room_name).order_by(
-            "-timestamp"
-        )[:20]
-
+        messages_ref = db.collection('chatRooms').document(self.room_name).collection('messages')
+        messages = messages_ref.order_by('timestamp', direction=Query.DESCENDING).limit(20).get()
+        return [{'message': message.to_dict()['message'],
+                 'user': message.to_dict()['sender'],
+                 'timestamp': message.to_dict()['timestamp']} for message in messages]
+    
     async def send_recent_messages(self):
         recent_messages = await self.get_recent_messages()
         for message in recent_messages:
-            await self.send(
-                text_data=json.dumps(
-                    {
-                        "type": "chat_message",
-                        "message": message.message,
-                        "user": message.sender.username,
-                        "timestamp": message.timestamp.isoformat(),
-                    }
-                )
-            )
+            await self.send(text_data=json.dumps({
+                'type': 'chat_message',
+                'message': message['message'],
+                'user': message['user'],
+                'timestamp': message['timestamp'],
+            }))
 
     @database_sync_to_async
     def get_course(self, course_id):
@@ -138,10 +172,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return user.enrollments.filter(course=course).exists()
 
     async def update_user_presence(self, is_online):
-        """
-        Updates user presence in the room.
-        """
-        # Ensure channel_layer is properly initialized before using it
         if self.channel_layer is not None:
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -151,13 +181,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     "is_online": is_online,
                 },
             )
-        else:
-            print("channel_layer is not initialized.")
 
     async def user_presence_update(self, event):
-        """
-        Handles user presence updates.
-        """
         await self.send(
             text_data=json.dumps(
                 {
