@@ -1,10 +1,9 @@
-from django.db import models
+""" from django.db import models
 from django.contrib.auth.models import User
 from backend.modules.models import Module
 
 
 class Course(models.Model):
-    """
     Represents a course in the application.
 
     Attributes:
@@ -19,7 +18,6 @@ class Course(models.Model):
         completion_rate (FloatField): The completion rate of the course.
         average_rating (FloatField): The average rating of the course.
         module_set (ManyToManyField): The modules associated with the course.
-    """
 
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
@@ -79,6 +77,7 @@ class DynamicContent(models.Model):
 
     def __str__(self):
         return f"{self.content_type} for {self.module.title}"
+        # Returns a string representation of the object.
 
 
 class InteractiveElement(models.Model):
@@ -100,3 +99,4 @@ class UserCourseInteraction(models.Model):
 
     def __str__(self):
         return f"{self.user.username} {self.interaction_type} {self.course.title}"
+ """
