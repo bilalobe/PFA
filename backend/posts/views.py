@@ -1,102 +1,84 @@
-from rest_framework import viewsets, permissions
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework.exceptions import NotFound, PermissionDenied
-from django.core.cache import cache
-from django.core.mail import send_mail
-from django.conf import settings
-from posts.serializers import PostSerializer
-from backend.notifications.tasks import send_notification
-from backend.AI.views import sentiment_analysis, correct_text, translate_text
-from backend.game.utils import award_points
-from backend.common.firebase_admin_init import db
 import logging
+from rest_framework import viewsets, permissions, status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
+from backend.common.AppService.PostService import PostService, get_post_content
+from posts.serializers import PostSerializer
+from backend.common.services.TranslationService import TranslationService
+from .exceptions import PostNotFoundException
 
 class PostViewSet(viewsets.ModelViewSet):
-    """
-    A viewset for viewing and editing post instances.
-    """
     serializer_class = PostSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
-        """
-        Create a new post, sending a notification and awarding points to the user.
-        """
-        user_ref = db.collection('users').document(self.request.user.pk)
-        user_doc = user_ref.get()
-        if user_doc.exists() and user_doc.to_dict().get('banned_from_forum', False): # type: ignore
-            raise PermissionDenied("You are banned from posting in the forum.")
+        post_service = PostService(self.request.user)
+        try:
+            post = post_service.create_post(serializer.validated_data)
+            # Fixed by removing the second argument as it was not expected by post_creation_actions
+            post_service.post_creation_actions(post)
+        except PermissionDenied as e:
+            raise e
+        except Exception as e:
+            logging.error(f"Failed to create post: {str(e)}")
 
-        post_data = serializer.validated_data
-        post_data['author'] = user_ref
-        post_ref = db.collection('posts').add(post_data)[1]
-        post = post_ref.get().to_dict() if post_ref else None
+@api_view(["GET"])
+def translate_post(request, pk=None):
+    """
+    Translate a post to the specified target language.
 
-        if post:
-            send_notification(post, self.request, "New post created")
-            self.analyze_and_flag_post(post_ref)
-            award_points(str(self.request.user.pk), 5)
-        else:
-            logging.error("Failed to create post reference in Firestore")
+    Args:
+        request (Request): The HTTP request object.
+        pk (int): The ID of the post to be translated.
 
+    Returns:
+        Response: The translated content in the specified target language.
+
+    Raises:
+        PostNotFoundException: If the post with the given ID is not found.
+        Exception: If an error occurs during translation.
+    """
+    if pk is None:
+        return Response({"error": "Post ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        post_content = get_post_content(pk)  # Retrieve the content of the post using its ID
+        target_language = request.query_params.get("to", "en")  # Get the target language from query parameters, default to English
+        translation_service = TranslationService(source_text=post_content, translated_text=None, source_language=None, target_language=target_language)
+        translated_content = translation_service.translate() # type: ignore
+        return Response({"translation": translated_content})  # Return the translated content
+    except PostNotFoundException:
+        return Response({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)  # Post not found
+    except Exception as e:
+        logging.error(f"Error translating post: {str(e)}")  # Log any other exceptions
+        return Response({"error": "An error occurred during translation."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
-    def analyze_and_flag_post(self, post_ref):
-        """
-        Analyzes the content of a post, performs sentiment analysis, and flags the post if necessary.
+@api_view(["GET"])
+def search_post(request, pk=None):
+    """
+    Retrieve the content of a post based on its ID.
 
-        Args:
-            post_ref: A reference to the post document in the database.
+    Args:
+        request (HttpRequest): The HTTP request object.
+        pk (int): The ID of the post to retrieve.
 
-        Returns:
-            None
-        """
-        post = post_ref.get() if post_ref is not None else None
-        if post is not None and post.exists():
-            post_data = post.to_dict()
-            corrected_content = correct_text(post_data['content'])
-            sentiment_result = sentiment_analysis(corrected_content)
-            sentiment = sentiment_result['sentiment']
-            post_ref.update({'sentiment': sentiment, 'content': corrected_content})
+    Returns:
+        Response: The response containing the post content or an error message.
 
-            if sentiment == "negative":
-                author_ref = post_data['author']
-                author_doc = author_ref.get()
-                if author_doc.exists():
-                    author_data = author_doc.to_dict()
-                    strikes = author_data.get('strikes', 0) + 1
-                    author_ref.update({'strikes': strikes})
+    Raises:
+        PostNotFoundException: If the post with the given ID is not found.
+        Exception: If an error occurs while fetching the post.
 
-                    if strikes >= 3:
-                        author_ref.update({'banned_from_forum': True})
-                        author_email = author_data.get('email')  # Assuming email is stored in the user document
-                        if author_email:
-                            send_mail(
-                                'Forum Posting Ban Notification',
-                                'Due to repeated violations of our community guidelines, your account has been banned from posting in the forum.',
-                                settings.DEFAULT_FROM_EMAIL,
-                                [author_email],
-                                fail_silently=False,
-                            )
+    """
+    if pk is None:
+        return Response({"error": "Post ID is required."}, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=True, methods=["get"])
-    def translate(self, request, pk=None):
-        """
-        Translate the content of the post to the specified language.
-        """
-        post_ref = db.collection('posts').document(pk)
-        post = post_ref.get()
-        if not post.exists():
-            raise NotFound("Post not found")
-
-        post_data = post.to_dict()
-        target_language = request.query_params.get("to", "en")
-        cache_key = f"post_translation_{pk}_{target_language}"
-        translated_content = cache.get(cache_key)
-
-        if translated_content is None:
-            post_content = post_data['content'] # type: ignore
-            translated_content = translate_text(post_content, target_language)
-            cache.set(cache_key, translated_content, 60 * 60)
-
-        return Response({"translation": translated_content})
+    try:
+        post_content = get_post_content(pk)
+        return Response({"content": post_content})
+    except PostNotFoundException:
+        return Response({"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        logging.error(f"Error fetching post: {str(e)}")
+        return Response({"error": "An error occurred while fetching the post."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

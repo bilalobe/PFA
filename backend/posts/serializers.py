@@ -1,34 +1,38 @@
 from rest_framework import serializers
-from .models import Post
+from common.firebase_admin_init import db
+from google.cloud import firestore
 
-class PostSerializer(serializers.ModelSerializer):
+db = firestore.Client()
+
+class PostSerializer(serializers.Serializer):
+    """
+    Serializer class for the Post model.
+    """
+
+    id = serializers.CharField(read_only=True)
+    title = serializers.CharField(max_length=200)
+    content = serializers.CharField()
     custom_field = serializers.CharField(required=False)
-
-    class Meta:
-        model = Post
-        fields = ['id', 'title', 'content', 'custom_field', 'author', 'created_at', 'updated_at']
-        read_only_fields = ['id', 'author', 'created_at', 'updated_at']  # Example read-only fields
+    author = serializers.CharField(read_only=True)
+    created_at = serializers.DateTimeField(read_only=True)
+    updated_at = serializers.DateTimeField(read_only=True)
 
     def validate(self, data):
-        """
-        Perform object-level validation. This is where you can add validations that span multiple fields.
-        """
         if 'custom_field' in data and not data['custom_field'].startswith('custom_'):
             raise serializers.ValidationError({"custom_field": "Custom field must start with 'custom_'."})
         return data
 
     def create(self, validated_data):
-        """
-        Custom logic for creating a new Post instance.
-        """
-        request = self.context.get('request')
-        if request and hasattr(request, 'user'):
-            validated_data['author'] = request.user
-        return super().create(validated_data)
+        ref = db.collection('posts').document()
+        validated_data['id'] = ref.id
+        validated_data['created_at'] = firestore.SERVER_TIMESTAMP
+        validated_data['updated_at'] = firestore.SERVER_TIMESTAMP
+        # Set the author based on the request context
+        validated_data['author'] = self.context['request'].user.username
+        ref.set(validated_data)
+        return validated_data
 
     def update(self, instance, validated_data):
-        """
-        Custom logic for updating an existing Post instance.
-        """
-        validated_data.pop('author', None)
-        return super().update(instance, validated_data)
+        validated_data['updated_at'] = firestore.SERVER_TIMESTAMP
+        db.collection('posts').document(instance['id']).update(validated_data)
+        return validated_data
