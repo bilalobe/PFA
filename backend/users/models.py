@@ -3,8 +3,9 @@ from enum import Enum
 import logging
 
 from backend.users.tasks import resize_profile_picture
-from backend.common.firebase_admin_init import db
+from backend.common.firebase_admin_init import db, auth
 from backend.common.validators import validate_email, validate_username
+from backend.users.exceptions import UserInitializationError, UserRoleError, UserSaveError
 import logging
 from enum import Enum
 
@@ -34,27 +35,6 @@ class Permissions(Enum):
     DELETE_COURSE = "delete_course"
 
 class User:
-    """
-    Represents a user in the system.
-
-    Attributes:
-        username (str): The username of the user.
-        email (str): The email address of the user.
-        user_type (UserType): The type of the user (e.g., STUDENT, TEACHER, SUPERVISOR).
-        bio (str): The bio of the user.
-        profile_picture (str): The path to the user's profile picture.
-        role (UserRole): The role of the user (e.g., STUDENT, STAFF, SUPERUSER).
-        facebook_link (str): The Facebook profile link of the user.
-        twitter_link (str): The Twitter profile link of the user.
-        linkedin_link (str): The LinkedIn profile link of the user.
-        instagram_link (str): The Instagram profile link of the user.
-        status (UserStatus): The status of the user (e.g., ACTIVE, INACTIVE).
-        last_login (datetime): The timestamp of the user's last login.
-        courses (list): The list of courses the user is enrolled in.
-        enrollments (list): The list of enrollments the user has.
-        user_id (str): The unique identifier of the user.
-    """
-
     def __init__(self, username, email, user_type=UserType.STUDENT, bio="", profile_picture=None,
                  role=UserRole.STUDENT, facebook_link=None, twitter_link=None, linkedin_link=None, instagram_link=None,
                  status=UserStatus.ACTIVE, last_login=None, courses=None, enrollments=None, user_id=None):
@@ -73,20 +53,34 @@ class User:
             self.last_login = last_login or datetime.utcnow()
             self.courses = courses or []
             self.enrollments = enrollments or []
-            self.user_id = user_id
+            self.user_id = user_id or self.create_firebase_user(email)
         except ValueError as e:
             logging.error(f"Error initializing user: {e}")
-            raise
+            raise UserInitializationError(e)
+
+    def create_firebase_user(self, email):
+        """
+        Creates a new user in Firebase Authentication.
+
+        Args:
+            email (str): The email address of the user.
+
+        Returns:
+            str: The UID of the created Firebase user.
+        """
+        user_record = auth.create_user(email=email)
+        return user_record.uid
 
     def set_role(self, role):
         """
         Sets the role of the user.
 
         Args:
-            role (UserRole): The role to set for the user.
+            role (UserRole): The role to be set for the user.
 
         Raises:
-            ValueError: If an invalid role is provided.
+            UserRoleError: If an invalid role is provided.
+
         """
         try:
             if role == UserRole.STAFF:
@@ -100,8 +94,8 @@ class User:
                 raise ValueError("Invalid role")
         except ValueError as e:
             logging.error(f"Error setting role: {e}")
-            raise
-
+            raise UserRoleError(e)
+        
     @classmethod
     def from_dict(cls, doc):
         """
@@ -129,20 +123,31 @@ class User:
     
     def save(self):
         """
-        Saves the User object to Firestore, including resizing the profile picture if present.
+        Saves the user data to Firestore.
+
+        This method saves the user data to Firestore by converting the user object to a dictionary,
+        removing the 'user_id' field, and then storing the dictionary in the 'users' collection
+        with the user's email as the document ID.
+
+        If the user has a profile picture, it resizes the picture and updates the 'profile_picture'
+        field before saving.
+
+        Raises:
+            UserSaveError: If there is an error saving the user to Firestore.
+
         """
         try:
-            # Check if the User object has an image field that needs resizing
             if hasattr(self, 'profile_picture') and self.profile_picture:
                 new_image_path = resize_profile_picture(self.user_id, 'profile_picture')
-                # Update the User object with the new image path
                 self.profile_picture = new_image_path
-    
+
             user_data = self.to_dict()
+            # Remove the user_id from the dictionary to prevent storing it in Firestore
+            user_data.pop('user_id', None)
             db.collection("users").document(self.email).set(user_data)
         except Exception as e:
             logging.error(f"Error saving user to Firestore: {e}")
-            raise
+            raise UserSaveError(e)
 
 
     def profile_completeness(self):
