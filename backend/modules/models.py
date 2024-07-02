@@ -1,11 +1,10 @@
-from django.db import models
+""" from django.db import models
 from django.contrib.auth.models import User
 from backend.courses.models import Course, CourseVersion
 import uuid
 
 
 class Module(models.Model):
-    """
     Represents a module within a course.
 
     Attributes:
@@ -19,7 +18,6 @@ class Module(models.Model):
         created_at (DateTimeField): The date and time when the module was created.
         updated_at (DateTimeField): The date and time when the module was last updated.
         created_by (ForeignKey): The user who created the module.
-    """
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name="modules")
@@ -39,3 +37,4 @@ class Module(models.Model):
 
     def __str__(self):
         return self.title
+ """
