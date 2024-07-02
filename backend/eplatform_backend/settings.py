@@ -17,7 +17,6 @@ Date: 202x-xx-xx
 import os
 import environ
 import firebase_admin
-from dotenv import load_dotenv
 from firebase_admin import credentials, firestore
 from pathlib import Path
 from datetime import timedelta
@@ -31,37 +30,20 @@ env = environ.Env()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 env_path = BASE_DIR.parent / 'keys.env'
-load_dotenv(dotenv_path=str(env_path))
+env.read_env(env_path)
 
 LOCALE_PATHS = [
     os.path.join(BASE_DIR, "locale"),
 ]
 
-SECRET_KEY = config("SECRET_KEY")
-DEBUG = config("DEBUG", default=False, cast=bool)
+SECRET_KEY = env("SECRET_KEY")
+DEBUG = env("DEBUG", cast=bool)
 
-# Ensure ALLOWED_HOSTS is always treated as a string
-allowed_hosts = config("ALLOWED_HOSTS", default="localhost")
-if isinstance(allowed_hosts, str):
-    ALLOWED_HOSTS = allowed_hosts.split(",")
-else:
-    ALLOWED_HOSTS = ["localhost"]
 
-# Secure cookies
-SESSION_COOKIE_SECURE = True  # Ensure session cookies are sent over HTTPS
-CSRF_COOKIE_SECURE = True  # Ensure CSRF cookies are sent over HTTPS
+cred = credentials.Certificate('path/to/serviceAccountKey.json')
+firebase_admin.initialize_app(cred)
 
-# Enforce HTTPS
-SECURE_SSL_REDIRECT = True  # Redirect all non-HTTPS requests to HTTPS
-SECURE_HSTS_SECONDS = (
-    31536000  # Set HTTP Strict Transport Security (HSTS) header for a year
-)
-SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Include subdomains in the HSTS policy
-SECURE_HSTS_PRELOAD = True  # Allow preloading of the site's HSTS policy
-
-FCM_SERVER_KEY = os.environ.get("FCM_SERVER_KEY")
-FCM_SENDER_ID = os.environ.get("FCM_SENDER_ID")
-
+db = firestore.client()
 
 """ # AWS S3 Settings for secure access
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
@@ -79,11 +61,6 @@ AWS_DEFAULT_ACL = "private"  # Set default ACL to private to ensure files are no
 
 VIRUS_TOTAL_API_KEY = config("VIRUS_TOTAL_API_KEY")
 
-cred = credentials.Certificate('path/to/your/serviceAccountKey.json')
-
-firebase_admin.initialize_app(cred)
-
-db = firestore.client()
 
 DATABASES = {
     "default": {
@@ -119,7 +96,6 @@ LOGGING = {
 }
 
 INSTALLED_APPS = [
-    "storages",  # AWS S3 Storage
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -135,7 +111,6 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "rest_framework_nested",
     "dj_rest_auth",
-    "storages",  # Azure Storage
     "channels",  # Websockets
     "allauth",
     "allauth.account",
@@ -158,6 +133,7 @@ INSTALLED_APPS = [
     "threads",
     "forums",
     "resources",
+    "notifications",
 ]
 
 MIDDLEWARE = [
@@ -364,11 +340,32 @@ CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 
-# Celery Beat Settings (for scheduling tasks)
-
+# Celery Beat Settings
 CELERY_BEAT_SCHEDULE = {
     "update-course-stats": {
         "task": "update_course_statistics",
         "schedule": crontab("* * 5 * *"),  # Run every day at 5:00 AM
     },
 }
+
+# Ensure ALLOWED_HOSTS is always treated as a string
+allowed_hosts = config("ALLOWED_HOSTS", default="localhost")
+if isinstance(allowed_hosts, str):
+    ALLOWED_HOSTS = allowed_hosts.split(",")
+else:
+    ALLOWED_HOSTS = ["localhost"]
+
+# Secure cookies
+SESSION_COOKIE_SECURE = True  # Ensure session cookies are sent over HTTPS
+CSRF_COOKIE_SECURE = True  # Ensure CSRF cookies are sent over HTTPS
+
+# Enforce HTTPS
+SECURE_SSL_REDIRECT = True  # Redirect all non-HTTPS requests to HTTPS
+SECURE_HSTS_SECONDS = (
+    31536000  # Set HTTP Strict Transport Security (HSTS) header for a year
+)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True  # Include subdomains in the HSTS policy
+SECURE_HSTS_PRELOAD = True  # Allow preloading of the site's HSTS policy
+
+FCM_SERVER_KEY = os.environ.get("FCM_SERVER_KEY")
+FCM_SENDER_ID = os.environ.get("FCM_SENDER_ID")
