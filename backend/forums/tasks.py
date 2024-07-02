@@ -1,44 +1,35 @@
-# backend/forum/tasks.py
-from asyncio.log import logger
 from celery import shared_task
 from django.contrib.auth import get_user_model
+from backend.common.firebase_admin_init import db
+import logging
+from google.cloud.firestore import SERVER_TIMESTAMP
 
-from backend.moderation.models import Moderation
-from .models import Post
-
+# Initialize logger
+logger = logging.getLogger(__name__)
 
 @shared_task(bind=True)
 def flag_post_for_moderation(self, post_id, reason="offensive"):
     """
-    Flags a post for moderation asynchronously.
+    Flags a post for moderation asynchronously using Firestore.
     Prevents duplicate flags for the same reason.
     Logs errors and retries the task if it fails.
     """
     User = get_user_model()
     try:
-        post = Post.objects.get(pk=post_id)
+        moderation_query = db.collection('moderation').where('post_id', '==', post_id).where('reason', '==', reason)
+        existing_flags = list(moderation_query.stream())
 
-        # Check if this post has been flagged before for the same reason
-        existing_flag = Moderation.objects.filter(
-            post=post, reason=reason, action_taken="none"
-        ).exists()
-
-        if not existing_flag:
-            # Get or create a system user for automated flags
-            system_user, _ = User.objects.get_or_create(username="system")
-            Moderation.objects.create(
-                post=post,
-                reason=reason,
-                reported_by=system_user,
-            )
-
-    except Post.DoesNotExist:
-        # Handle the case where the post doesn't exist
-        self.retry(
-            exc=Exception(f"Post with ID {post_id} not found."), countdown=60
-        )  # Retry after 60 seconds
+        if existing_flags and not any(flag.to_dict() and flag.to_dict().get('action_taken') == 'none' for flag in existing_flags): # type: ignore
+            User.objects.get_or_create(username="system", defaults={'password': 'system'})
+            
+            moderation_data = {
+                'post_id': post_id,
+                'reason': reason,
+                'created_at': SERVER_TIMESTAMP,
+                'action_taken': 'none',
+            }
+            db.collection('moderation').add(moderation_data)
 
     except Exception as e:
-        # Log the error and retry the task
-        logger.error(f"Error flagging post {post_id}: {str(e)}")
-        self.retry(exc=e, countdown=60)  # Retry after 60 seconds
+        logger.error(f"Error flagging post {post_id} for reason '{reason}': {str(e)}")
+        self.retry(exc=e, countdown=60)
