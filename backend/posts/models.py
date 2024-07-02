@@ -1,4 +1,4 @@
-from django.db import models
+""" from django.db import models
 from django.utils.translation import gettext_lazy as _
 from backend.AI.views import sentiment_analysis, detect_language, translate_text
 from google.cloud import firestore
@@ -7,7 +7,6 @@ import logging
 db = firestore.Client()
 
 class Post(models.Model):
-    """
     A model representing a post in a thread.
 
     Attributes:
@@ -18,7 +17,6 @@ class Post(models.Model):
     sentiment (CharField): The sentiment of the post, determined by AI analysis.
     language (CharField): The language of the post, detected by AI.
     is_moderated (BooleanField): Whether the post has been moderated.
-    """
     id = models.AutoField(primary_key=True)
     thread = models.ForeignKey('threads.Thread', on_delete=models.CASCADE, related_name="posts")
     author = models.ForeignKey('users.User', on_delete=models.CASCADE)
@@ -40,12 +38,10 @@ class Post(models.Model):
     def __str__(self):
         return f"{self.author.username} - {str(self.content)[:30]}..."
     def save(self, *args, **kwargs):
-        """
         Save the post instance to the database.
 
         This method performs AI analysis to determine the sentiment and language
         of the post, and translates the content to English if necessary.
-        """
         try:
             if not self.pk:  # Only perform AI analysis for new posts
                 self.sentiment = sentiment_analysis(self.content)['sentiment']
@@ -60,9 +56,7 @@ class Post(models.Model):
         self.sync_to_firestore()
 
     def sync_to_firestore(self):
-        """
         Sync the post instance to Google Firestore.
-        """
         try:
             doc_ref = db.collection(u'posts').document(str(self.pk))
             doc_ref.set({
@@ -78,11 +72,10 @@ class Post(models.Model):
             logging.error(f"Failed to sync post to Firestore: {e}")
 
     def delete(self, *args, **kwargs):
-        """
         Delete the post instance from the database and Firestore.
-        """
         super().delete(*args, **kwargs)
         try:
             db.collection(u'posts').document(str(self.pk)).delete()
         except Exception as e:
             logging.error(f"Failed to delete post from Firestore: {e}")
+ """

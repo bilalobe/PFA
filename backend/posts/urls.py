@@ -1,10 +1,14 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import PostViewSet
+from backend.posts.views import PostViewSet
 
+# Initialize the default router
 router = DefaultRouter()
-router.register(r"posts", PostViewSet, basename="post")
 
+# Register the PostViewSet with the router
+router.register(r'posts', PostViewSet, basename='post')
+
+# Define the URL patterns for the posts app
 urlpatterns = [
-    path("", include(router.urls)),
+    path('', include(router.urls)),
 ]
