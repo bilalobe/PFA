@@ -1,4 +1,4 @@
-from django.contrib.contenttypes.fields import GenericForeignKey
+""" from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import User
 from django.db import models
@@ -55,3 +55,4 @@ class Moderation(models.Model):
 
     def __str__(self):
         return f"Moderation Report: {self.reason} on {self.content_object} by {self.reported_by.username}"
+ """
