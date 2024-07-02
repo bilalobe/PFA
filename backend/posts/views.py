@@ -6,7 +6,7 @@ from rest_framework.exceptions import PermissionDenied
 from backend.common.AppService.PostService import PostService, get_post_content
 from posts.serializers import PostSerializer
 from backend.common.services.TranslationService import TranslationService
-from .exceptions import PostNotFoundException
+from common.exceptions import PostNotFoundException
 
 class PostViewSet(viewsets.ModelViewSet):
     serializer_class = PostSerializer
