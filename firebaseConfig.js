@@ -1,4 +1,5 @@
 import { initializeApp } from "firebase/app";
+import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
@@ -8,7 +9,7 @@ import { getFunctions } from "firebase/functions";
 import { getMessaging } from "firebase/messaging";
 import { getPerformance } from "firebase/performance";
 
-// Firebase configuration from Next.js environment variables
+
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -20,6 +21,12 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
+const appCheck = initializeAppCheck(app, {
+  provider: new ReCaptchaV3Provider('RECAPTCHA_SITE_KEY'),
+  isTokenAutoRefreshEnabled: true
+});
+
 
 // Initialize Firebase services
 const auth = getAuth(app);

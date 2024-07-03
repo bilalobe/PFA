@@ -2,6 +2,7 @@ import os
 import firebase_admin
 from firebase_admin import credentials, firestore, auth, storage
 import logging
+import requests
 
 logging.basicConfig(level=logging.INFO)
 
@@ -14,21 +15,13 @@ class FirebaseServices:
 
     def initialize_firebase_admin(self):
         """
-        Initializes the Firebase Admin SDK, handling potential errors.
-
-        This function attempts to get the already initialized app. If the app has not been initialized yet,
-        it checks if a service account file is available. If the file is found, it uses the service account
-        credentials to initialize the app. If the file is not found, it falls back to using environment variables
-        to retrieve the necessary credentials.
-
-        Returns:
-            firebase_admin.App: The initialized Firebase Admin app.
+        Initializes the Firebase Admin SDK.
         """
         try:
             return firebase_admin.get_app()
         except ValueError:
             try:
-                cred = credentials.Certificate('path/to/your/serviceAccountKey.json')
+                cred = credentials.Certificate('../../../serviceAccountKey.json')
             except FileNotFoundError:
                 cred = credentials.Certificate({
                     "type": os.environ.get("FIREBASE_TYPE", ""),
@@ -46,7 +39,23 @@ class FirebaseServices:
             app = firebase_admin.initialize_app(cred, {
                 'storageBucket': os.environ.get("FIREBASE_STORAGE_BUCKET")
             })
+            logging.info("Firebase Admin initialized successfully.")
             return app
 
-# Create a single instance of FirebaseServices to be imported and used across the application
+    def verify_app_check_token(self, app_check_token, project_id):
+        """
+        Verifies the Firebase App Check token.
+        """
+        url = f"https://firebaseappcheck.googleapis.com/v1/projects/{project_id}/apps/-/exchangeAppAttestAttestation:exchange"
+        headers = {
+            "Authorization": "Bearer " + app_check_token,
+            "Content-Type": "application/json",
+        }
+        try:
+            response = requests.post(url, headers=headers)
+            return response.status_code == 200
+        except requests.exceptions.RequestException as e:
+            logging.error(f"Failed to verify App Check token: {e}")
+            return False
+
 firebase_services = FirebaseServices()
