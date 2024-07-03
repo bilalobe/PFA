@@ -1,10 +1,12 @@
 import logging
+import os
 from rest_framework import permissions, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import NotFound, PermissionDenied
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from google.cloud import aiplatform
 from backend.chat.serializers import ChatMessageSerializer, ChatRoomSerializer
 from .utils import get_chat_room, send_chat_message, send_typing_notification
 from backend.common.firebase_admin_init import db
@@ -278,3 +280,46 @@ def chat_room(request, room_id):
         'messages': [message.to_dict() for message in messages],
     }
     return render(request, 'chat/chat_room.html', context)
+
+@login_required
+@api_view(['POST'])
+def ask_gemini(request):
+    """
+    Endpoint for asking a question to the Gemini AI model.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        Response: The HTTP response object containing the predictions from the Gemini AI model.
+
+    Raises:
+        ValueError: If the 'prompt' parameter is missing in the request data.
+        Exception: If there is an error during the prediction process.
+    """
+    prompt = request.data.get('prompt')
+    if not prompt:
+        return Response({"error": "Prompt is required"}, status=400)
+
+    # Fetch configuration from environment variables
+    project = os.environ.get('GOOGLE_PROJECT_ID')
+    location = os.environ.get('GOOGLE_API_LOCATION')
+    endpoint_name = os.environ.get('GEMINI_ENDPOINT_NAME')
+
+    # Placeholder for authentication and authorization logic
+    # Ensure the request is from an authenticated and authorized user
+    # if not request.user.is_authenticated:
+    #    return Response({"error": "Authentication required"}, status=401)
+
+    try:
+        # Initialize the AI Platform with the specified project and location
+        aiplatform.init(project=project, location=location)
+
+        endpoint = aiplatform.Endpoint(endpoint_name)
+
+        response = endpoint.predict(instances=[{"prompt": prompt}])
+
+        # Return the predictions in the response
+        return Response(response.predictions)
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
