@@ -1,19 +1,18 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useEffect, useState } from 'react';
-import { RootState } from '../types'; // Import RootState type
+import { RootState } from '../types';
 import { fetchUsers, filterUsers, sortUsers } from '../actions/userActions';
-import { Box, CircularProgress, FormControl, Select, MenuItem, FormControlLabel, Switch } from '@mui/material';
-import CustomPagination from '@/components/CustomComponents/Pagination.js';
+import { Box, CircularProgress, FormControl, Select, MenuItem, FormControlLabel, Switch, InputLabel } from '@mui/material';
+import CustomPagination from '@/components/CustomComponents/Pagination';
 import UserList from '@/components/Users/UserList';
 import CustomSort from '@/components/CustomComponents/Sort';
 import Alert from '@/components/CustomComponents/Alert';
+import axios from 'axios';
 
-function UsersPage() {
+function UsersPage({ initialUsers, error: initialError }) {
     const dispatch = useDispatch();
-    const users = useSelector((state: RootState) => state.users.all);
-    const loading = useSelector((state: RootState) => state.users.loading); // Provide RootState type for state parameter
-    const error = useSelector((state: RootState) => state.users.error); // Provide RootState type for state parameter
-    const sort = useSelector((state: RootState) => state.users.sort); // Provide RootState type for state parameter
+    const { all: usersFromRedux, loading, error: reduxError, sort } = useSelector((state: RootState) => state.users);
+    const [users, setUsers] = useState(initialUsers);
     const [role, setRole] = useState('all');
     const [onlyAdmins, setOnlyAdmins] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
@@ -24,8 +23,8 @@ function UsersPage() {
     }, [dispatch]);
 
     useEffect(() => {
-        dispatch(filterUsers(search, filter, role, onlyAdmins));
-    }, [dispatch, search, filter, role, onlyAdmins]);
+        dispatch(filterUsers(role, onlyAdmins));
+    }, [dispatch, role, onlyAdmins]);
 
     const handleSortChange = (newSort) => {
         dispatch(sortUsers(newSort));
@@ -33,30 +32,31 @@ function UsersPage() {
 
     if (loading) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+            <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
                 <CircularProgress />
             </Box>
         );
     }
 
-    if (error) {
+    const errorToShow = reduxError || initialError;
+    if (errorToShow) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                <Alert severity="error">{error}</Alert>
+            <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+                <Alert severity="error">{errorToShow}</Alert>
             </Box>
         );
     }
 
     if (!users.length) {
         return (
-            <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+            <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
                 <Alert severity="info">No users found</Alert>
             </Box>
         );
     }
 
     return (
-        <Box sx={{ padding: 4 }}>
+        <Box padding={4}>
             <CustomSort value={sort} onChange={handleSortChange} />
             <UserList users={users} />
             <CustomPagination
@@ -65,14 +65,14 @@ function UsersPage() {
                 totalItems={users.length}
                 onPageChange={setCurrentPage}
             />
-            <FormControl sx={{ marginTop: 2 }}>
+            <FormControl marginTop={2}>
                 <InputLabel id="role-select-label">Role</InputLabel>
                 <Select
                     labelId="role-select-label"
                     value={role}
                     onChange={(e) => {
                         setRole(e.target.value);
-                        setCurrentPage(1); // Reset pagination when changing the role filter
+                        setCurrentPage(1); // Reset pagination on role change
                     }}
                 >
                     <MenuItem value="all">All</MenuItem>
@@ -86,14 +86,34 @@ function UsersPage() {
                         checked={onlyAdmins}
                         onChange={(e) => {
                             setOnlyAdmins(e.target.checked);
-                            setCurrentPage(1); // Reset pagination when changing the admin filter
+                            setCurrentPage(1); // Reset pagination on admin filter change
                         }}
                     />
                 }
                 label="Show only admins"
-                sx={{ marginTop: 2 }}
+                marginTop={2}
             />
         </Box>
     );
 }
+
+export async function getServerSideProps() {
+    try {
+        const res = await axios.get('http://localhost:3000/api/users');
+        return {
+            props: {
+                initialUsers: res.data.users,
+            },
+        };
+    } catch (error) {
+        console.error("Failed to fetch users:", error);
+        return {
+            props: {
+                initialUsers: [],
+                error: "Failed to load user data.",
+            },
+        };
+    }
+}
+
 export default UsersPage;

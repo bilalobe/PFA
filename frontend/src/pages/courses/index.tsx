@@ -5,22 +5,33 @@ import { Grid, Typography, TextField, Card, CardContent, CardActions, CircularPr
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import { Link } from 'react-router-dom';
-import { fetchCourses } from '../features/course/courseSlice'; // Adjust the import path as necessary
+import { fetchCourses } from '../features/course/courseSlice';
+import  { initializeApp } from 'firebase/app';
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 function CourseList({ initialCourses = [] }) {
   const dispatch = useDispatch();
-  const courses = useSelector(state => state.course.courses) || initialCourses;
-  const loading = useSelector(state => state.course.loading);
-  const error = useSelector(state => state.course.error);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [coursesPerPage] = useState(9);
 
+    const [courses, setCourses] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+  
   useEffect(() => {
-    if (!initialCourses.length) {
-      dispatch(fetchCourses());
-    }
-  }, [dispatch]);
+    const fetchCourses = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get('/api/courses'); // Fetch from your Django API
+        setCourses(response.data);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCourses();
+  }, []);
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
