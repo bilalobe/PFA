@@ -1,18 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import axios from 'axios';
 import { TextField, Button, List, ListItem, ListItemText } from '@mui/material';
 
 interface ChatMessage {
-  uid?: string;
   sender: 'user' | 'bot';
   message: string;
 }
 
-const Chatbot: React.FC = () => {
+interface ChatbotProps {
+  welcomeMessage: string;
+  notRecognizedMessage: string;
+  autoResponseDelay: number;
+  timeoutMessage: string;
+}
+
+const Chatbot: React.FC<ChatbotProps> = ({
+}) => {
   const [userInput, setUserInput] = useState<string>('');
   const [conversation, setConversation] = useState<ChatMessage[]>([]);
 
-  const sendMessage = async () => {
+  const sendMessage = useCallback(async () => {
     if (userInput.trim()) {
       const newConversation: ChatMessage[] = [...conversation, { sender: 'user', message: userInput }];
       setConversation(newConversation);
@@ -25,13 +32,13 @@ const Chatbot: React.FC = () => {
         console.error('Error sending message:', error);
       }
     }
-  };
+  }, [userInput, conversation]);
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
     if (e.key === 'Enter') {
       sendMessage();
     }
-  };
+  }, [sendMessage]);
 
   return (
     <div>
