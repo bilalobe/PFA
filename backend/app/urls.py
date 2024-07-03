@@ -38,8 +38,6 @@ urlpatterns = [
     path("api/moderation/", include("moderation.urls")), 
     path("api/chat/", include("chat.urls")), 
     # AI URLs
-    path("api/ai/", include("ai.urls")),
-    path("api/generator/", include("generator.urls")),
 ]
 
 if settings.DEBUG:
