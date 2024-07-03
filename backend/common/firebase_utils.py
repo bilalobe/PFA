@@ -9,9 +9,9 @@ logging.basicConfig(level=logging.INFO)
 class FirebaseServices:
     def __init__(self):
         self.app = self.initialize_firebase_admin()
-        self.db = firestore.client(app=self.app)
+        self.db = firestore.client()
         self.firebase_auth = auth
-        self.firebase_bucket = storage.bucket(app=self.app)
+        self.firebase_bucket = storage.bucket()
 
     def initialize_firebase_admin(self):
         """
