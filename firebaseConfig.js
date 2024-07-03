@@ -38,4 +38,4 @@ const functions = getFunctions(app);
 const messaging = getMessaging(app);
 const performance = getPerformance(app);
 
-export { auth, db, storage, database, analytics, functions, messaging, performance, app };
+export { auth, db, storage, database, analytics, functions, messaging, performance, app, appCheck };
