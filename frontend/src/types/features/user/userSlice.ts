@@ -1,31 +1,40 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { userApi } from '@/utils/api';
-
-export const updateUserProfile = createAsyncThunk(
-  'user/updateUserProfile',
-  async (userData: User, { rejectWithValue }) => {
-    try {
-      const response = await userApi.updateProfile(userData);
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
+import * as firebaseConfig from '../../../../../firebaseConfig';
+import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
 export const fetchUserProfile = createAsyncThunk(
   'user/fetchUserProfile',
   async (_, { rejectWithValue }) => {
+    if (!firebaseConfig.auth.currentUser) return rejectWithValue('No user logged in');
     try {
-      const response = await userApi.getProfile();
-      return response.data;
+      const docRef = doc(firebaseConfig.db, 'users', firebaseConfig.auth.currentUser.uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        return docSnap.data() as UserInfo;
+      } else {
+        return rejectWithValue('No profile found');
+      }
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
   }
 );
 
-interface User {
+export const updateUserProfile = createAsyncThunk(
+  'user/updateUserProfile',
+  async (userData: UserInfo, { rejectWithValue }) => {
+    if (!firebaseConfig.auth.currentUser) return rejectWithValue('No user logged in');
+    try {
+      const userRef = doc(firebaseConfig.db, 'users', firebaseConfig.auth.currentUser.uid);
+      await updateDoc(userRef, userData);
+      return userData;
+    } catch (error: any) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+interface UserInfo {
   id: number;
   name: string;
   email: string;
@@ -34,6 +43,7 @@ interface User {
   grade: string;
   cumulativescore: number;
   role: string;
+  [x: string]: any;
 }
 
 interface Sort {
@@ -42,10 +52,11 @@ interface Sort {
 }
 
 interface UserState {
-  profile: User | null;
-  all: User[];
+  profile: UserInfo | null;
+  all: UserInfo[];
   loading: boolean;
   sort: Sort;
+  error: string | null;
 }
 
 const initialState: UserState = {
@@ -53,6 +64,7 @@ const initialState: UserState = {
   all: [],
   loading: false,
   sort: { field: '', direction: 'asc' },
+  error: null,
 };
 
 const userSlice = createSlice({
@@ -62,6 +74,7 @@ const userSlice = createSlice({
     logoutUser: (state) => {
       state.profile = null;
       state.all = [];
+      state.error = null;
     },
     sortUsers: (state, action) => {
       state.sort = action.payload;
@@ -75,9 +88,11 @@ const userSlice = createSlice({
       .addCase(fetchUserProfile.fulfilled, (state, action) => {
         state.profile = action.payload;
         state.loading = false;
+        state.error = null;
       })
-      .addCase(fetchUserProfile.rejected, (state) => {
+      .addCase(fetchUserProfile.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload as string;
       })
       .addCase(updateUserProfile.pending, (state) => {
         state.loading = true;
@@ -85,9 +100,11 @@ const userSlice = createSlice({
       .addCase(updateUserProfile.fulfilled, (state, action) => {
         state.profile = action.payload;
         state.loading = false;
+        state.error = null;
       })
-      .addCase(updateUserProfile.rejected, (state) => {
+      .addCase(updateUserProfile.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload as string;
       });
   },
 });
