@@ -1,4 +1,4 @@
-from django.db import models
+""" from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
@@ -7,7 +7,6 @@ from courses.models import Course, CourseVersion, Module
 
 
 class Enrollment(models.Model):
-    """
     Represents an enrollment of a student in a course.
 
     Attributes:
@@ -26,7 +25,6 @@ class Enrollment(models.Model):
     Methods:
         __str__(): Returns a string representation of the enrollment.
         update_progress(): Updates the progress and completion status of the enrollment based on the completed modules.
-    """
 
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, related_name='enrollments')
@@ -71,3 +69,4 @@ class ModuleCompletion(models.Model):
 @receiver(post_save, sender=ModuleCompletion)
 def update_enrollment_progress(sender, instance, **kwargs):
     instance.enrollment.update_progress()
+ """

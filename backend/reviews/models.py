@@ -1,13 +1,11 @@
-from django.db import models
+""" from django.db import models
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from common.firestore_mixins import FirestoreDocumentMixin
 from google.cloud.firestore import Timestamp # type: ignore
 
 class Review(FirestoreDocumentMixin, models.Model):
-    """
     Represents a course review by a user.
-    """
     id = models.AutoField(primary_key=True)
     text = models.TextField()
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -17,9 +15,7 @@ class Review(FirestoreDocumentMixin, models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def clean(self):
-        """
         Validates the rating is between 1 and 5.
-        """
         super().clean()
         if not 1 <= self.rating <= 5:
             raise ValidationError({'rating': 'Rating must be between 1 and 5.'})
@@ -28,9 +24,7 @@ class Review(FirestoreDocumentMixin, models.Model):
         return f"Review by {self.user.username} for {self.course.title} - {self.rating} Stars"
 
     def to_firestore_doc(self):
-        """
         Converts the review instance to a Firestore document.
-        """
         return {
             "text": self.text,
             "user_id": self.user.id,
@@ -42,18 +36,14 @@ class Review(FirestoreDocumentMixin, models.Model):
 
     @classmethod
     def get_average_rating_for_course(cls, course_id):
-        """
         Calculates the average rating for a given course.
-        """
         reviews = cls.objects.filter(course_id=course_id)
         if reviews.exists():
             return reviews.aggregate(models.Avg('rating'))['rating__avg']
         return None
 
 class ReviewLike(FirestoreDocumentMixin, models.Model):
-    """
     Represents a 'like' given by a user to a review.
-    """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name='likes')
     created_at = models.DateTimeField(auto_now_add=True)
@@ -65,9 +55,7 @@ class ReviewLike(FirestoreDocumentMixin, models.Model):
         return f"{self.user.username} likes Review {self.review.id}"
 
     def to_firestore_doc(self):
-        """
         Converts the review like instance to a Firestore document.
-        """
         return {
             "user_id": self.user.id,
             "review_id": self.review.id,
@@ -76,7 +64,7 @@ class ReviewLike(FirestoreDocumentMixin, models.Model):
 
     @classmethod
     def count_likes_for_review(cls, review_id):
-        """
         Counts the number of likes for a given review.
-        """
+        
         return cls.objects.filter(review_id=review_id).count()
+ """

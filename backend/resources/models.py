@@ -1,4 +1,4 @@
-from django.db import models
+""" from django.db import models
 from django.conf import settings
 from courses.models import Module
 from google.cloud import firestore
@@ -10,7 +10,6 @@ def resource_directory_path(instance, filename):
 
 
 class Resource(models.Model):
-    """
     Represents a resource uploaded to the system.
 
     Attributes:
@@ -25,7 +24,6 @@ class Resource(models.Model):
         upload_date (DateTimeField): The date and time when the resource was uploaded.
         download_count (PositiveIntegerField): The number of times the resource has been downloaded.
         thumbnail (ImageField): The thumbnail image associated with the resource.
-    """
 
     id = models.AutoField(primary_key=True)
     module = models.ForeignKey(
@@ -73,4 +71,4 @@ class Resource(models.Model):
             "file_size": self.file_size,
             "upload_date": self.upload_date.strftime("%Y-%m-%d %H:%M:%S"),
             "download_count": self.download_count,
-        })
+        }) """

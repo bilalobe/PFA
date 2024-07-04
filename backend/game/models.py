@@ -1,4 +1,4 @@
-from django.db import models
+""" from django.db import models
 from django.contrib.auth import get_user_model
 from django.utils.timezone import now
 from django.core.exceptions import ValidationError
@@ -8,7 +8,6 @@ from common.validators import validate_criteria
 User = get_user_model()
 
 class UserLevel(models.Model):
-    """
     Represents the level of a user in the game.
 
     Attributes:
@@ -18,7 +17,6 @@ class UserLevel(models.Model):
 
     Methods:
         __str__(): Returns a string representation of the user level.
-    """
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="level", verbose_name="User")
     level = models.IntegerField(default=1, verbose_name="Level")
     experience = models.IntegerField(default=0, verbose_name="Experience")
@@ -31,7 +29,6 @@ class UserLevel(models.Model):
         return f"{self.user.pk} - Level {self.level}"
 
 class UserForumPoints(models.Model):
-    """
     Represents the forum points of a user in the game.
 
     Attributes:
@@ -41,7 +38,6 @@ class UserForumPoints(models.Model):
     Methods:
 
         __str__(): Returns a string representation of the user forum points.
-    """
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="forum_points", verbose_name="User")
     points = models.PositiveIntegerField(default=0, verbose_name="Points")
 
@@ -54,7 +50,6 @@ class UserForumPoints(models.Model):
 
 
 class Badge(models.Model):
-    """
     Represents a badge in the game.
 
     Attributes:
@@ -66,7 +61,6 @@ class Badge(models.Model):
     Methods:
         clean(): Validates the badge criteria.
         __str__(): Returns a string representation of the badge.
-    """
 
     name = models.CharField(max_length=50, unique=True, verbose_name="Name")
     description = models.CharField(max_length=255, verbose_name="Description")
@@ -89,7 +83,6 @@ class Badge(models.Model):
         verbose_name_plural = "Badges"
 
 class UserBadge(TimestampMixin, UserRelatedMixin):
-    """
     Represents a badge earned by a user in the game.
 
     Attributes:
@@ -101,7 +94,6 @@ class UserBadge(TimestampMixin, UserRelatedMixin):
     Methods:
     
             __str__(): Returns a string representation of the user badge.
-        """
     badge = models.ForeignKey(Badge, on_delete=models.CASCADE, related_name="user_badges", verbose_name="Badge")
     awarded_at = models.DateTimeField(auto_now_add=True, verbose_name="Awarded At")
 
@@ -114,7 +106,6 @@ class UserBadge(TimestampMixin, UserRelatedMixin):
         return f"{self.user.username} - {self.badge.name}"
 
 class Challenge(models.Model):
-    """
     Represents a challenge in the game.
 
     Attributes:
@@ -126,7 +117,6 @@ class Challenge(models.Model):
     Methods:
 
         __str__(): Returns a string representation of the challenge.
-    """
     name = models.CharField(max_length=100, verbose_name="Name")
     description = models.TextField(verbose_name="Description")
     criteria = models.JSONField(default=dict, verbose_name="Criteria")
@@ -140,7 +130,6 @@ class Challenge(models.Model):
         return self.name
 
 class UserChallenge(models.Model):
-    """
     Represents a challenge completed by a user in the game.
 
     Attributes:
@@ -150,7 +139,6 @@ class UserChallenge(models.Model):
 
     Methods:
         __str__(): Returns a string representation of the user challenge.
-    """
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="completed_challenges", verbose_name="User")
     challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE, verbose_name="Challenge")
     completed_at = models.DateTimeField(auto_now_add=True, verbose_name="Completed At")
@@ -164,7 +152,6 @@ class UserChallenge(models.Model):
         return f"{self.user.pk} - {self.challenge.name}"
 
 class Quest(models.Model):
-    """
     Represents a quest in the game.
 
     Attributes:
@@ -175,7 +162,6 @@ class Quest(models.Model):
     Methods:
         __str__(): Returns a string representation of the quest.
 
-    """             
     name = models.CharField(max_length=100, verbose_name="Name")
     description = models.TextField(verbose_name="Description")
     challenges = models.ManyToManyField(Challenge, verbose_name="Challenges")
@@ -188,7 +174,6 @@ class Quest(models.Model):
         return self.name
 
 class UserQuest(models.Model):
-    """
 
     Represents a quest started by a user in the game.
 
@@ -202,7 +187,6 @@ class UserQuest(models.Model):
     Methods:
             
                     __str__(): Returns a string representation of the user quest.
-                """
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="quests", verbose_name="User")
     quest = models.ForeignKey(Quest, on_delete=models.CASCADE, verbose_name="Quest")
     started_at = models.DateTimeField(default=now, verbose_name="Started At")
@@ -216,7 +200,6 @@ class UserQuest(models.Model):
         return f"{self.user.pk} - {self.quest.name}"
 
 class UserAchievement(models.Model):
-    """
 
     Represents an achievement earned by a user in the game.
 
@@ -230,7 +213,6 @@ class UserAchievement(models.Model):
     Methods:
     
             __str__(): Returns a string representation of the user achievement.
-        """
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="achievements", verbose_name="User")
     name = models.CharField(max_length=100, verbose_name="Name")
     description = models.TextField(verbose_name="Description")
@@ -241,4 +223,4 @@ class UserAchievement(models.Model):
         verbose_name_plural = "User Achievements"
 
     def __str__(self):
-        return f"{self.user.pk} - {self.name}"
+        return f"{self.user.pk} - {self.name}" """
