@@ -1,8 +1,9 @@
+"""
 from google.cloud.firestore import SERVER_TIMESTAMP
 from common.firebase_admin_init import db
 
 class Thread:
-    """
+     
     Represents a thread in Firestore.
 
     Attributes:
@@ -20,7 +21,7 @@ class Thread:
         is_pinned (bool): Indicates whether the thread is pinned or not.
         pinned_by_path (str): The path of the user who pinned the thread.
         pinned_at (datetime): The timestamp when the thread was pinned.
-    """
+     
 
     def __init__(self, title, forum_path, created_by_path, id=None, **kwargs):
         self.id = id  # Firestore document ID
@@ -39,12 +40,12 @@ class Thread:
         self.pinned_at = kwargs.get('pinned_at', None)
 
     def to_dict(self):
-        """
+         
         Converts the ThreadFirestore object to a dictionary.
 
         Returns:
             dict: A dictionary representation of the ThreadFirestore object.
-        """
+         
         return {
             "title": self.title,
             "forum_path": self.forum_path,
@@ -63,7 +64,7 @@ class Thread:
 
     @staticmethod
     def from_dict(data, doc_id=None):
-        """
+         
         Creates a ThreadFirestore object from a dictionary.
 
         Args:
@@ -72,18 +73,18 @@ class Thread:
 
         Returns:
             ThreadFirestore: The ThreadFirestore object.
-        """
+         
         if doc_id:
             data['id'] = doc_id
         return Thread(**data)
 
     def save(self):
-        """
+         
         Saves the ThreadFirestore object to Firestore.
 
         If the object doesn't have an ID, it will be added as a new document.
         Otherwise, it will be updated in the Firestore collection.
-        """
+         
         if not self.id:
             doc_ref = db.collection('threads').add(self.to_dict())[1]
             self.id = doc_ref.id
@@ -91,26 +92,26 @@ class Thread:
             self.update(self.id)
 
     def update(self, thread_id):
-        """
+         
         Updates the ThreadFirestore object in Firestore.
 
         Args:
             thread_id (str): The ID of the thread document in Firestore.
-        """
+         
         db.collection('threads').document(thread_id).update(self.to_dict())
 
     def delete(self):
-        """
+         
         Deletes the ThreadFirestore object from Firestore.
 
         If the object has an ID, it will be deleted from the Firestore collection.
-        """
+         
         if self.id:
             db.collection('threads').document(self.id).delete()
 
     @staticmethod
     def get(thread_id):
-        """
+         
         Retrieves a ThreadFirestore object from Firestore.
 
         Args:
@@ -118,7 +119,7 @@ class Thread:
 
         Returns:
             ThreadFirestore: The ThreadFirestore object if found, None otherwise.
-        """
+         
         doc = db.collection('threads').document(thread_id).get()
         if doc.exists:
             return Thread.from_dict(doc.to_dict(), doc_id=thread_id)
@@ -126,7 +127,7 @@ class Thread:
 
     @staticmethod
     def get_all(limit=None, order_by=None):
-        """
+         
         Retrieves all ThreadFirestore objects from Firestore.
 
         Args:
@@ -135,7 +136,7 @@ class Thread:
 
         Returns:
             list: A list of ThreadFirestore objects.
-        """
+         
         query = db.collection('threads')
         if order_by:
             query = query.order_by(order_by)
@@ -146,7 +147,7 @@ class Thread:
 
 
 class Tag:
-    """
+     
     Represents a tag in Firestore.
 
     Attributes:
@@ -154,7 +155,7 @@ class Tag:
         name (str): The name of the tag.
         description (str): A brief description of the tag.
         created_at (datetime): The timestamp when the tag was created.
-    """
+     
 
     def __init__(self, name, description, id=None, created_at=SERVER_TIMESTAMP):
         self.id = id  # Firestore document ID
@@ -163,12 +164,12 @@ class Tag:
         self.created_at = created_at
 
     def to_dict(self):
-        """
+         
         Converts the Tag object to a dictionary.
 
         Returns:
             dict: A dictionary representation of the Tag object.
-        """
+         
         return {
             "name": self.name,
             "description": self.description,
@@ -177,7 +178,7 @@ class Tag:
 
     @staticmethod
     def from_dict(data, doc_id=None):
-        """
+         
         Creates a Tag object from a dictionary.
 
         Args:
@@ -186,18 +187,18 @@ class Tag:
 
         Returns:
             Tag: The Tag object.
-        """
+         
         if doc_id:
             data['id'] = doc_id
         return Tag(**data)
 
     def save(self):
-        """
+         
         Saves the Tag object to Firestore.
 
         If the object doesn't have an ID, it will be added as a new document.
         Otherwise, it will update the existing document in the Firestore collection.
-        """
+         
         if not self.id:
             doc_ref = db.collection('tags').add(self.to_dict())[1]
             self.id = doc_ref.id
@@ -205,17 +206,15 @@ class Tag:
             db.collection('tags').document(self.id).update(self.to_dict())
 
     def delete(self):
-        """
         Deletes the Tag object from Firestore.
 
         If the object has an ID, it will be deleted from the Firestore collection.
-        """
+         
         if self.id:
             db.collection('tags').document(self.id).delete()
 
     @staticmethod
     def get(tag_id):
-        """
         Retrieves a Tag object from Firestore.
 
         Args:
@@ -223,7 +222,6 @@ class Tag:
 
         Returns:
             Tag: The Tag object if found, None otherwise.
-        """
         doc = db.collection('tags').document(tag_id).get()
         if doc.exists:
             return Tag.from_dict(doc.to_dict(), doc_id=tag_id)
@@ -231,7 +229,6 @@ class Tag:
 
     @staticmethod
     def get_all(limit=None, order_by=None):
-        """
         Retrieves all Tag objects from Firestore.
 
         Args:
@@ -240,7 +237,6 @@ class Tag:
 
         Returns:
             list: A list of Tag objects.
-        """
         query = db.collection('tags')
         if order_by:
             query = query.order_by(order_by)
@@ -248,3 +244,4 @@ class Tag:
             query = query.limit(limit)
         tags = query.stream()
         return [Tag.from_dict(tag.to_dict(), doc_id=tag.id) for tag in tags]
+"""

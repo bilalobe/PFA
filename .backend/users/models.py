@@ -1,4 +1,4 @@
-from datetime import datetime
+"""   from datetime import datetime
 from enum import Enum
 import logging
 
@@ -59,7 +59,7 @@ class User:
             raise UserInitializationError(e)
 
     def create_firebase_user(self, email):
-        """
+         
         Creates a new user in Firebase Authentication.
 
         Args:
@@ -67,12 +67,12 @@ class User:
 
         Returns:
             str: The UID of the created Firebase user.
-        """
+         
         user_record = auth.create_user(email=email)
         return user_record.uid
 
     def set_role(self, role):
-        """
+         
         Sets the role of the user.
 
         Args:
@@ -81,7 +81,7 @@ class User:
         Raises:
             UserRoleError: If an invalid role is provided.
 
-        """
+         
         try:
             if role == UserRole.STAFF:
                 self.is_staff = True
@@ -98,7 +98,7 @@ class User:
         
     @classmethod
     def from_dict(cls, doc):
-        """
+         
         Creates a User object from a dictionary.
 
         Args:
@@ -106,23 +106,23 @@ class User:
 
         Returns:
             User: The User object created from the dictionary.
-        """
+         
         return cls(**doc)
 
     def to_dict(self):
-        """
+         
         Returns a dictionary representation of the User object, excluding sensitive information.
 
         Returns:
             dict: The dictionary representation of the User object.
-        """
+         
         user_dict = self.__dict__.copy()
         # Exclude sensitive information
         user_dict.pop('password_hash', None)
         return user_dict
     
     def save(self):
-        """
+         
         Saves the user data to Firestore.
 
         This method saves the user data to Firestore by converting the user object to a dictionary,
@@ -135,7 +135,7 @@ class User:
         Raises:
             UserSaveError: If there is an error saving the user to Firestore.
 
-        """
+         
         try:
             if hasattr(self, 'profile_picture') and self.profile_picture:
                 new_image_path = resize_profile_picture(self.user_id, 'profile_picture')
@@ -151,12 +151,12 @@ class User:
 
 
     def profile_completeness(self):
-        """
+         
         Calculates the profile completeness percentage based on filled fields.
 
         Returns:
             str: The profile completeness percentage.
-        """
+         
         fields = ["username", "email", "bio", "profile_picture"]
         filled_fields = sum(bool(getattr(self, field)) for field in fields)
         total_fields = len(fields)
@@ -165,15 +165,15 @@ class User:
 
     @property
     def permissions(self):
-        """
+         
         Returns a list of permissions based on the user's type.
 
         Returns:
             list: The list of permissions.
-        """
+         
         permissions_map = {
             UserType.STUDENT: [Permissions.VIEW_COURSE],
             UserType.TEACHER: [Permissions.VIEW_COURSE, Permissions.EDIT_COURSE, Permissions.CREATE_COURSE],
             UserType.SUPERVISOR: [Permissions.VIEW_COURSE, Permissions.EDIT_COURSE, Permissions.CREATE_COURSE, Permissions.DELETE_COURSE],
         }
-        return permissions_map.get(self.user_type, [])
+        return permissions_map.get(self.user_type, [])   """
