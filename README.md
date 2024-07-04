@@ -1,6 +1,6 @@
 # PFA - Your Personalized E-Learning Adventure 🚀
 
-PFA is an open-source e-learning platform built with Django (backend) and Next.js (frontend). It empowers both learners and educators to create, share, and engage in a dynamic and personalized learning experience.
+**PFA** is an open-source e-learning platform designed to empower learners and educators.  Discover a universe of knowledge through personalized learning paths, interactive modules, and engaging AI-powered features. Soon, you'll experience seamless real-time collaboration with Firebase's powerful technology! 
 
 ## ✨ Features That Spark _Curiosity_
 
