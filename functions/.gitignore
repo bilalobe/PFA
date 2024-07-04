@@ -8,9 +8,3 @@ typings/
 # Node.js dependency directory
 node_modules/
 *.local
-
-# Optional npm cache directory
-.npm
-
-# Backend dir
-.backend/
