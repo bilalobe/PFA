@@ -29,6 +29,10 @@ keys.env
 node_modules/  
 *.env
 
+# Backend dir
+.backend/
+/.backend
+
 frontend/PFA.code-workspace
 *.env
 keys.env
