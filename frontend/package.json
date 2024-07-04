@@ -19,7 +19,7 @@
     "@mui/icons-material": "^5.15.21",
     "@mui/material": "^5.15.19",
     "@reduxjs/toolkit": "^2.2.6",
-    "@sentry/react": "^8.13.0",
+    "@sentry/react": "^8.14.0",
     "@sentry/tracing": "^7.114.0",
     "@testing-library/jest-dom": "^6.4.6",
     "@testing-library/react": "^16.0.0",
