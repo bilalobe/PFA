@@ -2,6 +2,12 @@
 
 **PFA** is an open-source e-learning platform designed to empower learners and educators.  Discover a universe of knowledge through personalized learning paths, interactive modules, and engaging AI-powered features. Soon, you'll experience seamless real-time collaboration with Firebase's powerful technology! 
 
+### Badges 👇 
+[![Version](https://img.shields.io/badge/version-v1.0.0-green)](https://img.shields.io/badge/version-v1.0.0-green) 
+[![Repo Size Octocat](https://img.shields.io/github/repo-size/bilalobe/PFA)](https://img.shields.io/github/repo-size/bilalobe/PFA)
+[![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](https://unlicense.org/)
+[![Last Commit](https://img.shields.io/github/last-commit/bilalobe/PFA)](https://img.shields.io/github/last-commit/bilalobe/PFA) 
+
 ## ✨ Features That Spark _Curiosity_
 
 - **Tailored Learning:** Discover a universe of knowledge with courses tailored to your unique interests and skills.
