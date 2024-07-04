@@ -1,5 +1,5 @@
 import * as Sentry from '@sentry/react';
-import { AppError } from '@/types/ErrorType';
+import { AppError } from '@/types/middleware/ErrorType';
 
 export const errorHandlingMiddleware = (store: { dispatch: (arg0: { type: string; payload: AppError; }) => void; }) => (next: (arg0: any) => any) => (action: { type: string; payload: AppError; }) => {
   if (action.type.endsWith('FAILURE')) {

@@ -1,6 +1,6 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from gensim.summarization import summarize # type: ignore   
+from gensim.summarization import summarize
 
 @api_view(["POST"])
 def summarize_text(request):

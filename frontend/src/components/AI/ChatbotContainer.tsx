@@ -1,7 +1,8 @@
 import React, { useEffect, useState, memo } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../../../firebaseConfig';
 import Chatbot from '@/components/AI/Chatbot';
-import { onAuthStateChanged } from 'firebase/auth';
+import { useChatbotConfig } from '@/components/AI/ChatbotConfig';
 
 interface User {
   uid: string;
@@ -11,19 +12,10 @@ interface User {
   emailVerified: boolean;
 }
 
-interface Message {
-  sender: string;
-  message: string;
-}
-
-interface ChatbotProps {
-  user: User;
-  conversation: Message[];
-}
-
-const ChatbotContainer: React.FC<ChatbotProps> = memo(() => {
-  const [user, setUser] = useState<null | User>(null);
-  const [conversation, setConversation] = useState<Message[]>([]);
+const ChatbotContainer: React.FC = memo(() => {
+  const [user, setUser] = useState<User | null>(null);
+  const [conversation, setConversation] = useState<{ sender: string; message: string }[]>([]);
+  const { welcomeMessage, notRecognizedMessage, autoResponseDelay, timeoutMessage } = useChatbotConfig();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -36,9 +28,8 @@ const ChatbotContainer: React.FC<ChatbotProps> = memo(() => {
           emailVerified: currentUser.emailVerified,
         };
         setUser(userMapped);
-        // Optionally fetch conversation history from Firestore or Realtime Database
-        const welcomeMessage: Message = { sender: 'bot', message: `Hello, ${userMapped.displayName}! How can I assist you today?` };
-        setConversation([welcomeMessage]);
+        const welcomeMsg = { sender: 'bot', message: `Hello, ${userMapped.displayName}! How can I assist you today?` };
+        setConversation([welcomeMsg]);
       } else {
         setUser(null);
         setConversation([]);
@@ -55,9 +46,12 @@ const ChatbotContainer: React.FC<ChatbotProps> = memo(() => {
   }
 
   return (
-    <div>
-      <Chatbot user={user} conversation={conversation} />
-    </div>
+    <Chatbot
+      welcomeMessage={welcomeMessage}
+      notRecognizedMessage={notRecognizedMessage}
+      autoResponseDelay={autoResponseDelay}
+      timeoutMessage={timeoutMessage}
+    />
   );
 });
 

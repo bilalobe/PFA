@@ -1,4 +1,4 @@
-from django.db import models
+""" from django.db import models
 from django.contrib.auth import get_user_model
 from backend.common.firestore_mixins import FirestoreDocumentMixin
 from backend.common.firebase_admin_init import db as firestore_client
@@ -8,7 +8,6 @@ from google.cloud import firestore
 User = get_user_model()
 
 class Quiz(FirestoreDocumentMixin, models.Model):
-    """
     Represents a quiz in the system.
 
     Attributes:
@@ -18,7 +17,6 @@ class Quiz(FirestoreDocumentMixin, models.Model):
         description (TextField): The description of the quiz.
         created_by (ForeignKey): The user who created the quiz.
         created_at (DateTimeField): The timestamp when the quiz was created.
-    """
 
     id = models.AutoField(primary_key=True)
     course = models.ForeignKey('courses.Course', on_delete=models.CASCADE, related_name="quizzes")
@@ -43,7 +41,6 @@ class Quiz(FirestoreDocumentMixin, models.Model):
 
 
 class QuizQuestion(FirestoreDocumentMixin, models.Model):
-    """
     Represents a question in a quiz.
 
     Attributes:
@@ -61,8 +58,6 @@ class QuizQuestion(FirestoreDocumentMixin, models.Model):
         save: Overrides the save method to save the question in a transaction to Firestore.
         delete: Overrides the delete method to delete the question in a transaction from Firestore.
         to_firestore_doc: Converts the question to a dictionary representation for Firestore.
-
-    """
 
     id = models.AutoField(primary_key=True)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="questions")
@@ -84,20 +79,16 @@ class QuizQuestion(FirestoreDocumentMixin, models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        """
         Returns a string representation of the question.
 
         Returns:
             str: The text of the question.
-        """
         return self.text
 
     firestore_client = firestore.Client()
 
     def save(self, *args, **kwargs):
-        """
         Overrides the save method to save the question in a transaction to Firestore.
-        """
         transaction = firestore_client.transaction()
     
         @firestore.transactional
@@ -109,9 +100,7 @@ class QuizQuestion(FirestoreDocumentMixin, models.Model):
         save_in_transaction(transaction, self)
 
     def delete(self, *args, **kwargs):
-        """
         Overrides the delete method to delete the question in a transaction from Firestore.
-        """
         transaction = firestore_client.transaction()
     
         @firestore.transactional
@@ -123,12 +112,10 @@ class QuizQuestion(FirestoreDocumentMixin, models.Model):
         delete_in_transaction(transaction, self)
 
     def to_firestore_doc(self):
-        """
         Converts the question to a dictionary representation for Firestore.
 
         Returns:
             dict: A dictionary representation of the question.
-        """
         return {
             "quiz_id": self.quiz.id,
             "text": self.text,
@@ -141,7 +128,6 @@ class QuizQuestion(FirestoreDocumentMixin, models.Model):
 
 
 class QuizAnswerChoice(FirestoreDocumentMixin, models.Model):
-    """
     Represents an answer choice for a quiz question.
 
     Attributes:
@@ -150,7 +136,6 @@ class QuizAnswerChoice(FirestoreDocumentMixin, models.Model):
         is_correct (BooleanField): Indicates whether the answer choice is correct or not.
         order (PositiveIntegerField): The order of the answer choice.
         created_at (DateTimeField): The timestamp when the answer choice was created.
-    """
 
     question = models.ForeignKey(
         'quizzes.QuizQuestion', on_delete=models.CASCADE, related_name="choices"
@@ -174,7 +159,6 @@ class QuizAnswerChoice(FirestoreDocumentMixin, models.Model):
 
 
 class UserQuizAttempt(models.Model):
-    """
     Represents a user's attempt at a quiz.
 
     Attributes:
@@ -188,7 +172,6 @@ class UserQuizAttempt(models.Model):
         end_time (datetime): The end time of the attempt.
         progress (int): The progress of the attempt (in percentage).
         completed (bool): Indicates whether the attempt is completed or not.
-    """
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="quiz_attempts"
@@ -206,4 +189,4 @@ class UserQuizAttempt(models.Model):
     completed = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.user} - {self.quiz.title} - Score: {self.score}"
+        return f"{self.user} - {self.quiz.title} - Score: {self.score}" """

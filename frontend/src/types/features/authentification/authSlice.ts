@@ -3,6 +3,8 @@ import axios from 'axios';
 import { apiUrl } from '@/utils/api';
 
 interface User {
+  lastName: any;
+  firstName: any;
   id: number;
   username: string;
   email: string;
