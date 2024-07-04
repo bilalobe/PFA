@@ -1,17 +1,27 @@
 {
-  "compileOnSave": true,
-  "include": [
-    "src"
-  ],
   "compilerOptions": {
-    "module": "commonjs",
-    "noImplicitReturns": true,
-    "outDir": "lib",
-    "sourceMap": true,
-    "strict": true,
-    "target": "es2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "noImplicitAny": false,
+    "allowJs": true,
     "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
     "esModuleInterop": true,
-    "noUnusedLocals": true
-  }
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }
