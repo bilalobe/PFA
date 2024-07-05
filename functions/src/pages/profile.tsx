@@ -1,10 +1,10 @@
-// frontend2/src/pages/Profile.tsx
-
 import { Box, Card, CardContent } from '@material-ui/core';
 import { GetServerSideProps } from 'next';
 import { useState } from 'react';
 import { ProfileView } from '../components/ProfileView';
-import { User } from '../interfaces/User'; // import the User interface
+import { User } from '../interfaces/User';
+import { apiUrl } from '../utils/api'; // Import the new API URL
+import React from 'react';
 
 interface ProfileProps {
   user: User;
@@ -43,7 +43,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
     }
 
-    const response = await fetch('http://your-django-backend/api/users/me/', {
+    const response = await fetch(`${apiUrl}/users/me/`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
