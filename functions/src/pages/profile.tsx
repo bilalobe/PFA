@@ -1,9 +1,9 @@
 import { Box, Card, CardContent } from '@material-ui/core';
 import { GetServerSideProps } from 'next';
-import { useState } from 'react';
-import { ProfileView } from '../components/ProfileView';
-import { User } from '../interfaces/User';
-import { apiUrl } from '../utils/api'; // Import the new API URL
+import { useState, useEffect } from 'react';
+import { ProfileView } from '../components/Users/ProfileView';
+import { User } from '../interfaces/user';
+import { firebase } from '../utils/firebase';
 import React from 'react';
 
 interface ProfileProps {
@@ -11,7 +11,31 @@ interface ProfileProps {
 }
 
 const Profile: React.FC<ProfileProps> = ({ user }) => {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [profile, setProfile] = useState<User>(user);
+
+  const handleEdit = () => setIsEditing(true);
+  const handleCancel = () => setIsEditing(false);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const userRef = firebase.firestore().collection('users').doc(user.id);
+        const snapshot = await userRef.get();
+
+        if (snapshot.exists) {
+          const userData = snapshot.data() as User;
+          setProfile(userData);
+        } else {
+          throw new Error('User data not found');
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchProfile();
+  }, [user.id]);
 
   return (
     <Box>
@@ -19,9 +43,9 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
         <CardContent>
           <Box>
             {isEditing ? (
-              <ProfileEdit user={user} onCancel={() => setIsEditing(false)} />
+              <ProfileEdit user={profile} onCancel={handleCancel} />
             ) : (
-              <ProfileView profile={user} onEdit={() => setIsEditing(true)} />
+              <ProfileView profile={profile} onEdit={handleEdit} />
             )}
           </Box>
         </CardContent>
@@ -43,24 +67,25 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
       };
     }
 
-    const response = await fetch(`${apiUrl}/users/me/`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    // Authenticate with Firebase using the token
+    await firebase.auth().signInWithCustomToken(token);
 
-    if (response.ok) {
-      const userData: User = await response.json();
-      return { props: { user: userData } };
-    } else {
-      return {
-        redirect: {
-          destination: '/login',
-          permanent: false,
-        },
-      };
+    const user = firebase.auth().currentUser;
+
+    if (!user) {
+      throw new Error('User not found');
     }
+
+    const userData: User = {
+      id: user.uid,
+      name: user.displayName || '',
+      email: user.email || '',
+      // Add other user properties as needed
+    };
+
+    return { props: { user: userData } };
   } catch (error) {
+    console.error('Error fetching user data:', error);
     return {
       redirect: {
         destination: '/login',

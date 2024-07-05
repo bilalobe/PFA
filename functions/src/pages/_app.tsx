@@ -1,5 +1,4 @@
 import { loginUser } from '@/types/features/authentication/authSlice'; // Corrected path if necessary
-import logoutUser from '@/types/features/authentication/authSlice'; // Corrected import statement
 import LoginPage from '@/pages/LoginPage'; // Corrected path
 import { getProfile } from '@/features/profileSlice'; // Corrected path
 import { fetchEnrollments } from '@/features/enrollmentSlice'; // Corrected path
@@ -12,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import ThemeProvider from '@mui/material/styles/ThemeProvider';
 import CssBaseline from '@mui/material/CssBaseline';
 import HomeGuard from '@/components/Homeguard';
+import React from 'react';
 
 const queryClient = new QueryClient();
 

@@ -1,5 +1,5 @@
 import React, { ReactNode, useEffect, useState } from 'react';
-import { db } from '../../../firebaseConfig';
+import { db } from '../../firebaseConfig';
 import { collection, query, onSnapshot, addDoc, orderBy } from 'firebase/firestore';
 
 const ChatRoom = () => {

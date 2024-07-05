@@ -1,11 +1,11 @@
 import axios from 'axios'; 
+import 'firebase/firestore';
 
 // Replace with your actual Django backend URL (use environment variables in production)
 export const apiUrl = 'http://localhost:8000/api'; 
 
 // Helper function to get the authorization token
 const getAuthToken = () => {
-  // Adapt based on your token storage (localStorage or cookies) 
   return localStorage.getItem('token'); 
 };
 
