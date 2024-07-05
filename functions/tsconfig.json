@@ -4,6 +4,7 @@
     "src"
   ],
   "compilerOptions": {
+    "jsx": "react",
     "module": "commonjs",
     "noImplicitReturns": true,
     "outDir": "lib",
