@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { db } from '../../../../firebaseConfig';
+import { db } from '../../../firebaseConfig';
 import { DocumentData, doc, onSnapshot } from 'firebase/firestore';
 
 const UserProfile = ({ userId }) => {

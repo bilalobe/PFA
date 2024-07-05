@@ -1,13 +1,13 @@
+import { getAnalytics } from "firebase/analytics";
 import { initializeApp } from "firebase/app";
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getStorage } from "firebase/storage";
 import { getDatabase } from "firebase/database";
-import { getAnalytics } from "firebase/analytics";
+import { getFirestore } from "firebase/firestore";
 import { getFunctions } from "firebase/functions";
 import { getMessaging } from "firebase/messaging";
 import { getPerformance } from "firebase/performance";
+import { getStorage } from "firebase/storage";
 
 
 const firebaseConfig = {
@@ -38,4 +38,4 @@ const functions = getFunctions(app);
 const messaging = getMessaging(app);
 const performance = getPerformance(app);
 
-export { auth, db, storage, database, analytics, functions, messaging, performance, app, appCheck };
+export { analytics, app, appCheck, auth, database, db, functions, messaging, performance, storage };

@@ -3,7 +3,7 @@ import { Button } from '@mui/material';
 import { signInWithPopup, GoogleAuthProvider, GithubAuthProvider } from 'firebase/auth';
 import { logEvent } from 'firebase/analytics';
 import { doc, setDoc } from 'firebase/firestore';
-import { auth, analytics, db } from '../../../../firebaseConfig';
+import { auth, analytics, db } from '../../../firebaseConfig';
 import { FirebaseError } from 'firebase/app';
 
 const SocialLogin = () => {
