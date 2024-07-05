@@ -16,6 +16,32 @@ configureGenkit({
   enableTracingAndMetrics: true,
 });
 
+const functions = require("firebase-functions");
+const twilio = require('twilio');
+
+// Initialize Twilio client with your credentials (use environment variables)
+const client = new twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+
+exports.sendSmsNotification = functions.https.onCall(async (data, context) => {
+    try {
+        const phoneNumber = data.phoneNumber; // The phone number to send the message to
+        const message = data.message;      // The message content
+
+        const messageResponse = await client.messages.create({
+            to: phoneNumber, 
+            from: '+1XXXXXXXXXX', // Replace with your Twilio number 
+            body: message, 
+        });
+
+        console.log('SMS notification sent successfully:', messageResponse.sid); 
+        return { success: true }; // Return success response
+    } catch (error) {
+        console.error("Error sending SMS notification:", error); 
+        // Consider throwing an error for error handling in your client
+        throw new functions.https.HttpsError('internal', 'Failed to send SMS'); 
+    }
+});
+
 export const menuSuggestionFlow = onFlow(
   {
     name: "menuSuggestionFlow",
