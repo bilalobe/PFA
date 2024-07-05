@@ -1,5 +1,5 @@
 import React, { useEffect, useState, memo } from 'react';
-import { auth } from '../../../firebaseConfig';
+import { auth } from '../../firebaseConfig';
 import Chatbot from '@/components/AI/Chatbot';
 import { onAuthStateChanged } from 'firebase/auth';
 

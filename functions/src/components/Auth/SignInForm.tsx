@@ -3,7 +3,7 @@ import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useRouter } from 'next/router';
 import { Alert } from '@mui/material';
 
-const SignInForm = ({ onSignInSuccess, onSignInFailure }) => {
+const SignInForm = ({ onSignInSuccess, onSignInFailure }: { onSignInSuccess: any, onSignInFailure: any }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);

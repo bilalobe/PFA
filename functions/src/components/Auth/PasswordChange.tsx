@@ -7,7 +7,7 @@ const PasswordChange = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState<string | undefined>('');
 
-  const handleChangePassword = async (e) => {
+  const handleChangePassword = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
     setMessage('');
     setError('');

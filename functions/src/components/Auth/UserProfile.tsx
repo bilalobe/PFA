@@ -3,7 +3,7 @@ import { Box, Typography, TextField, Button, CircularProgress, Alert } from '@mu
 import { useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { auth, db } from '../../../firebaseConfig';
+import { auth, db } from '../../firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 
