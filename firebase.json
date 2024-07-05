@@ -4,12 +4,16 @@
     "ignore": [
       "firebase.json",
       "**/.*",
-      "**/node_modules/**"
+      "**/node_modules/**" 
     ],
     "rewrites": [
       {
-        "source": "**",
-        "destination": "/index.html"
+        "source": "/api/**",
+        "function": "api"
+      },
+      {
+        "source": "**", 
+        "destination": "/index.html" 
       }
     ]
   },
@@ -20,7 +24,7 @@
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
-  "functions": [
+  "functions": [ 
     {
       "source": "functions",
       "codebase": "default",
@@ -32,7 +36,7 @@
         "*.local"
       ],
       "predeploy": [
-        "npm --prefix \"$RESOURCE_DIR\" run build"
+        "npm --prefix \"$RESOURCE_DIR\" run build" 
       ]
     }
   ],
@@ -64,9 +68,6 @@
     "eventarc": {
       "port": 9299
     },
-    "dataconnect": {
-      "port": 9399
-    },
     "ui": {
       "enabled": true
     },
@@ -75,9 +76,5 @@
   "remoteconfig": {
     "template": "remoteconfig.template.json"
   },
-  "extensions": {},
-  "dataconnect": {
-    "source": "dataconnect",
-    "location": "us-central1"
-  }
+  "extensions": {}
 }
