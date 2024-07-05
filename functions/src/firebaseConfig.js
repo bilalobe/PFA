@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { getAnalytics } from "firebase/analytics";
 import { initializeApp } from "firebase/app";
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
@@ -9,6 +10,10 @@ import { getFunctions } from "firebase/functions";
 import { getMessaging } from "firebase/messaging";
 import { getPerformance } from "firebase/performance";
 import { getStorage } from "firebase/storage";
+import dotenv from "dotenv";
+
+// Load environment variables from .env.local
+dotenv.config({ path: ".env.local" });
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -23,7 +28,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 const appCheck = initializeAppCheck(app, {
-  provider: new ReCaptchaV3Provider('RECAPTCHA_SITE_KEY'),
+  provider: new ReCaptchaV3Provider("RECAPTCHA_SITE_KEY"),
   isTokenAutoRefreshEnabled: true
 });
 
