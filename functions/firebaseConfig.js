@@ -1,6 +1,7 @@
 import { getAnalytics } from "firebase/analytics";
 import { initializeApp } from "firebase/app";
 import { initializeAppCheck, ReCaptchaV3Provider } from "firebase/app-check";
+import { getVertexAI, getGenerativeModel } from "firebase/vertexai";
 import { getAuth } from "firebase/auth";
 import { getDatabase } from "firebase/database";
 import { getFirestore } from "firebase/firestore";
@@ -8,7 +9,6 @@ import { getFunctions } from "firebase/functions";
 import { getMessaging } from "firebase/messaging";
 import { getPerformance } from "firebase/performance";
 import { getStorage } from "firebase/storage";
-
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -27,6 +27,12 @@ const appCheck = initializeAppCheck(app, {
   isTokenAutoRefreshEnabled: true
 });
 
+// Initialize the Vertex AI service
+const vertexAI = getVertexAI(app);
+
+// Initialize the generative model with a model that supports your use case
+// Gemini 1.5 Pro is versatile and can accept both text-only or multimodal prompt inputs
+getGenerativeModel(vertexAI, { model: "gemini-1.5-pro-preview-0409" });
 
 // Initialize Firebase services
 const auth = getAuth(app);
