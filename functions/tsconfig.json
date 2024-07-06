@@ -1,10 +1,11 @@
 {
   "compileOnSave": true,
   "include": [
-    "src"
+    "src",
+    ".next/types/**/*.ts"
   ],
   "compilerOptions": {
-    "jsx": "react",
+    "jsx": "preserve",
     "module": "commonjs",
     "noImplicitReturns": true,
     "outDir": "lib",
@@ -13,6 +14,25 @@
     "target": "es2017",
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "noUnusedLocals": true
-  }
+    "noUnusedLocals": true,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "noEmit": true,
+    "incremental": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "exclude": [
+    "node_modules"
+  ]
 }

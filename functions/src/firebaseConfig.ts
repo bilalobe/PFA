@@ -61,4 +61,5 @@ const functions: Functions = getFunctions(app);
 const messaging: Messaging = getMessaging(app);
 const performance = getPerformance(app);
 
-export { analytics, app, appCheck, auth, database, db, functions, messaging, performance, storage, vertexAIClient };
+export { analytics, app, appCheck, auth, database, db, functions, messaging, performance, storage, vertexAIClient, firebaseConfig };
+export type { FirebaseApp };
