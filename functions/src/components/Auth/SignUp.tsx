@@ -1,4 +1,5 @@
-import React, { useState, FormEvent } from 'react';
+import * as React from 'react';
+import { useState, FormEvent } from 'react';
 import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { TextField, Button, Alert } from '@mui/material';
 import { initializeApp } from 'firebase/app';
