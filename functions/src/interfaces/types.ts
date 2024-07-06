@@ -1,6 +1,32 @@
 import { QueryDocumentSnapshot, Timestamp } from 'firebase/firestore';
 
+// User Data Interface
+
+export interface User {
+    id: string;
+    name: string;
+    role: string;
+    email: string;
+    uid: string;
+    displayName: string;
+    photoURL: string;
+    emailVerified: boolean;
+    user_type?: string; // Add this line
+    [key: string]: any;
+}
+  
+export interface UserProfile {
+    firstName: string;
+    lastName: string;
+    email: string;
+    [key: string]: any;
+}
+  
 // General Data Interfaces
+export interface CourseData {
+    [key: string]: any;
+}
+
 export interface ModuleData {
     [key: string]: any;
 }
@@ -32,6 +58,16 @@ export interface AnswerData {
     [key: string]: any;
 }
 
+export interface PostData {
+    title: string;
+    content: string;
+    [key: string]: any; // Add other fields as necessary
+  }
+  
+export interface CreatePostResponse {
+    id: string;
+    [key: string]: any;
+  }
 // Resource Data Interface
 export interface Resource {
     id: string;
