@@ -9,7 +9,9 @@ import { getFunctions, Functions } from "firebase/functions";
 import { getMessaging, Messaging } from "firebase/messaging";
 import { getPerformance } from "firebase/performance";
 import { getStorage } from "firebase/storage";
+import "firebase/compat/auth";
 import dotenv from "dotenv";
+import firebaseui from "firebaseui";
 
 // Load environment variables from .env.local
 dotenv.config({ path: ".env.local" });
@@ -40,6 +42,29 @@ const appCheck: AppCheck = initializeAppCheck(app, {
   provider: new ReCaptchaV3Provider("RECAPTCHA_SITE_KEY"),
   isTokenAutoRefreshEnabled: true
 });
+
+// FirebaseUI configuration
+export const uiConfig: FirebaseUIAuthConfig = {
+  signInFlow: 'popup', // or 'redirect'
+  signInSuccessUrl: '/dashboard', // Redirect URL after successful sign-in 
+  signInOptions: [
+    firebaseui.auth.EmailAuthProvider.PROVIDER_ID, 
+    // Add other providers like Google, Facebook, Twitter, etc.
+  ],
+};
+
+
+// Define or import FirebaseUIAuthConfig
+interface FirebaseUIAuthConfig {
+  signInSuccessUrl: string;
+  signInOptions: string[];
+  signInFlow: string;
+}
+
+
+
+
+export const ui = new firebaseui.auth.AuthUI(getAuth());
 
 
 // Initialize the Vertex AI client
