@@ -1,6 +1,11 @@
 import React, { useState, FormEvent } from 'react';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
 import { TextField, Button, Alert } from '@mui/material';
+import { initializeApp } from 'firebase/app';
+import { firebaseConfig } from '../../firebaseConfig';
+
+// Initialize Firebase
+const FirebaseApp = initializeApp(firebaseConfig);
 
 const SignUp = () => {
   const [email, setEmail] = useState('');
@@ -12,10 +17,11 @@ const SignUp = () => {
     e.preventDefault();
     setMessage('');
     setError('');
-    const auth = getAuth(firebaseApp);
+    const auth = getAuth(FirebaseApp);
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await userCredential.user.sendEmailVerification();
+      const user = userCredential.user;
+      await sendEmailVerification(user);
       setMessage('Please check your email to verify your account.');
     } catch (error) {
       if (error instanceof Error) setError('Failed to create account. ' + error.message);

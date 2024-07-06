@@ -1,16 +1,25 @@
 import React from 'react';
-import firebase from 'firebase/app';
-import auth from '../../firebaseConfig';
+import { getAuth, signOut } from 'firebase/auth';
+import { initializeApp } from 'firebase/app';
+import { firebaseConfig } from '../../firebaseConfig';
 
+// Initialize Firebase
+const FirebaseApp = initializeApp(firebaseConfig);
 
 const SignOutButton = () => {
   const handleSignOut = async () => {
+    const auth = getAuth(FirebaseApp);
     try {
-      await firebase.auth().signOut();
+      await signOut(auth);
       alert('You have been signed out.');
     } catch (error) {
-      console.error('Sign out error:', error.message);
-      alert('Failed to sign out. Please try again.');
+      if (error instanceof Error) {
+        console.error('Sign out error:', error.message);
+        alert('Failed to sign out. Please try again.');
+      } else {
+        console.error('Sign out error:', error);
+        alert('Failed to sign out. Please try again.');
+      }
     }
   };
 

@@ -17,7 +17,7 @@ const validationSchema = yup.object({
 const UserProfile = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [success] = useState(false);
   const { control, handleSubmit, formState: { errors }, setValue } = useForm({
     resolver: yupResolver(validationSchema),
     defaultValues: {
@@ -45,7 +45,7 @@ const UserProfile = () => {
     return unsubscribe; // Unsubscribe on cleanup
   }, [setValue]);
 
-  const onSubmit = async (data) => {
+  const onSubmit = async (data: { firstName: any; lastName: any; email: any; }) => {
     setLoading(true);
     setError(null);
     try {
@@ -128,6 +128,3 @@ const UserProfile = () => {
 
 export default UserProfile;
 
-function initializeApp(firebaseConfig: any) {
-  throw new Error('Function not implemented.');
-}
