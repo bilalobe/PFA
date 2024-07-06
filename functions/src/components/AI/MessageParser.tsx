@@ -7,7 +7,7 @@ interface Message {
   senderId: string;
 }
 
-const MessageParser = ({ chatId }) => {
+const MessageParser = ({ chatId }: { chatId: string }) => {
   const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {

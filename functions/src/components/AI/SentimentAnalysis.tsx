@@ -1,22 +1,34 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Typography, Chip } from '@mui/material';
+import { Typography, Chip, CircularProgress } from '@mui/material';
+import { getSentiment } from '../../utils/api';
 
-function SentimentDisplay({ text, sentiment: initialSentiment }) {
-  const [sentiment, setSentiment] = useState(initialSentiment);
+interface SentimentDisplayProps {
+  text: string;
+  initialSentiment?: string;
+}
+
+const SentimentDisplay: React.FC<SentimentDisplayProps> = ({ text, initialSentiment }) => {
+  const [sentiment, setSentiment] = useState<string | null>(initialSentiment || null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // If the sentiment was not provided, fetch it from the API
     if (!sentiment) {
       const analyzeSentiment = async () => {
         setIsLoading(true);
         try {
-          const response = await axios.post('/api/sentiment/', { text });
-          setSentiment(response.data.sentiment);
+          const response = await getSentiment(text);
+          if (response && response.sentiment) {
+            setSentiment(response.sentiment as string);
+          } else {
+            setError('Failed to get sentiment from response');
+          }
         } catch (error) {
-          setError(error.message);
+          if (error instanceof Error) {
+            setError(error.message);
+          } else {
+            setError('An unexpected error occurred');
+          }
         } finally {
           setIsLoading(false);
         }
@@ -25,7 +37,7 @@ function SentimentDisplay({ text, sentiment: initialSentiment }) {
     }
   }, [text, sentiment]);
 
-  const getSentimentColor = (sentiment) => {
+  const getSentimentColor = (sentiment: string | null) => {
     switch (sentiment) {
       case 'positive':
         return 'success';
@@ -39,7 +51,7 @@ function SentimentDisplay({ text, sentiment: initialSentiment }) {
   return (
     <Typography component="div">
       {isLoading ? (
-        <Chip label="Loading..." />
+        <CircularProgress />
       ) : error ? (
         <Chip label="Error" color="error" />
       ) : (
@@ -47,6 +59,6 @@ function SentimentDisplay({ text, sentiment: initialSentiment }) {
       )}
     </Typography>
   );
-}
+};
 
 export default SentimentDisplay;

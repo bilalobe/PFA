@@ -17,7 +17,7 @@ function QuestionGeneration() {
       const response = await axios.post('/api/ai/generate-questions/', { text: inputText }); // Your API endpoint
       setQuestions(response.data.questions);
     } catch (error) {
-      setError(error.message || 'An error occurred. Please try again later.');
+      setError((error as Error).message || 'An error occurred. Please try again later.');
     } finally {
       setLoading(false);
     }

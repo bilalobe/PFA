@@ -42,7 +42,7 @@ function RecommendationList() {
   return (
     <List>
       {recommendations && recommendations.length > 0 ? (
-        recommendations.map((course, index) => (
+        recommendations.map((course: { title: string | number | bigint | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<React.AwaitedReactNode> | null | undefined; description: string | number | bigint | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<React.AwaitedReactNode> | null | undefined; }, index: React.Key | null | undefined) => (
           <ListItem key={index}>
             <ListItemText primary={course.title} secondary={course.description} />
           </ListItem>
