@@ -1,24 +1,22 @@
 import { useState } from 'react';
 import { TextField, Button, CircularProgress, Alert } from '@mui/material';
-
-interface User {
-  uid: string;
-  email: string | null;
-  displayName: string;
-  photoURL: string;
-  emailVerified: boolean;
-}
+import React from 'react';
+import { User } from '../../interfaces/types';
 
 interface ProfileViewProps {
-  user: User;
+  user: User | null;
   isEditing: boolean;
-  onSave: (userData: User) => void;
   isLoading: boolean;
+  onSave: (userData: User) => void;
+  onEdit: () => void;
+  onCancel: () => void;
+  onLogout: () => void;
   error: string | null;
 }
 
+
 const ProfileView: React.FC<ProfileViewProps> = ({ user, isEditing, onSave, isLoading, error }) => {
-  const [userData, setUserData] = useState<User>(user);
+  const [userData, setUserData] = useState<User>(user as User);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setUserData({

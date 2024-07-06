@@ -2,37 +2,47 @@ import { useState, useEffect } from 'react';
 import { 
   collection, 
   addDoc, 
-  getDocs, 
   doc, 
+  getDoc, 
   updateDoc, 
   deleteDoc, 
   onSnapshot, 
-  FirestoreError 
+  FirestoreError, 
+  DocumentData,
+  WithFieldValue,
+  UpdateData
 } from 'firebase/firestore';
-import db from '../firebaseConfig.js';
+import { db } from '../firebaseConfig';
 
 interface FirestoreHook<T> {
   data: T[];
   loading: boolean;
   error: string | null;
   addDocument: (newDoc: T) => Promise<void>;
-  updateDocument: (id: string, updatedDoc: Partial<T>) => Promise<void>;
+  updateDocument: (id: string, updatedDoc: UpdateData<T>) => Promise<void>;
   deleteDocument: (id: string) => Promise<void>;
 }
 
-export const useFirestore = <T>(collectionName: string): FirestoreHook<T> => {
-  const [data, setData] = useState<T[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+interface FirestoreDocumentHook<T> {
+  docData: T | null;
+  loading: boolean;
+  error: string | null;
+}
+
+const useFirestore = <T extends DocumentData>(collectionName: string): FirestoreHook<T> => {
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<T[]>([]);
 
   useEffect(() => {
+    setLoading(true);
     const unsubscribe = onSnapshot(
       collection(db, collectionName),
       (snapshot) => {
         const documents = snapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-        })) as T[];
+        })) as unknown as T[];
         setData(documents);
         setLoading(false);
       },
@@ -46,7 +56,7 @@ export const useFirestore = <T>(collectionName: string): FirestoreHook<T> => {
     return () => unsubscribe();
   }, [collectionName]);
 
-  const addDocument = async (newDoc: T) => {
+  const addDocument = async (newDoc: WithFieldValue<T>) => {
     setLoading(true);
     try {
       await addDoc(collection(db, collectionName), newDoc);
@@ -58,7 +68,7 @@ export const useFirestore = <T>(collectionName: string): FirestoreHook<T> => {
     }
   };
 
-  const updateDocument = async (id: string, updatedDoc: Partial<T>) => {
+  const updateDocument = async (id: string, updatedDoc: UpdateData<T>) => {
     setLoading(true);
     try {
       const docRef = doc(db, collectionName, id);
@@ -86,3 +96,35 @@ export const useFirestore = <T>(collectionName: string): FirestoreHook<T> => {
 
   return { data, loading, error, addDocument, updateDocument, deleteDocument };
 };
+
+export const useFirestoreDocument = <T extends DocumentData>(collectionName: string, docId: string): FirestoreDocumentHook<T> => {
+  const [docData, setDocData] = useState<T | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchDocument = async () => {
+      setLoading(true);
+      try {
+        const docRef = doc(db, collectionName, docId);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setDocData(docSnap.data() as T);
+        } else {
+          setError('Document does not exist');
+        }
+      } catch (error: any) {
+        console.error('Error fetching document:', error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDocument();
+  }, [collectionName, docId]);
+
+  return { docData, loading, error };
+};
+
+export { useFirestore };

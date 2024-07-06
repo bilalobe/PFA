@@ -16,11 +16,10 @@ configureGenkit({
   enableTracingAndMetrics: true,
 });
 
-const functions = require("firebase-functions");
-const twilio = require('twilio');
+import functions from "firebase-functions";
+import twilio from 'twilio';
 
-// Initialize Twilio client with your credentials (use environment variables)
-const client = new twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
+const client = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
 exports.sendSmsNotification = functions.https.onCall(async (data, context) => {
     try {

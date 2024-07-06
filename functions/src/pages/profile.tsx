@@ -1,41 +1,57 @@
-import { Box, Card, CardContent } from '@material-ui/core';
-import { GetServerSideProps } from 'next';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useAuth } from '../hooks/useAuth'; 
+import { useFirestoreDocument } from '../hooks/useFirestore';
+import { Navigate } from 'react-router-dom';
+import { Box, Card, CardContent, CircularProgress, Typography } from '@mui/material';
 import { ProfileView } from '../components/Users/ProfileView';
-import { User } from '../interfaces/user';
-import { firebase } from '../utils/firebase';
+import ProfileEdit from '../components/Users/ProfileEdit'; 
+import { User } from '../interfaces/types';
 import React from 'react';
+import { getAuth, signOut } from 'firebase/auth';
 
-interface ProfileProps {
-  user: User;
-}
+const Profile: React.FC = () => {
+  const { user } = useAuth();
 
-const Profile: React.FC<ProfileProps> = ({ user }) => {
-  const [isEditing, setIsEditing] = useState<boolean>(false);
-  const [profile, setProfile] = useState<User>(user);
+  if (!user) {
+    return <Navigate to="/login" replace />;  
+  }
 
-  const handleEdit = () => setIsEditing(true);
-  const handleCancel = () => setIsEditing(false);
+  const { docData: profile, loading, error } = useFirestoreDocument<User>(`users/${user.uid}`, 'user');
+  const [isEditing, setIsEditing] = useState(false); 
+  const [updatedProfile, setUpdatedProfile] = useState<User | null>(null);
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const userRef = firebase.firestore().collection('users').doc(user.id);
-        const snapshot = await userRef.get();
+  const handleSave = (userData: User) => {
+    setUpdatedProfile(userData);
+    setIsEditing(false);
+  };
 
-        if (snapshot.exists) {
-          const userData = snapshot.data() as User;
-          setProfile(userData);
-        } else {
-          throw new Error('User data not found');
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      }
-    };
+  const handleCancel = () => {
+    setIsEditing(false);
+  };
 
-    fetchProfile();
-  }, [user.id]);
+  const handleLogout = () => {
+    const auth = getAuth();
+    signOut(auth)
+      .then(() => {
+        // Sign-out successful.
+        console.log('User signed out successfully');
+      })
+      .catch((error) => {
+        console.error('Error signing out: ', error);
+      });
+  };
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
+        <CircularProgress />
+      </Box>
+    ); 
+  }
+
+  if (error) {
+    return <Typography variant="body1" color="error">Error: {error}</Typography>;
+  }
 
   return (
     <Box>
@@ -43,56 +59,30 @@ const Profile: React.FC<ProfileProps> = ({ user }) => {
         <CardContent>
           <Box>
             {isEditing ? (
-              <ProfileEdit user={profile} onCancel={handleCancel} />
+              profile && (
+                <ProfileEdit 
+                  user={updatedProfile || profile} 
+                  onCancel={handleCancel} 
+                  onSave={handleSave} 
+                />
+              )
             ) : (
-              <ProfileView profile={profile} onEdit={handleEdit} />
+                <ProfileView 
+                  user={updatedProfile || profile}
+                  isEditing={isEditing}
+                  isLoading={false}
+                  onEdit={() => setIsEditing(true)}
+                  onCancel={handleCancel}
+                  onLogout={handleLogout} 
+                  onSave={handleSave}
+                  error={null}
+                />
             )}
           </Box>
         </CardContent>
       </Card>
     </Box>
   );
-};
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  try {
-    const token = context.req.cookies.token;
-
-    if (!token) {
-      return {
-        redirect: {
-          destination: '/login',
-          permanent: false,
-        },
-      };
-    }
-
-    // Authenticate with Firebase using the token
-    await firebase.auth().signInWithCustomToken(token);
-
-    const user = firebase.auth().currentUser;
-
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    const userData: User = {
-      id: user.uid,
-      name: user.displayName || '',
-      email: user.email || '',
-      // Add other user properties as needed
-    };
-
-    return { props: { user: userData } };
-  } catch (error) {
-    console.error('Error fetching user data:', error);
-    return {
-      redirect: {
-        destination: '/login',
-        permanent: false,
-      },
-    };
-  }
 };
 
 export default Profile;

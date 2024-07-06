@@ -16,10 +16,12 @@ import {
 } from "firebase/firestore";
 
 import 'firebase/storage';
-import { deleteObject, getDownloadURL, ref, StorageReference,  } from "firebase/storage"; // @ts-ignore
+import { deleteObject, getDownloadURL, ref, StorageReference,  } from "firebase/storage";
 
-import { auth, db, storage, firestore } from "@/firebaseConfig";
-import { QuizAttemptData, QuizData, AnswerData, ModuleData, QuestionData, Resource, ForumData } from "../interfaces/types";
+import { auth, db, functions, storage } from "../firebaseConfig";
+import { UserProfile, QuizAttemptData, CourseData, QuizData, AnswerData, ModuleData, QuestionData, Resource, ForumData, PostData, CreatePostResponse } from "../interfaces/types";
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { firestore } from "firebase-admin";
 
 
 // --- Error Handling --- 
@@ -79,11 +81,6 @@ export const authApi = {
 };
 
 
-interface UserProfile {
-  id: string;
-  [key: string]: any;
-}
-
 export const userApi = {
   getProfile: async (): Promise<UserProfile | null> => {
     try {
@@ -96,7 +93,8 @@ export const userApi = {
       const docSnap = await getDoc(userDocRef);
 
       if (docSnap.exists()) {
-        return { id: user.uid, ...docSnap.data() };
+        const userData = docSnap.data() as UserProfile;
+        return { id: user.uid, user_type: '', ...userData };
       } else {
         throw new Error("User profile not found.");
       }
@@ -125,9 +123,6 @@ export const userApi = {
 
 // === Course API (Firestore) === 
 
-interface CourseData {
-  [key: string]: any;
-}
 
 export const courseApi = {
   fetchCourses: async (): Promise<CourseData[] | null> => {
@@ -161,10 +156,6 @@ export const courseApi = {
       const user = auth.currentUser;
       if (!user) {
         throw new Error('User not authenticated');
-      }
-
-      if (user.user_type !== 'teacher') { // Adjust if you use a different field for teacher role
-        throw new Error('You do not have permission to create courses.');
       }
 
       const docRef = await addDoc(collection(db, 'courses'), {
@@ -512,41 +503,56 @@ export const forumApi = {
   
 
   // 6.  Create a New Post
-  createPost: async (forumId: string, threadId: string, postData: any) => {
-    try {
-      const user = auth.currentUser;
-      if (!user) {
-        throw new Error("User not authenticated."); 
-      }
-
-      // Add timestamp
-      const timestamp = Timestamp.now();
-
-      // Optionally perform sentiment analysis (asynchronously - good for Cloud Functions)
-      // ...
-
-      const postsRef = collection(db, 'forums', forumId, 'threads', threadId, 'posts');
-      const docRef = await addDoc(postsRef, {
-        ...postData, 
-        author: user.uid,
-        createdAt: timestamp,
-        // sentiment:  // ... if you did sentiment analysis 
-      });
-
-      // Award forum points to the user using the `gamificationApi` or update in your backend
-      // (Make sure to handle this securely and prevent user manipulation!)
-
-      // Increment the post count on the thread (use Firestore.FieldValue.increment())
-      await updateDoc(doc(db, 'forums', forumId, 'threads', threadId), {
-        postCount:  firestore.FieldValue.increment(1) 
-      });
-
-      return { id: docRef.id, ...postData }; 
-
-    } catch (error) {
-      handleApiError(error, `Failed to create post in thread ${threadId}.`); 
+ createPost : async (forumId: string, threadId: string, postData: PostData): Promise<CreatePostResponse | void> => {
+  try {
+    const user = auth.currentUser;
+    if (!user) {
+      throw new Error("User not authenticated.");
     }
-  },
+
+    // Add timestamp
+    const timestamp = Timestamp.now();
+
+    // Optionally perform sentiment analysis
+    let sentiment = null;
+    try {
+      const functions = getFunctions();
+      const analyzeSentiment = httpsCallable(functions, 'analyzeSentiment');
+      const response = await analyzeSentiment({ text: postData.content });
+      if (response.data && typeof response.data === 'object' && 'sentiment' in response.data) {
+        sentiment = response.data.sentiment;
+      }
+    } catch (sentimentError) {
+      console.error('Sentiment analysis failed:', sentimentError);
+    }
+
+    const postsRef = collection(db, 'forums', forumId, 'threads', threadId, 'posts');
+    const docRef = await addDoc(postsRef, {
+      ...postData,
+      author: user.uid,
+      createdAt: timestamp,
+      sentiment: sentiment // Add sentiment if available
+    });
+
+    // Award forum points to the user
+    try {
+      const awardPoints = httpsCallable(functions, 'awardPoints');
+      await awardPoints({ userId: user.uid, points: 10 }); // Adjust points as necessary
+    } catch (pointsError) {
+      console.error('Awarding points failed:', pointsError);
+    }
+
+    // Increment the post count on the thread
+    await updateDoc(doc(db, 'forums', forumId, 'threads', threadId), {
+      postCount: firestore.FieldValue.increment(1)
+    });
+
+    return { id: docRef.id, ...postData };
+
+  } catch (error) {
+    console.error(`Failed to create post in thread ${threadId}:`, error);
+  }
+},
 
   // 7. Fetch Comments for a Post (Use Subcollections)
   fetchComments: async (postId: string, lastVisible?: QueryDocumentSnapshot, limitValue: number = 10): Promise<{ comments: Comment[], lastVisible?: QueryDocumentSnapshot } | null> => {
@@ -796,3 +802,24 @@ function calculateQuizScore(answers: any): number {
 function uploadBytesResumable(storageRef: StorageReference, file: File) {
   throw new Error("Function not implemented.");
 }
+
+
+// === AI API (Firestore) ===
+
+
+export const getSentiment = async (text: string) => {
+  try {
+    const functions = getFunctions();
+    const analyzeSentiment = httpsCallable(functions, 'analyzeSentiment');
+    const response = await analyzeSentiment({ text });
+
+    if (response.data && typeof response.data === 'object' && 'sentiment' in response.data) {
+      return { sentiment: response.data.sentiment };
+    } else {
+      throw new Error('Invalid response from Genkit AI');
+    }
+  } catch (error) {
+    handleApiError(error, 'Failed to analyze sentiment.');
+    return { sentiment: null, error: 'Failed to analyze sentiment.' };
+  }
+};

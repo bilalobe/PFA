@@ -1,12 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { List, ListItem, ListItemText, Typography, Divider, ListItemAvatar, Avatar, CircularProgress, Alert } from '@mui/material';
+import { List, ListItemText, Divider, ListItemAvatar, Avatar, CircularProgress, Alert, ListItemButton } from '@mui/material';
 import { useRouter } from 'next/router';
 
+interface User {
+  id: string;
+  name: string;
+  profile_picture: string;
+}
+
 function PrivateChatList() {
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -15,7 +21,11 @@ function PrivateChatList() {
         const response = await axios.get('/api/users/');
         setUsers(response.data);
       } catch (error) {
-        setError(error.message);
+        if (axios.isAxiosError(error)) {
+          setError(error.message);
+        } else {
+          setError('An unexpected error occurred');
+        }
       } finally {
         setLoading(false);
       }
@@ -23,7 +33,7 @@ function PrivateChatList() {
     fetchUsers();
   }, []);
 
-  const handleUserClick = (userId: any) => {
+  const handleUserClick = (userId: string) => {
     router.push(`/chat/private/${userId}`);
   };
 
@@ -47,12 +57,12 @@ function PrivateChatList() {
     <List>
       {users.map(user => (
         <React.Fragment key={user.id}>
-          <ListItem button onClick={() => handleUserClick(user.id)}>
+          <ListItemButton onClick={() => handleUserClick(user.id)}>
             <ListItemAvatar>
               <Avatar alt={user.name} src={user.profile_picture} />
             </ListItemAvatar>
             <ListItemText primary={user.name} />
-          </ListItem>
+          </ListItemButton>
           <Divider />
         </React.Fragment>
       ))}

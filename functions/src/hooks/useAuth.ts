@@ -11,6 +11,7 @@ import { auth, db } from '../firebaseConfig.js';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 interface UserProfile {
+  uid<T>(arg0: string, uid: any): { docData: any; loading: any; error: any; };
   id: string;
   email: string;
   emailVerified: boolean;
