@@ -23,6 +23,8 @@ import { UserProfile, QuizAttemptData, CourseData, QuizData, AnswerData, ModuleD
 import { getFunctions, httpsCallable } from "firebase/functions";
 import { firestore } from "firebase-admin";
 
+import { searchClient } from './algolia';
+
 
 // --- Error Handling --- 
 
@@ -803,7 +805,77 @@ function uploadBytesResumable(storageRef: StorageReference, file: File) {
   throw new Error("Function not implemented.");
 }
 
+// === Search API (Algolia) ===
+export const searchApi = { // @ts-ignore
+  search: async (collection: string, query: string, options?: SearchOptions) => {
+    try {
+      const index = searchClient.initIndex(collection); // Example for 'courses'
+      const response = await index.search(query, options);
+      return response.hits;
+    } catch (error) {
+      // ... error handling logic ...
+      throw error;
+    }
+  },
+};
 
+// === Enrollment API (Firestore) ===
+
+export const enrollmentApi = {
+  fetchEnrollments: async (): Promise<any[]> => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error("User not authenticated.");
+      }
+
+      const q = query(collection(db, 'enrollments'), where('user', '==', user.uid));
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (error) {
+      handleApiError(error, 'Failed to fetch enrollments.');
+    }
+    return [];
+  },
+
+  enrollInCourse: async (courseId: string): Promise<void> => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error("User not authenticated.");
+      }
+
+      const enrollmentRef = collection(db, 'enrollments');
+      await addDoc(enrollmentRef, { user: user.uid, course: courseId });
+    } catch (error) {
+      handleApiError(error, 'Failed to enroll in course.');
+    }
+  },
+
+  unenrollFromCourse: async (enrollmentId: string): Promise<void> => {
+    try {
+      const user = auth.currentUser;
+      if (!user) {
+        throw new Error("User not authenticated.");
+      }
+
+      const enrollmentRef = doc(db, 'enrollments', enrollmentId);
+      const enrollmentSnap = await getDoc(enrollmentRef);
+
+      if (!enrollmentSnap.exists()) {
+        throw new Error('Enrollment not found.');
+      }
+
+      if (enrollmentSnap.data().user !== user.uid) {
+        throw new Error('You are not authorized to unenroll from this course.');
+      }
+
+      await deleteDoc(enrollmentRef);
+    } catch (error) {
+      handleApiError(error, 'Failed to unenroll from course.');
+    }
+  }
+};
 // === AI API (Firestore) ===
 
 
