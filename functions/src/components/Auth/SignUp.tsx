@@ -4,6 +4,7 @@ import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from '
 import { TextField, Button, Alert } from '@mui/material';
 import { initializeApp } from 'firebase/app';
 import { firebaseConfig } from '../../firebaseConfig';
+import { useNavigate } from 'react-router-dom';
 
 // Initialize Firebase
 const FirebaseApp = initializeApp(firebaseConfig);
@@ -13,6 +14,7 @@ const SignUp = () => {
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleSignUp = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -24,6 +26,8 @@ const SignUp = () => {
       const user = userCredential.user;
       await sendEmailVerification(user);
       setMessage('Please check your email to verify your account.');
+      // Redirect to the login page after successful sign-up
+      setTimeout(() => navigate('/login'), 3000); // Redirect after 3 seconds
     } catch (error) {
       if (error instanceof Error) setError('Failed to create account. ' + error.message);
       else setError('Failed to create account. An unknown error occurred.');
