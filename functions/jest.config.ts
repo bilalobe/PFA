@@ -10,17 +10,15 @@ const config: Config.InitialOptions = {
     // Add more mappings as needed
   },
   transform: {
-    // ts-jest transformation
-    '^.+\\.(ts|tsx)$': 'ts-jest',
-  },
-  globals: {
-    'ts-jest': {
+    '^.+\\.(js|jsx|ts|tsx)$': ['ts-jest', {
       tsconfig: 'tsconfig.json', // Specify your tsconfig if it's not in the root
-    },
+    }],
   },
   testMatch: [
     '**/__tests__/**/*.ts?(x)',
+    '**/__tests__/**/*.js?(x)',
     '**/?(*.)+(spec|test).ts?(x)', // Adjust if you use different naming conventions
+    '**/?(*.)+(spec|test).js?(x)', // Adjust if you use different naming conventions
   ],
   // Add more configuration as needed
 };
