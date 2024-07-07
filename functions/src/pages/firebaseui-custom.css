@@ -1,0 +1,78 @@
+/* firebaseui-custom.css */
+.firebaseui-container {
+  background-color: #f0f0f0; /* Change background color */
+  border-radius: 8px; /* Add border radius */
+  padding: 20px; /* Add padding */
+}
+
+.firebaseui-title {
+  font-family: 'Arial', sans-serif; /* Change font family */
+  color: #333; /* Change text color */
+}
+
+.firebaseui-idp-button {
+  border-radius: 4px; /* Add border radius to buttons */
+  margin-bottom: 10px; /* Add margin between buttons */
+}
+
+.firebaseui-idp-google {
+  background-color: #4285f4; /* Change Google button color */
+  color: white; /* Change text color */
+}
+
+.firebaseui-idp-facebook {
+  background-color: #3b5998; /* Change Facebook button color */
+  color: white; /* Change text color */
+}
+
+.firebaseui-idp-email {
+  background-color: #d14836; /* Change Email button color */
+  color: white; /* Change text color */
+}
+
+/* Example HTML structure using Tailwind CSS */
+.firebaseui-container .bg-gray-100 {
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.firebaseui-container .font-sans {
+  font-family: 'Arial', sans-serif;
+  color: #333;
+}
+
+.firebaseui-container .bg-blue-500 {
+  background-color: #4285f4;
+  color: white;
+}
+
+.firebaseui-container .bg-blue-800 {
+  background-color: #3b5998;
+  color: white;
+}
+
+.firebaseui-container .bg-red-600 {
+  background-color: #d14836;
+  color: white;
+}
+
+.firebaseui-container .rounded-lg {
+  border-radius: 8px;
+}
+
+.firebaseui-container .rounded-md {
+  border-radius: 4px;
+}
+
+.firebaseui-container .mb-2 {
+  margin-bottom: 10px;
+}
+
+.firebaseui-container .text-gray-800 {
+  color: #333;
+}
+
+.firebaseui-container .text-white {
+  color: white;
+}

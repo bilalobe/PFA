@@ -1,24 +1,40 @@
-import { useState } from 'react';
-import { useAuth } from '../hooks/useAuth'; 
+import { useState, useEffect } from 'react';
+import useAuth from '../hooks/useAuth'; 
 import { useFirestoreDocument } from '../hooks/useFirestore';
-import { Navigate } from 'react-router-dom';
 import { Box, Card, CardContent, CircularProgress, Typography } from '@mui/material';
 import { ProfileView } from '../components/Users/ProfileView';
 import ProfileEdit from '../components/Users/ProfileEdit'; 
 import { User } from '../interfaces/types';
 import React from 'react';
 import { getAuth, signOut } from 'firebase/auth';
+import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
+import { uiConfig } from '../firebaseConfig';
+import firebaseui from 'firebaseui';
 
 const Profile: React.FC = () => {
   const { user } = useAuth();
+  const [isEditing, setIsEditing] = useState(false); 
+  const [updatedProfile, setUpdatedProfile] = useState<User | null>(null);
+
+  useEffect(() => {
+    // Cleanup FirebaseUI widget on component unmount
+    return () => {
+      const ui = firebaseui.auth.AuthUI.getInstance();
+      if (ui) {
+        ui.delete();
+      }
+    };
+  }, []);
 
   if (!user) {
-    return <Navigate to="/login" replace />;  
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="50vh">
+        <StyledFirebaseAuth uiConfig={uiConfig} firebaseAuth={getAuth()} />
+      </Box>
+    );
   }
 
   const { docData: profile, loading, error } = useFirestoreDocument<User>(`users/${user.uid}`, 'user');
-  const [isEditing, setIsEditing] = useState(false); 
-  const [updatedProfile, setUpdatedProfile] = useState<User | null>(null);
 
   const handleSave = (userData: User) => {
     setUpdatedProfile(userData);
