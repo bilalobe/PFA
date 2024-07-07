@@ -2,7 +2,7 @@ import { getAnalytics, Analytics } from "firebase/analytics";
 import { initializeApp, FirebaseApp } from "firebase/app";
 import { initializeAppCheck, ReCaptchaV3Provider, AppCheck } from "firebase/app-check";
 import { PredictionServiceClient }from "@google-cloud/aiplatform";
-import { getAuth, Auth } from "firebase/auth";
+import { getAuth, Auth, GoogleAuthProvider, EmailAuthProvider, FacebookAuthProvider, GithubAuthProvider } from "firebase/auth";
 import { getDatabase, Database } from "firebase/database";
 import { getFirestore, Firestore } from "firebase/firestore";
 import { getFunctions, Functions } from "firebase/functions";
@@ -11,7 +11,9 @@ import { getPerformance } from "firebase/performance";
 import { getStorage } from "firebase/storage";
 import "firebase/compat/auth";
 import dotenv from "dotenv";
-import firebaseui from "firebaseui";
+import firebaseui from 'firebaseui';
+import 'firebaseui/dist/firebaseui';
+
 
 // Load environment variables from .env.local
 dotenv.config({ path: ".env.local" });
@@ -44,15 +46,18 @@ const appCheck: AppCheck = initializeAppCheck(app, {
 });
 
 // FirebaseUI configuration
-export const uiConfig: FirebaseUIAuthConfig = {
-  signInFlow: 'popup', // or 'redirect'
-  signInSuccessUrl: '/dashboard', // Redirect URL after successful sign-in 
+const uiConfig = {
+  signInFlow: 'popup',
   signInOptions: [
-    firebaseui.auth.EmailAuthProvider.PROVIDER_ID, 
-    // Add other providers like Google, Facebook, Twitter, etc.
+    EmailAuthProvider.PROVIDER_ID,
+    GoogleAuthProvider.PROVIDER_ID,
+    FacebookAuthProvider.PROVIDER_ID,
+    GithubAuthProvider.PROVIDER_ID,
   ],
+  callbacks: {
+    signInSuccessWithAuthResult: () => false,
+  },
 };
-
 
 // Define or import FirebaseUIAuthConfig
 interface FirebaseUIAuthConfig {
@@ -77,7 +82,7 @@ const vertexAIClient = new PredictionServiceClient({
 });
 
 // Initialize Firebase services
-const auth: Auth = getAuth(app);
+const auth: Auth = getAuth();
 const db: Firestore = getFirestore(app);
 const storage = getStorage(app);
 const database: Database = getDatabase(app);
@@ -86,5 +91,6 @@ const functions: Functions = getFunctions(app);
 const messaging: Messaging = getMessaging(app);
 const performance = getPerformance(app);
 
-export { analytics, app, appCheck, auth, database, db, functions, messaging, performance, storage, vertexAIClient, firebaseConfig };
+export { analytics, app, appCheck, auth, database, db, functions, messaging, performance, storage, vertexAIClient, firebaseConfig, uiConfig };
 export type { FirebaseApp };
+export type { FirebaseUIAuthConfig}
