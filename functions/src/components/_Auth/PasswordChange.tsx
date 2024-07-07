@@ -5,7 +5,7 @@ import { getAuth, updatePassword } from "firebase/auth";
 const PasswordChange = () => {
   const [newPassword, setNewPassword] = useState('');
   const [message, setMessage] = useState('');
-  const [error, setError] = useState<string | undefined>('');
+  const [error, setError] = useState<string | undefined>(undefined);
 
   const handleChangePassword = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
@@ -21,7 +21,7 @@ const PasswordChange = () => {
         setMessage('Your password has been changed successfully.');
       } catch (error) {
         if (error instanceof Error) {
-          setError('Failed to change password. ' + error.message);
+          setError(`Failed to change password. ${error.message}`);
         } else {
           setError('Failed to change password. An unknown error occurred.');
         }

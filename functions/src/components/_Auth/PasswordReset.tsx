@@ -5,7 +5,7 @@ import { TextField, Button, Alert } from '@mui/material';
 const PasswordReset = () => {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | undefined>(undefined);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -16,7 +16,7 @@ const PasswordReset = () => {
       await sendPasswordResetEmail(auth, email);
       setMessage('Check your email for the password reset link.');
     } catch (error) {
-      setError('Failed to send password reset email. Make sure the email is correct.');
+      setError(`Failed to send password reset email. Error: ${(error as Error).message}`);
     }
   };
 

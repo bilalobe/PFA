@@ -7,7 +7,7 @@ const SignInForm = ({ onSignInSuccess, onSignInFailure }: { onSignInSuccess: any
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | undefined>(undefined);
   const router = useRouter();
 
   const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -20,10 +20,10 @@ const SignInForm = ({ onSignInSuccess, onSignInFailure }: { onSignInSuccess: any
       setLoading(false);
       onSignInSuccess && onSignInSuccess();
       router.push('/dashboard'); // Redirect to dashboard or another page
-    } catch (error) {
+    } catch (error: any) {
       setLoading(false);
-      setError('Failed to sign in. Please check your credentials and try again.');
-      onSignInFailure && onSignInFailure(error);
+      setError(`Failed to sign in. Error: ${error.message}`);
+      onSignInFailure && onSignInFailure(error.message);
     }
   };
 
