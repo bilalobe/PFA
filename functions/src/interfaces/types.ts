@@ -1,7 +1,6 @@
 import { QueryDocumentSnapshot, Timestamp } from 'firebase/firestore';
 
-// User Data Interface
-
+// User Data Interfaces
 export interface User {
     id: string;
     name: string;
@@ -11,18 +10,26 @@ export interface User {
     displayName: string;
     photoURL: string;
     emailVerified: boolean;
-    user_type?: string; // Add this line
+    user_type?: string;
     [key: string]: any;
 }
-  
+
 export interface UserProfile {
     firstName: string;
     lastName: string;
     email: string;
     [key: string]: any;
 }
-  
-// General Data Interfaces
+
+// Course Data Interfaces
+export interface Course {
+    id: string;
+    title: string;
+    description: string;
+    modules: string[];
+    [key: string]: any;
+}
+
 export interface CourseData {
     [key: string]: any;
 }
@@ -31,15 +38,11 @@ export interface ModuleData {
     [key: string]: any;
 }
 
+// Quiz Data Interfaces
 export interface QuizData {
     [key: string]: any;
 }
 
-export interface ForumData {
-    [key: string]: any;
-}
-
-// Quiz Attempt Data Interface
 export interface QuizAttemptData {
     user: string;
     score: number;
@@ -58,16 +61,27 @@ export interface AnswerData {
     [key: string]: any;
 }
 
+// Forum Data Interfaces
+export interface ForumData {
+    [key: string]: any;
+}
+
 export interface PostData {
     title: string;
     content: string;
-    [key: string]: any; // Add other fields as necessary
-  }
-  
+    [key: string]: any;
+}
+
 export interface CreatePostResponse {
     id: string;
     [key: string]: any;
-  }
+}
+
+export interface FetchPostsResult {
+    posts: Post[];
+    lastVisible?: QueryDocumentSnapshot;
+}
+
 // Resource Data Interface
 export interface Resource {
     id: string;
@@ -77,15 +91,10 @@ export interface Resource {
     [key: string]: any;
 }
 
-// Post Data Interfaces
+// Post Data Interface
 export interface Post {
     id: string;
     [key: string]: any;
-}
-
-export interface FetchPostsResult {
-    posts: Post[];
-    lastVisible?: QueryDocumentSnapshot;
 }
 
 // Error Interface
