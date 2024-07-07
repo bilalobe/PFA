@@ -12,7 +12,6 @@ import { getStorage } from "firebase/storage";
 import "firebase/compat/auth";
 import dotenv from "dotenv";
 import firebaseui from 'firebaseui';
-import 'firebaseui/dist/firebaseui';
 
 
 // Load environment variables from .env.local
