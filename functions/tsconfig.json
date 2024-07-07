@@ -3,7 +3,7 @@
   "include": [
     "src",
     ".next/types/**/*.ts"
-  ],
+, "index.ts"  ],
   "compilerOptions": {
     "jsx": "preserve",
     "module": "commonjs",
