@@ -1,44 +1,46 @@
-import { loginUser } from '@/types/features/authentication/authSlice'; // Corrected path if necessary
-import LoginPage from '@/pages/LoginPage'; // Corrected path
-import { getProfile } from '@/features/profileSlice'; // Corrected path
-import { fetchEnrollments } from '@/features/enrollmentSlice'; // Corrected path
-import type { RootState } from '@/app/store'; // Corrected path
-
-// Added React Query setup
+import LoginPage from './login';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
 import ThemeProvider from '@mui/material/styles/ThemeProvider';
 import CssBaseline from '@mui/material/CssBaseline';
-import HomeGuard from '@/components/Homeguard';
+import HomeGuard from '../components/Homeguard';
 import React from 'react';
+import { createTheme } from '@mui/material/styles';
+import { useAuth } from '../hooks/useAuth';
+import { Box, CircularProgress } from '@mui/material';
 
 const queryClient = new QueryClient();
+const theme = createTheme();
 
 function App() {
+  const { user, loading } = useAuth();
   const [token, setToken] = useState<string | null>(null);
-  const dispatch = useDispatch();
-  const authState = useSelector((state: RootState) => state.auth);
 
-  // Corrected dispatch call to match expected parameters of loginUser
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
       setToken(storedToken);
-      // Assuming loginUser expects a token directly or adjust accordingly
-      dispatch(loginUser(storedToken));
-      dispatch(getProfile());
-      dispatch(fetchEnrollments());
     }
-  }, [dispatch]);
+  }, []);
 
-  // Assuming HomeGuard component is updated to accept onLogout prop
-  // or create a wrapper component that handles logout functionality
+  if (loading) {
+    return (
+        <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+            <CircularProgress />
+        </Box>
+    );
+}
 
-  // Use userProfile or remove if unnecessary
-  // const userProfile = useSelector((state: RootState) => state.profile.profile);
+if (!user) {
+    return <LoginPage />;
+}
 
-  if (!authState.isAuthenticated && !token) {
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setToken(null);
+  };
+
+  if (!token) {
     return <LoginPage />;
   }
 
