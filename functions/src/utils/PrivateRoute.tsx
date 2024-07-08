@@ -1,11 +1,9 @@
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { RootState } from '../types/store'; // Or wherever your root reducer is
+import { PrivateRouteProps } from '../interfaces/props';
 
-const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, isAuthenticated }) => {
   const router = useRouter();
-  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated);
 
   useEffect(() => {
     if (!isAuthenticated) {
