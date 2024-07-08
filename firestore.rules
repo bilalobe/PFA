@@ -1,35 +1,37 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // --- Users Collection ---
+    // --- Users ---
     match /users/{userId} {
-      allow read: if request.auth != null;
+      allow read: if request.auth != null; 
 
-      // Allow users to create/update their own profile, but not delete
+      // Users can only create their profile (during registration) and update their own data
       allow create, update: if request.auth.uid == userId;
-      allow delete: if false; 
+      allow delete: if false;  // Never allow users to delete their account directly!
     }
 
-    // --- Courses Collection ---
+    // --- Courses ---
     match /courses/{courseId} {
-      allow read: if true; // Allow everyone to read courses
+      allow read: if true; //  Allow anyone to read courses
 
-      // Teachers and supervisors can create, update, and delete
-      allow create, update, delete: if request.auth != null && request.auth.token.userType in ['teacher', 'supervisor']; 
-
-      // --- Modules Subcollection ---
+      //  Only teachers can create courses, but only the course creator (instructor) 
+      //  or a supervisor can update or delete 
+      allow create: if request.auth != null && request.auth.token.userType == 'teacher'; 
+      allow update, delete: if request.auth != null && 
+            (request.auth.uid == resource.data.instructor || request.auth.token.userType == 'supervisor');  
+     
       match /modules/{moduleId} {
-        allow read: if true; 
+        allow read: if true; // Allow anyone to read modules
 
-        // Teachers and supervisors can create, update, and delete
-        allow create, update, delete: if request.auth != null && request.auth.token.userType in ['teacher', 'supervisor'];
+        // Only teachers can create, update, and delete modules 
+        allow create, update, delete: if request.auth != null && request.auth.token.userType == 'teacher';
 
-        // --- Resources Subcollection ---
+        // --- Resources Subcollection --- 
         match /resources/{resourceId} {
-          allow read: if true; 
+          allow read: if true; // Allow anyone to read resources
 
-          // Only teachers and supervisors can create, update, and delete
-          allow create, update, delete: if request.auth != null && request.auth.token.userType in ['teacher', 'supervisor'];
+          // Only teachers can create, update, and delete resources
+          allow create, update, delete: if request.auth != null && request.auth.token.userType == 'teacher';
         }
 
         // --- Quizzes Subcollection ---
@@ -37,30 +39,46 @@ service cloud.firestore {
           // Only authenticated users (students) can read quizzes
           allow read: if request.auth != null;
 
-          // Only teachers can create, update, and delete
-          allow create, update, delete: if request.auth != null && request.auth.token.userType == 'teacher'; 
+          // Only teachers can create, update, and delete quizzes
+          allow create, update, delete: if request.auth != null && request.auth.token.userType == 'teacher';
 
           // --- Questions Subcollection ---
           match /questions/{questionId} {
-            // Only authenticated users can read questions
+            // Only authenticated users (students) can read questions 
             allow read: if request.auth != null; 
 
-            // Only teachers can manage questions
-            allow create, update, delete: if request.auth != null && request.auth.token.userType == 'teacher';
+            // Only teachers can manage questions 
+            allow create, update, delete: if request.auth != null && request.auth.token.userType == 'teacher'; 
           }
         }
       }
 
-      // --- Comments Subcollection (New) --- 
+      // --- Comments (now a subcollection of courses) --- 
       match /comments/{commentId} {
         allow read: if true; 
 
-        allow create: if request.auth != null 
-            && request.resource.data.courseId == courseId // Make sure comment belongs to course 
-            && request.resource.data.author == request.auth.uid;  // Only the comment author can create
+        // Allow creation only if the comment is associated with the course
+        allow create: if request.auth != null && 
+                        request.resource.data.courseId == courseId &&
+                        request.auth.uid == resource.data.author; // Only comment author can create
 
-        allow update, delete: if request.auth.uid == resource.data.author  
-                               || request.auth.token.userType == 'teacher'; // Author or teacher can update/delete
+        // Allow update/delete by the author or a teacher
+        allow update, delete: if request.auth.uid == resource.data.author 
+                               || request.auth.token.userType == 'teacher'; 
+      }
+
+      // --- Reviews  (now a subcollection of courses) --- 
+      match /reviews/{reviewId} {
+        allow read: if true; 
+
+        // Allow creation only if the review is associated with the course
+        allow create: if request.auth != null && 
+                        request.resource.data.courseId == courseId &&
+                        request.auth.uid == resource.data.author; // Only review author can create
+
+        // Allow update/delete by the author or a teacher
+        allow update, delete: if request.auth.uid == resource.data.author 
+                               || request.auth.token.userType == 'teacher'; 
       }
 
       // --- Reviews Subcollection ---
@@ -68,121 +86,121 @@ service cloud.firestore {
         allow read: if true; // Allow anyone to read reviews
 
         // Only authenticated users can create reviews
-        allow create: if request.auth != null 
-            && request.resource.data.courseId == courseId  // Ensure review belongs to the course
-            && request.auth.uid == resource.data.userId;  // Only the reviewer can create
+        allow create: if request.auth != null;
 
-        // Only the review author can update or delete it 
-        allow update, delete: if request.auth.uid == resource.data.userId;  
+        // Only the author of a review can update or delete it
+        allow update, delete: if request.auth.uid == resource.data.userId; 
       }
     }
 
-    // --- Enrollments Collection ---
+    // --- Enrollments --- 
     match /enrollments/{enrollmentId} {
-      // Only the enrolled student or teachers and supervisors can read
-      allow read: if request.auth.uid == resource.data.studentId || request.auth.token.userType in ['teacher', 'supervisor'];
+      allow read: if request.auth.uid == resource.data.studentId || 
+                      request.auth.token.userType in ['teacher', 'supervisor']; 
 
-      // Only authenticated users can create enrollments, ensuring it's for themselves
-      allow create: if request.auth != null && request.auth.uid == resource.data.studentId;
+      // Students can only create enrollments for themselves
+      allow create: if request.auth != null && request.auth.uid == resource.data.studentId;  
 
-      // Allow updates only by the student (e.g., progress) or teachers
-      allow update: if request.auth.uid == resource.data.studentId || request.auth.token.userType == 'teacher';
+      // Allow enrolled students to update certain fields (e.g., progress), but not all 
+      allow update: if request.auth.uid == resource.data.studentId 
+                      && request.resource.data.course == resource.data.course  // Prevent changing the course
+                      && request.resource.data.student == resource.data.student  // Prevent changing the student
+                      && (request.writeFields.size() == 1 && request.writeFields[0] == 'progress')  // Only allow updating 'progress' 
+                      || request.auth.token.userType in ['teacher', 'supervisor']; // Full update allowed by teacher or supervisor 
 
-      // Only teachers can delete enrollments
-      allow delete: if request.auth.token.userType == 'teacher';
+      // Only teachers can delete enrollments 
+      allow delete: if request.auth.token.userType == 'teacher'; 
     }
 
-    // --- Forums Collection ---
+    // --- Forums ---
     match /forums/{forumId} {
-      allow read: if true; // Allow anyone to read forums 
+      allow read: if true; // Allow anyone to read forums
 
-      // Only teachers can create forums 
+      // Only teachers can create forums
       allow create: if request.auth != null && request.auth.token.userType == 'teacher'; 
 
       // --- Threads Subcollection ---
       match /threads/{threadId} {
-        allow read: if true; // Anyone can read threads
+        allow read: if true;  // Anyone can read threads
 
         // Only enrolled students can create new threads
         allow create: if request.auth != null && request.auth.token.userType == 'student';
 
         // --- Posts Subcollection --- 
         match /posts/{postId} {
-          allow read: if true;  
+          allow read: if true; 
 
-          // Only the author can create a post
-          allow create: if request.auth.uid == resource.data.author; 
+          // Only the author can create a post, teachers can update or delete it
+          allow create: if request.auth.uid == resource.data.author;
+          allow update, delete: if request.auth.token.userType == 'teacher'  || request.auth.uid == resource.data.author;
 
-          // Only teachers or the author can update or delete a post
-          allow update, delete: if request.auth.token.userType == 'teacher' || request.auth.uid == resource.data.author;
-
-          // --- Comments Subcollection --- (Moved inside posts)
+          // --- Comments Subcollection --- 
           match /comments/{commentId} {
             allow read: if true;  // Anyone can read comments 
 
             // Only authenticated users can create comments
-            allow create: if request.auth != null
-                          && request.resource.data.postId == postId 
-                          && request.auth.uid == resource.data.author; 
+            allow create: if request.auth != null;
 
-            // Only the comment author or a teacher can update or delete it
-            allow update, delete: if request.auth.uid == resource.data.author 
-                                 || request.auth.token.userType == 'teacher';
-          } 
+            // Only the comment author or teachers can update/delete 
+            allow update, delete: if request.auth.uid == resource.data.author || request.auth.token.userType == 'teacher'; 
+          }
         }
       }
     }
 
-    // --- Chat Rooms Collection ---
+    // --- Chat Rooms --- 
     match /chatRooms/{chatRoomId} {
-      // Rules for reading depend on the chat room type
-      allow read: if (resource.data.type == 'course' && exists(/databases/$(database)/documents/courses/$(resource.data.courseId))) 
-        || (resource.data.type == 'private' && request.auth.uid in resource.data.users);  
+      // Allow reading based on chat room type
+      allow read: if (resource.data.type == 'course' && exists(/databases/$(database)/documents/courses/$(resource.data.courseId)))
+                   || (resource.data.type == 'private' && request.auth.uid in resource.data.users); 
 
-      // Only authenticated users can create
       allow create: if request.auth != null;
 
-      // ... Add rules for updating or deleting based on your logic
+      // ... rules for update and delete ... 
 
-      // --- Messages Subcollection --- 
       match /messages/{messageId} {
-        // Allow users in the chat to read messages
-        allow read: if exists(/databases/$(database)/documents/chatRooms/$(chatRoomId)) && (
+        // Allow users in the chat to read messages 
+        allow read: if exists(/databases/$(database)/documents/chatRooms/$(chatRoomId)) 
+            && (
               (resource.data.type == 'course' && exists(/databases/$(database)/documents/courses/$(resource.data.courseId))) || 
               (resource.data.type == 'private' && request.auth.uid in resource.data.users)
             ); 
+            
 
         // Only users in the chat room can create a message
-        allow create: if exists(/databases/$(database)/documents/chatRooms/$(chatRoomId)) && (
-              (resource.data.type == 'course' && exists(/databases/$(database)/documents/courses/$(resource.data.courseId))) ||
-              (resource.data.type == 'private' && request.auth.uid in resource.data.users)
-            ); 
+        allow create: if exists(/databases/$(database)/documents/chatRooms/$(chatRoomId))
+          &&  (
+            (resource.data.type == 'course' && exists(/databases/$(database)/documents/courses/$(resource.data.courseId))) || 
+            (resource.data.type == 'private' && request.auth.uid in resource.data.users) 
+          );
       } 
     }
 
-    // --- Moderation Collection ---
+    // --- Moderation --- 
     match /moderation/{moderationId} {
-      // Allow reads by the reporter, moderator (if action taken), and teachers or supervisors
+      // Only the reporter, the moderator (if action has been taken), or teachers and supervisors can read
       allow read: if request.auth.uid == resource.data.reportedBy 
-                || request.auth.uid == resource.data.moderator 
-                || request.auth.token.userType in ['teacher', 'supervisor']; 
+                  || request.auth.uid == resource.data.moderator 
+                  || request.auth.token.userType in ['teacher', 'supervisor']; 
 
-      // Only authenticated users can create moderation reports
+      // Only authenticated users can report content
       allow create: if request.auth != null;
 
-      // Only teachers and supervisors can update moderation reports
-      allow update: if request.auth != null && request.auth.token.userType in ['teacher', 'supervisor'];
-
-      allow delete: if false; // Prevent deleting moderation reports
+      // Only teachers or supervisors can take moderation actions 
+      allow update: if request.auth != null && request.auth.token.userType in ['teacher', 'supervisor']; 
+      allow delete: if false;  // Don't allow deleting moderation records. 
     }
 
-    // --- Resources Collection --- 
+    // --- Resources ---
     match /resources/{resourceId} {
-        allow read: if true;  // Anyone can read resources (you might restrict this later)
-        allow create: if request.auth != null && request.auth.token.userType == 'teacher';
-        allow update, delete: if request.auth.uid == resource.data.uploadedBy; // Resource owner can update/delete 
-    }
+      // Only authenticated users can read
+      allow read: if request.auth != null;
 
-    // ... (Rules for other collections like gamification)
+      // Teachers can create resources
+      allow create: if request.auth != null && request.auth.token.userType == 'teacher';
+
+      // Only the resource uploader can update or delete
+      allow update, delete: if request.auth.uid == resource.data.uploadedBy; 
+    }
   }
 }
