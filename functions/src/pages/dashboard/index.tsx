@@ -11,7 +11,8 @@ import {
     ListItemIcon,
     ListItemText,
     Toolbar,
-    Typography} from '@mui/material';
+    Typography
+} from '@mui/material';
 import {
     AccountCircle as AccountCircleIcon,
     Chat as ChatIcon,
@@ -21,23 +22,28 @@ import {
     Menu as MenuIcon,
     School as SchoolIcon
 } from '@mui/icons-material';
-import { onAuthStateChanged, User as FirebaseUser, signOut } from 'firebase/auth'; 
-import { auth, db } from '../../firebaseConfig'; 
+import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
+
+import { auth, db } from '../../firebaseConfig';
 import AutoCorrect from '../../components/AI/AutoCorrect';
 import QuestionGeneration from '../../components/AI/QuestionGeneration';
 import TextSummarization from '../../components/AI/TextSummarization';
+import { useAuth } from '../../hooks/useAuth';
 
 const drawerWidth = 240;
 
 const DrawerContent = ({ navigate, toggleChatbotVisibility }: { navigate: (path: string) => void, toggleChatbotVisibility: () => void }) => {
     const handleLogout = useCallback(() => {
-        signOut(auth).then(() => {
-            navigate('/'); 
+        const { logout } = useAuth();
+        const router = useRouter();
+    
+        logout().then(() => {
+            router.push('/');
         }).catch((error) => {
-            console.error("Error signing out: ", error); 
+            console.error("Error signing out: ", error);
         });
-    }, [navigate]);
+    }, [useAuth, useRouter]);
 
     return (
         <List>
