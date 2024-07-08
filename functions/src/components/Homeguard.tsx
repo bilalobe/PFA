@@ -1,13 +1,10 @@
-import React, { useEffect, useState, useCallback, useMemo, Suspense } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { fetchUserProfile, logoutUser } from '@/types/features/user/userSlice';
+import React, { useState, useCallback, Suspense } from 'react';
 import {
   Box, CircularProgress, Drawer, List, ListItemText, ListItemIcon, IconButton,
-  Toolbar, AppBar, Typography, CssBaseline, Alert, ListItemButton, Link, Divider, styled
+  Toolbar, AppBar, Typography, CssBaseline, ListItemButton, Divider, styled
 } from '@mui/material';
-import { useLocation } from 'react-router-dom';
-import { createSelector } from 'reselect';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import PrivateRoute from '../utils/PrivateRoute';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
@@ -15,32 +12,20 @@ import HomeIcon from '@mui/icons-material/Home';
 import SchoolIcon from '@mui/icons-material/School';
 import ForumIcon from '@mui/icons-material/Forum';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import AdminIcon from '@mui/icons-material/Security';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ChatIcon from '@mui/icons-material/Chat';
 import dynamic from 'next/dynamic';
-import { RootState } from '@/types/store';
-import { ChatbotProvider, useChatbotContext } from '@/contexts/ChatbotContext'; // Custom Context API for Chatbot state
-import { NotificationsProvider, useNotifications } from '@/contexts/NotificationsContext'; // Custom Context API for Notifications
+
 import 'react-chatbot-kit/build/main.css';
-import MessageParser from '@/components/AI/MessageParser';
-import ActionProvider from '@/components/AI/ActionProvider';
-import error from 'next/error';
+
+import { HomeGuardProps } from '../interfaces/props';
+import { useAuth } from '../hooks/useAuth';
 
 // Lazy load Dashboard
-const Dashboard = React.lazy(() => import('../pages/dashboard'));
-const Chatbot = dynamic(() => import('@/components/AI/Chatbot'), { ssr: false });
+const Dashboard = React.lazy(() => import('../pages/dashboard/dashboard'));
+const ChatbotContainer = dynamic(() => import('../components/AI/ChatbotContainer'), { ssr: false });
 
 const drawerWidth = 240;
-
-const selectUserAndAuthState = createSelector(
-  (state: RootState) => ({
-    profile: state.user.profile,
-    loading: state.user.loading,
-    isAuthenticated: state.auth.isAuthenticated,
-  }),
-  (userAndAuth) => userAndAuth
-);
 
 const DrawerContent: React.FC<{ handleDrawerClose: () => void; handleLogout: () => void }> = ({
   handleDrawerClose, handleLogout
@@ -56,25 +41,25 @@ const DrawerContent: React.FC<{ handleDrawerClose: () => void; handleLogout: () 
       </Toolbar>
       <Divider />
       <List>
-        <ListItemButton component={Link} href="/">
+        <ListItemButton component={Link} href="/" passHref>
           <ListItemIcon>
             <HomeIcon />
           </ListItemIcon>
           <ListItemText primary="Home" />
         </ListItemButton>
-        <ListItemButton component={Link} href="/courses">
+        <ListItemButton component={Link} href="/courses" passHref>
           <ListItemIcon>
             <SchoolIcon />
           </ListItemIcon>
           <ListItemText primary="Courses" />
         </ListItemButton>
-        <ListItemButton component={Link} href="/forum">
+        <ListItemButton component={Link} href="/forum" passHref>
           <ListItemIcon>
             <ForumIcon />
           </ListItemIcon>
           <ListItemText primary="Forum" />
         </ListItemButton>
-        <ListItemButton component={Link} href="/profile">
+        <ListItemButton component={Link} href="/profile" passHref>
           <ListItemIcon>
             <AccountCircleIcon />
           </ListItemIcon>
@@ -105,31 +90,20 @@ const StyledDrawer = styled(Drawer)`
   }
 `;
 
-type HomeGuardProps = {
-  isAuthenticated: boolean;
-};
-
-const HomeGuard: React.FC<HomeGuardProps> = ({ isAuthenticated }) => {
-  const dispatch = useDispatch();
-  const router = useRouter();
-  const location = useLocation();
-  const { addNotification } = useNotifications();
-  const { profile, loading, isAuthenticated: authIsAuthenticated } = useSelector(selectUserAndAuthState);
+const HomeGuard: React.FC<HomeGuardProps> = ({ isAuthenticated, user }) => {
   const [drawerOpen, setDrawerOpen] = useState(false);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      dispatch(fetchUserProfile());
-    }
-  }, [isAuthenticated, dispatch]);
+  const { logout } = useAuth();
+  const router = useRouter();
 
   const handleLogout = useCallback(() => {
-    dispatch(logoutUser()).then(() => {
-      router.push('/login');
-    }).catch((err: Error) => {
-      addNotification({ type: 'error', message: err.message });
-    });
-  }, [dispatch, router, addNotification]);
+    logout()
+      .then(() => {
+        router.push('/login');
+      })
+      .catch((err: Error) => {
+        console.error(err.message);
+      });
+  }, [logout, router]);
 
   const handleDrawerOpen = useCallback(() => {
     setDrawerOpen(true);
@@ -139,22 +113,8 @@ const HomeGuard: React.FC<HomeGuardProps> = ({ isAuthenticated }) => {
     setDrawerOpen(false);
   }, []);
 
-  const drawerItems = useMemo(() => [
-    { href: '/', text: 'Home', Icon: HomeIcon },
-    { href: '/courses', text: 'Courses', Icon: SchoolIcon },
-    { href: '/forum', text: 'Forum', Icon: ForumIcon },
-    { href: '/profile', text: 'Profile', Icon: AccountCircleIcon },
-    profile?.role === 'admin' && { href: '/admin', text: 'Admin Tools', Icon: AdminIcon },
-  ].filter(Boolean), [profile]);
-
-  if (loading) return <CircularProgress />;
-  if (error) {
-    const errorMessage = error.toString();
-    return <Alert severity="error">{errorMessage}</Alert>;
-  }
-
   return (
-    <ChatbotProvider>
+    <ChatbotContainer user={user} conversation={[]} chatRoomId={undefined}>
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
         <AppBar position="fixed">
@@ -172,7 +132,7 @@ const HomeGuard: React.FC<HomeGuardProps> = ({ isAuthenticated }) => {
             </Typography>
           </Toolbar>
         </AppBar>
-        
+
         <StyledDrawer
           variant="temporary"
           open={drawerOpen}
@@ -184,15 +144,20 @@ const HomeGuard: React.FC<HomeGuardProps> = ({ isAuthenticated }) => {
 
         <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
           <Toolbar />
-          <PrivateRoute isAuthenticated={authIsAuthenticated}>
+          <PrivateRoute isAuthenticated={isAuthenticated}>
             <Suspense fallback={<CircularProgress />}>
-              <Dashboard messageParser={() => { throw new Error('Function not implemented.'); }} />
+              <Dashboard />
             </Suspense>
           </PrivateRoute>
         </Box>
       </Box>
-    </ChatbotProvider>
+    </ChatbotContainer>
   );
 };
 
 export default HomeGuard;
+
+function useChatbotContext(): { toggleChatbotVisibility: any; } {
+  // Implement the chatbot context or replace with actual implementation
+  return { toggleChatbotVisibility: () => {} };
+}
