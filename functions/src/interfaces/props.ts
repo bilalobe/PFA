@@ -1,3 +1,4 @@
+import { SxProps, Theme } from '@mui/material/styles';
 import { User, ChatMessage } from './types';
 
 export interface ChatbotProps {
@@ -16,4 +17,21 @@ export type HomeGuardProps = {
 export interface PrivateRouteProps {
   isAuthenticated: boolean;
   children: React.ReactNode;
+}
+
+export interface CustomCardProps {
+  title: string;
+  content: string;
+  image?: string;
+  variant?: 'outlined' | 'elevation';
+  sx?: SxProps<Theme>;
+}
+
+
+export interface CourseCardProps {
+  courseTitle: string;
+  courseDescription: string;
+  courseImage?: string;
+  variant?: 'outlined' | 'elevation';
+  sx?: SxProps<Theme>;
 }
