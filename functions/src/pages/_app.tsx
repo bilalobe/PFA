@@ -1,20 +1,20 @@
-import LoginPage from './login';
+import React, { useEffect, useState } from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
-import { useEffect, useState } from 'react';
 import ThemeProvider from '@mui/material/styles/ThemeProvider';
 import CssBaseline from '@mui/material/CssBaseline';
-import HomeGuard from '../components/Homeguard';
-import React from 'react';
 import { createTheme } from '@mui/material/styles';
-import { useAuth } from '../hooks/useAuth';
 import { Box, CircularProgress } from '@mui/material';
+import LoginPage from '../pages/auth/login';
+import HomeGuard from '../components/Homeguard';
+import { useAuth } from '../hooks/useAuth';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const queryClient = new QueryClient();
 const theme = createTheme();
 
 function App() {
   const { user, loading } = useAuth();
-  const [token, setToken] = useState<string | null>(null);
+  const [, setToken] = useState<string | null>(null);
 
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
@@ -23,32 +23,44 @@ function App() {
     }
   }, []);
 
-  if (loading) {
-    return (
-        <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
-            <CircularProgress />
-        </Box>
-    );
-}
-
-if (!user) {
-    return <LoginPage />;
-}
+  const handleRecaptchaChange = (value: string | null) => {
+    console.log('Captcha value:', value);
+  };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     setToken(null);
   };
 
-  if (!token) {
-    return <LoginPage />;
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div>
+        <LoginPage />
+        <ReCAPTCHA
+          sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
+          onChange={handleRecaptchaChange}
+        />
+      </div>
+    );
   }
 
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
-        <CssBaseline /> 
-        <HomeGuard onLogout={handleLogout} isAuthenticated={false} user={user} />
+        <CssBaseline />
+        <HomeGuard
+          isAuthenticated={!!user}
+          user={user}
+          onLogout={handleLogout}
+        />
       </ThemeProvider>
     </QueryClientProvider>
   );
