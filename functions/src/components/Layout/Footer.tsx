@@ -1,20 +1,23 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { Box, Container, Typography, Link, styled } from '@mui/material';
-import logo from '../../assets/logo.png'; // Adjust the path to your logo
-import Image from 'next/image';
+import EggAltIcon from '@mui/icons-material/EggAlt'; // Updated import
 
 const StyledBox = styled(Box)(({ theme }) => ({
   backgroundColor: theme.palette.background.paper,
   padding: theme.spacing(3, 0),
 }));
 
-function CustomFooter({ appName = 'MyApp', slogan = 'Enhancing Learning Experiences' }) {
+interface CustomFooterProps {
+  appName?: string;
+  slogan?: string;
+}
+
+const CustomFooter: React.FC<CustomFooterProps> = ({ appName = 'MyApp', slogan = 'Enhancing Learning Experiences' }) => {
   return (
     <StyledBox>
       <Container maxWidth="lg">
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mb: 3 }}>
-          <Image src={logo} alt="logo" style={{ width: '50px', marginRight: '10px' }} />
+          <EggAltIcon style={{ width: '50px', marginRight: '10px' }} /> {/* Updated logo */}
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             {appName}
           </Typography>
@@ -31,22 +34,17 @@ function CustomFooter({ appName = 'MyApp', slogan = 'Enhancing Learning Experien
           {slogan}
         </Typography>
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2, flexWrap: 'wrap' }}>
-          <Link href="/about" color="inherit" sx={{ m: 1 }}>
+          <Link href="/about" color="inherit" sx={{ m: 1 }} aria-label="About">
             About
           </Link>
-          <Link href="/contact" color="inherit" sx={{ m: 1 }}>
+          <Link href="/contact" color="inherit" sx={{ m: 1 }} aria-label="Contact">
             Contact
           </Link>
-          {/* ...other links */}
+          {/* Add more links as needed */}
         </Box>
       </Container>
     </StyledBox>
   );
-}
-
-CustomFooter.propTypes = {
-  appName: PropTypes.string,
-  slogan: PropTypes.string,
 };
 
 export default CustomFooter;
