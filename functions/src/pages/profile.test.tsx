@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
 import Profile from './profile';
-import useAuth from '../hooks/useAuth';
+import { useAuth } from '../hooks/useAuth';
 import { useFirestoreDocument } from '../hooks/useFirestore';
 import { getAuth, signOut } from 'firebase/auth';
 

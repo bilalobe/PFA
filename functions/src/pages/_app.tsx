@@ -47,8 +47,8 @@ if (!user) {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <HomeGuard onLogout={handleLogout} />
+        <CssBaseline /> 
+        <HomeGuard onLogout={handleLogout} isAuthenticated={false} user={user} />
       </ThemeProvider>
     </QueryClientProvider>
   );
