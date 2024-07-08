@@ -97,6 +97,12 @@ export interface Post {
     [key: string]: any;
 }
 
+// Chat Message Interface AI
+export interface ChatMessage {
+    uid?: string;
+    sender: 'user' | 'bot';
+    message: string;
+}
 // Error Interface
 export interface Error {
     code: string;
