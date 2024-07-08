@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import { getAuth, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { uiConfig } from '../firebaseConfig'; // Import your uiConfig
+import { uiConfig } from '../../firebaseConfig'; // Import your uiConfig
 import LoginPage, { onAuthStateChanged, signOut, signInWithGoogle } from './login';
 
 jest.mock('firebase/auth', () => ({
@@ -28,7 +28,7 @@ describe('LoginPage', () => {
     });
 
     it('renders the FirebaseUI login component', async () => {
-        render();
+        render(<LoginPage />);
         // You may need to use more specific selectors based on how your StyledFirebaseAuth is configured.
         expect(screen.getByText(/Sign in with Google/i)).toBeInTheDocument(); 
     }); 

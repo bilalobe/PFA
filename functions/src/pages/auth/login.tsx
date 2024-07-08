@@ -1,6 +1,6 @@
 import React from 'react';
 import { getAuth, GoogleAuthProvider, signInWithPopup, User } from 'firebase/auth';
-import { uiConfig } from '../firebaseConfig';
+import { uiConfig } from '../../firebaseConfig';
 import dynamic from 'next/dynamic';
 import 'firebaseui/dist/firebaseui.css';
 
@@ -12,12 +12,10 @@ const DynamicStyledFirebaseAuth = dynamic(
 
 const auth = getAuth();
 
-// Function to listen for authentication state changes
 export function onAuthStateChanged(cb: (user: User | null) => void) {
   return auth.onAuthStateChanged(cb);
 }
 
-// Function to sign in with Google
 export async function signInWithGoogle() {
   const provider = new GoogleAuthProvider();
 
@@ -28,7 +26,6 @@ export async function signInWithGoogle() {
   }
 }
 
-// Function to sign out
 export async function signOut() {
   try {
     return auth.signOut();
