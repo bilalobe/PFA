@@ -877,21 +877,43 @@ export const enrollmentApi = {
   }
 };
 // === AI API (Firestore) ===
+export const aiApi = {
 
+  getSentiment: async (text: string) => {
+    try {
+      const functions = getFunctions();
+      const analyzeSentiment = httpsCallable(functions, 'analyzeSentiment');
+      const response = await analyzeSentiment({ text });
 
-export const getSentiment = async (text: string) => {
-  try {
-    const functions = getFunctions();
-    const analyzeSentiment = httpsCallable(functions, 'analyzeSentiment');
-    const response = await analyzeSentiment({ text });
-
-    if (response.data && typeof response.data === 'object' && 'sentiment' in response.data) {
-      return { sentiment: response.data.sentiment };
-    } else {
-      throw new Error('Invalid response from Genkit AI');
+      if (response.data && typeof response.data === 'object' && 'sentiment' in response.data) {
+        return { sentiment: response.data.sentiment };
+      } else {
+        throw new Error('Invalid response from Genkit AI');
+      }
+    } catch (error) {
+      handleApiError(error, 'Failed to analyze sentiment.');
+      return { sentiment: null, error: 'Failed to analyze sentiment.' };
     }
-  } catch (error) {
-    handleApiError(error, 'Failed to analyze sentiment.');
-    return { sentiment: null, error: 'Failed to analyze sentiment.' };
+  },
+
+  // Function to interact with your chatbot Genkit flow
+  getChatbotResponse: async (userInput: string): Promise<string> => {
+    try {
+      const response = await fetch('/api/chat/askGemini', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: userInput })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data.reply; // Assuming your API returns { reply: "chatbot's message" }
+    } catch (error) {
+      console.error('Error fetching chatbot response:', error);
+      throw new Error('Failed to fetch chatbot response');
+    }
   }
 };
