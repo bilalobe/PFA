@@ -1,62 +1,53 @@
 import React, { useEffect, useState, memo } from 'react';
 import { auth } from '../../firebaseConfig';
-import Chatbot from '@/components/AI/Chatbot';
+import Chatbot from './Chatbot';
 import { onAuthStateChanged } from 'firebase/auth';
+import { User, ChatMessage } from '../../interfaces/types';
+import { ChatbotProps } from '../../interfaces/props';
 
-interface User {
-  uid: string;
-  email: string | null;
-  displayName: string;
-  photoURL: string;
-  emailVerified: boolean;
-}
-
-interface Message {
-  sender: string;
-  message: string;
-}
-
-interface ChatbotProps {
-  user: User;
-  conversation: Message[];
-}
-
-const ChatbotContainer: React.FC<ChatbotProps> = memo(() => {
-  const [user, setUser] = useState<null | User>(null);
-  const [conversation, setConversation] = useState<Message[]>([]);
+const ChatbotContainer: React.FC<ChatbotProps> = memo(({ conversation: propsConversation, chatRoomId }) => {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentConversation, setCurrentConversation] = useState<ChatMessage[]>(propsConversation);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (currentUser) {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
         const userMapped: User = {
-          uid: currentUser.uid,
-          email: currentUser.email,
-          displayName: currentUser.displayName || 'Anonymous',
-          photoURL: currentUser.photoURL || '',
-          emailVerified: currentUser.emailVerified,
+          uid: user.uid,
+          email: user.email ?? '',
+          displayName: user.displayName || 'Anonymous',
+          photoURL: user.photoURL || '',
+          emailVerified: user.emailVerified,
+          id: '',
+          name: '',
+          role: ''
         };
-        setUser(userMapped);
+        setCurrentUser(userMapped);
         // Optionally fetch conversation history from Firestore or Realtime Database
-        const welcomeMessage: Message = { sender: 'bot', message: `Hello, ${userMapped.displayName}! How can I assist you today?` };
-        setConversation([welcomeMessage]);
+        const welcomeMessage: ChatMessage = { sender: 'bot', message: `Hello, ${userMapped.displayName}! How can I assist you today?` };
+        setCurrentConversation([welcomeMessage]);
       } else {
-        setUser(null);
-        setConversation([]);
+        setCurrentUser(null);
+        setCurrentConversation([]);
       }
-    }, (error) => {
-      console.error("Failed to subscribe to auth changes", error);
     });
 
     return () => unsubscribe();
   }, []);
 
-  if (!user) {
+  useEffect(() => {
+    setCurrentConversation(propsConversation);
+  }, [propsConversation]);
+
+  if (!currentUser) {
     return <div>Please log in to access the chatbot.</div>;
   }
 
   return (
     <div>
-      <Chatbot user={user} conversation={conversation} />
+      <React.Fragment>
+        <Chatbot chatRoomId={chatRoomId} user={currentUser} conversation={currentConversation} children={undefined} />
+      </React.Fragment>
     </div>
   );
 });
