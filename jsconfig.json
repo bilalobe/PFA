@@ -6,10 +6,26 @@
         "jsx": "react",
         "allowImportingTsExtensions": true,
         "strictNullChecks": true,
-        "strictFunctionTypes": true
+        "strictFunctionTypes": true,
+        "baseUrl": "./src",
+        "paths": {
+            "components/*": ["components/*"],
+            "pages/*": ["pages/*"],
+            "utils/*": ["utils/*"],
+            "types/*": ["types/*"],
+        },
+        "sourceMap": true, // Generate corresponding '.map' file.
+        "outDir": "./dist", // Redirect output structure to the directory.
+        "removeComments": true, // Do not emit comments to output.
+        "noImplicitAny": true, // Raise error on expressions and declarations with an implied 'any' type.
+        "importHelpers": true, // Import emit helpers from 'tslib'.
+        "downlevelIteration": true, // Provide full support for iterables in 'for-of', spread, and destructuring when targeting 'ES5' or 'ES3'.
+        "strictBindCallApply": true, // Enable strict 'bind', 'call', and 'apply' methods on functions.
+        "esModuleInterop": true // Enables emit interoperability between CommonJS and ES Modules via creation of namespace objects for all imports. Implies 'allowSyntheticDefaultImports'.
     },
     "exclude": [
         "node_modules",
         "**/node_modules/*"
+
     ]
 }

@@ -1,10 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { useSelector, useDispatch } from 'react-redux';
-import { joinChatRoom, leaveChatRoom, sendChatMessage } from '@/types/features/chat-function/chatSlice';
 import { Typography, TextField, Button, List, ListItem, ListItemText, Box } from '@mui/material';
 import io from 'socket.io-client';
-import { RootState } from '@/types/store';
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
 const socket = io('http://localhost:8000');

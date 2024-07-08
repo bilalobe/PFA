@@ -4,7 +4,7 @@ import ThemeProvider from '@mui/material/styles/ThemeProvider';
 import CssBaseline from '@mui/material/CssBaseline';
 import { createTheme } from '@mui/material/styles';
 import { Box, CircularProgress } from '@mui/material';
-import LoginPage from '../pages/auth/login';
+import LoginPage from './auth/login';
 import HomeGuard from '../components/Homeguard';
 import { useAuth } from '../hooks/useAuth';
 import ReCAPTCHA from 'react-google-recaptcha';

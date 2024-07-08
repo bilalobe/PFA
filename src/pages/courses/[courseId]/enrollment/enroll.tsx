@@ -3,7 +3,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/router';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import { enrollInCourse } from '../../../store/courseSlice'; 
 import { Typography, Button, Box, CircularProgress, Alert } from '@mui/material';
 
 const validationSchema = Yup.object().shape({
