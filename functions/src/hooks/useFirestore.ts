@@ -127,4 +127,4 @@ export const useFirestoreDocument = <T extends DocumentData>(collectionName: str
   return { docData, loading, error };
 };
 
-export { useFirestore };
+export { useFirestore, type FirestoreHook };
