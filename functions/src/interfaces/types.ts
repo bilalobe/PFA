@@ -1,19 +1,22 @@
 import { QueryDocumentSnapshot, Timestamp } from 'firebase/firestore';
 
 // User Data Interfaces
-export interface User {
+interface BaseUser {
     id: string;
     name: string;
-    role: string;
-    email: string;
-    uid: string;
+    email: string | null;
     displayName: string;
     photoURL: string;
     emailVerified: boolean;
+}
+
+export interface User extends BaseUser {
+    role: string;
+    uid: string;
     user_type?: string;
     [key: string]: any;
 }
-
+  
 export interface UserProfile {
     firstName: string;
     lastName: string;
@@ -108,3 +111,10 @@ export interface Error {
     code: string;
     message: string;
 }
+
+export interface Testimonial {
+    id: number;
+    name: string;
+    text: string;
+    avatarUrl: string;
+  }
