@@ -7,15 +7,16 @@ import { db } from '../../firebaseConfig';
 import { aiApi } from '../../utils/api'; 
 import { ChatbotProps } from '../../interfaces/props';
 
-const Chatbot: React.FC<ChatbotProps> = ({ chatRoomId }) => {
+const Chatbot: React.FC<ChatbotProps> = ({ }) => {
   const { user } = useAuth();
-  const chatMessagesRef = collection(db, 'chatRooms', chatRoomId, 'messages'); 
-
-  // @ts-ignore
-  const { data: messages, loading, error } = useFirestore(query<DocumentData>(chatMessagesRef, orderBy('timestamp', 'asc'))) as FirestoreHook<DocumentData>;
+  
+  const chatMessagesRef = collection(db, 'chatMessages');
+  const chatMessagesQuery = query<DocumentData, DocumentData>(chatMessagesRef, orderBy('timestamp', 'asc'));
+  
+  const { data: messages, loading, error } = useFirestore(chatMessagesQuery.toString()) as FirestoreHook<DocumentData[]>;
 
   const [userInput, setUserInput] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false); // State for when chatbot response is being fetched
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -23,15 +24,13 @@ const Chatbot: React.FC<ChatbotProps> = ({ chatRoomId }) => {
     if (userInput.trim() !== "") { 
       setIsSubmitting(true);
       try {
-        // Send user's message to Firestore
         await addDoc(chatMessagesRef, {
-          sender: user?.uid, // Send user UID instead of 'user' 
+          sender: user?.uid,
           message: userInput,
           timestamp: serverTimestamp()
         });
  
-        // Get Chatbot's response using Genkit Flow (or a direct call to Gemini) 
-        const response = await aiApi.getChatbotResponse(userInput); // Assume this calls a Genkit flow
+        const response = await aiApi.getChatbotResponse(userInput);
  
         await addDoc(chatMessagesRef, {
           sender: 'chatbot', 
