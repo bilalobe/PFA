@@ -22,7 +22,7 @@ import { HomeGuardProps } from '../interfaces/props';
 import { useAuth } from '../hooks/useAuth';
 
 // Lazy load Dashboard
-const Dashboard = React.lazy(() => import('../pages/dashboard/dashboard'));
+const Dashboard = React.lazy(() => import('../pages/dashboard'));
 const ChatbotContainer = dynamic(() => import('../components/AI/ChatbotContainer'), { ssr: false });
 
 const drawerWidth = 240;
