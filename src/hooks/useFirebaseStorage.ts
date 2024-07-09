@@ -1,10 +1,9 @@
-import { useState } from 'react';
 import { 
   ref, 
   uploadBytesResumable,
   getDownloadURL 
 } from 'firebase/storage';
-import storage from '../firebaseConfig.js';
+import  {storage} from '../firebaseConfig.js';
 
 interface UseFirebaseStorage {
   uploadFile: (file: File, folder: string) => Promise<string>;
