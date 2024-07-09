@@ -16,12 +16,18 @@ export interface User extends BaseUser {
     user_type?: string;
     [key: string]: any;
 }
-  
+
 export interface UserProfile {
     firstName: string;
     lastName: string;
     email: string;
     [key: string]: any;
+}
+
+export interface UserForumPoints {
+    id: string;
+    points: number;
+    user: User;
 }
 
 // Course Data Interfaces
@@ -42,6 +48,38 @@ export interface ModuleData {
 }
 
 // Quiz Data Interfaces
+export interface Quiz {
+    id: string;
+    title: string;
+    description: string;
+    questions?: QuizQuestion[];
+    [key: string]: any;
+}
+
+export interface QuizQuestion {
+    id: string;
+    question: string;
+    options: AnswerData[];
+    correctAnswer: string;
+    [key: string]: any;
+}
+
+export interface QuizAttempt {
+    id: string;
+    quiz: string;
+    user: string;
+    score: number;
+    startedAt: Timestamp;
+    completedAt: Timestamp;
+    [key: string]: any;
+}
+
+export interface QuizAnswerChoice {
+    id: string;
+    text: string;
+    [key: string]: any;
+}
+
 export interface QuizData {
     [key: string]: any;
 }
@@ -94,6 +132,74 @@ export interface Resource {
     [key: string]: any;
 }
 
+// Forum Data Interfaces
+export interface Forum {
+    id: string;
+    title: string;
+    description: string;
+    [key: string]: any;
+}
+
+export interface ForumPost {
+    id: string;
+    title: string;
+    content: string;
+    createdAt: Timestamp;
+    createdBy: string;
+    [key: string]: any;
+}
+
+// Comment Data Interface
+export interface Comment {
+    id: string;
+    content: string;
+    createdAt: Timestamp;
+    createdBy: string;
+    [key: string]: any;
+}
+
+// Enrollment Data Interface
+export interface Enrollment {
+    id: string;
+    course: string;
+    student: string;
+    enrolledAt: Timestamp;
+    completedModules: string[];
+    [key: string]: any;
+}
+
+export interface EnrollmentData {
+    [key: string]: any;
+}
+
+// Thread Data Interface
+export interface Thread {
+    id: string;
+    title: string;
+    content: string;
+    createdAt: Timestamp;
+    createdBy: string;
+    [key: string]: any;
+}
+
+// Reply Data Interface
+export interface Reply {
+    id: string;
+    content: string;
+    createdAt: Timestamp;
+    createdBy: string;
+    [key: string]: any;
+}
+
+// Module Data Interface
+export interface Module {
+    id: string;
+    title: string;
+    description: string;
+    resources: Resource[];
+    [key: string]: any;
+}
+
 // Post Data Interface
 export interface Post {
     id: string;
@@ -118,3 +224,13 @@ export interface Testimonial {
     text: string;
     avatarUrl: string;
   }
+
+export interface ModerationReport {
+    id: string;
+    post: string;
+    reason: string;
+    reportedBy: string;
+    actionTaken?: string;
+    moderator?: string;
+    [key: string]: any;
+}
