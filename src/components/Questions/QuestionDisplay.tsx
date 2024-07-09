@@ -1,5 +1,4 @@
-// frontend2/src/components/QuestionDisplay.tsx
-
+import React from 'react';
 import { FC } from 'react';
 
 interface Question {
