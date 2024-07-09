@@ -1,5 +1,5 @@
 import { SxProps, Theme } from '@mui/material/styles';
-import { User, ChatMessage } from './types';
+import { User, ChatMessage, Course } from './types';
 
 export interface ChatbotProps {
   chatRoomId: any;
@@ -29,9 +29,26 @@ export interface CustomCardProps {
 
 
 export interface CourseCardProps {
-  courseTitle: string;
-  courseDescription: string;
-  courseImage?: string;
+  course: {
+    courseTitle: string;
+    courseDescription: string;
+    courseImage?: string;
+  };
   variant?: 'outlined' | 'elevation';
-  sx?: SxProps<Theme>;
+  sx?: object;
+}
+
+
+
+export interface CourseListProps {
+  courses: Course[];
+  loading: boolean;
+  error: string | null;
+  searchQuery: string;
+  lastVisible: any;
+  currentPage: number;
+  coursesPerPage: number;
+  onSearch: (query: string) => void;
+  onNextPage: () => void;
+  onPreviousPage: () => void;
 }
