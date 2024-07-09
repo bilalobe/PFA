@@ -1,61 +1,32 @@
-import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { fetchResources } from '@/types/features/resource/resourceSlice';
-import { Typography, CircularProgress, Box } from '@mui/material';
-import { FixedSizeList as List } from 'react-window';
-import { RootState, AppDispatch } from '@/types/store';
+import { Box, Typography, List, ListItem, ListItemText, Button, Link } from '@mui/material';
+import { Resource } from '../../interfaces/types';
 
-function ResourceList({ moduleId }: { moduleId: string }) {
-  const dispatch: AppDispatch = useDispatch();
-  const { resources, loading, error } = useSelector((state: RootState) => ({
-    resources: state.resource.resources,
-    loading: state.resource.loading,
-    error: state.resource.error,
-  }));
+interface ResourceListProps {
+  resources: Resource[];
+}
 
-  useEffect(() => {
-    dispatch(fetchResources({ moduleId }));
-  }, [dispatch, moduleId]);
-
-  const Row = ({ index, style }) => (
-    <Box style={style} key={resources[index].id}>
+const ResourceList: React.FC<ResourceListProps> = ({ resources }) => {
+  return (
+    <Box sx={{ mt: 2 }}>
       <Typography variant="h6" gutterBottom>
-        {resources[index].title}
+        Resources
       </Typography>
-      <Typography variant="body2" gutterBottom>
-        {resources[index].description}
-      </Typography>
+      <List>
+        {resources.map((resource: Resource) => (
+          <ListItem key={resource.id}>
+            <ListItemText primary={resource.title} />
+            {resource.url && (
+              <Link href={resource.url} target="_blank" rel="noopener noreferrer">
+                <Button variant="contained" size="small">
+                  View Resource
+                </Button>
+              </Link>
+            )}
+          </ListItem>
+        ))}
+      </List>
     </Box>
   );
-
-  if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" mt={4} aria-label="Loading resources">
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box display="flex" justifyContent="center" mt={4} aria-label="Error">
-        <Typography variant="body1" color="error">
-          Error: {error?.message || 'Unknown error'}
-        </Typography>
-      </Box>
-    );
-  }
-
-  return (
-    <List
-      height={600}
-      width={'100%'}
-      itemCount={resources.length}
-      itemSize={120}
-    >
-      {Row}
-    </List>
-  );
-}
+};
 
 export default ResourceList;
