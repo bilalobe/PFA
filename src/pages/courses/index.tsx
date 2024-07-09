@@ -1,119 +1,174 @@
-import axios from 'axios';
-import { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { Grid, Typography, TextField, Card, CardContent, CardActions, CircularProgress, Alert, Box, Pagination, Button, InputAdornment, IconButton } from '@mui/material';
+import { useState, useEffect, useCallback } from 'react';
+import {
+  Grid,
+  Typography,
+  TextField,
+  CircularProgress,
+  Box,
+  Pagination, InputAdornment,
+  IconButton,
+  Alert
+} from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
-import { Link } from 'react-router-dom';
-import { fetchCourses } from '../features/course/courseSlice'; // Adjust the import path as necessary
+import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
+import { debounce } from 'lodash';
+import { collection, getDocs, orderBy, query, where, limit, startAfter, DocumentData, CollectionReference } from 'firebase/firestore';
+import { db } from '../../firebaseConfig';
+import CourseCard from '../../components/Courses/CourseCard';
+import { Course } from '../../interfaces/types';
 
-function CourseList({ initialCourses = [] }) {
-  const dispatch = useDispatch();
-  const courses = useSelector(state => state.course.courses) || initialCourses;
-  const loading = useSelector(state => state.course.loading);
-  const error = useSelector(state => state.course.error);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [coursesPerPage] = useState(9);
+const CoursesPage: React.FC = () => {
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [lastVisible, setLastVisible] = useState<any>(null);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const coursesPerPage = 9;
 
-  useEffect(() => {
-    if (!initialCourses.length) {
-      dispatch(fetchCourses());
+  const { register, handleSubmit, setValue } = useForm();
+
+// Fetch Courses from Firestore with Pagination
+const fetchCourses = useCallback(async () => {
+  try {
+    setLoading(true);
+    setError(null);
+
+    let coursesQuery: CollectionReference<DocumentData, DocumentData> = collection(db, 'courses');
+    coursesQuery = query(coursesQuery, orderBy('createdAt', 'desc'));
+
+    if (searchQuery) {
+      coursesQuery = query(
+        coursesQuery,
+        where('title', '>=', searchQuery),
+        where('title', '<=', searchQuery + '\uf8ff')
+      );
     }
-  }, [dispatch]);
 
-  const handleSearchChange = (event) => {
-    setSearchQuery(event.target.value);
+    if (lastVisible) {
+      coursesQuery = query(coursesQuery, startAfter(lastVisible), limit(coursesPerPage));
+    } else {
+      coursesQuery = query(coursesQuery, limit(coursesPerPage));
+    }
+
+    const querySnapshot = await getDocs(coursesQuery);
+    const fetchedCourses: Course[] = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Course));
+    setCourses((prevCourses) => (lastVisible ? [...prevCourses, ...fetchedCourses] : fetchedCourses));
+    setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
+  } catch (err) {
+    console.error("Error fetching courses:", err);
+    setError('An error occurred while fetching courses.');
+  } finally {
+    setLoading(false);
+  }
+}, [searchQuery, lastVisible, coursesPerPage, setLoading, setError, setCourses, setLastVisible]);
+
+  // Debounce the Search Input for Performance
+  const debouncedSearch = useCallback(
+    debounce((query: string) => {
+      setLastVisible(null);
+      setCurrentPage(1);
+      setSearchQuery(query);
+    }, 500),
+    []
+  );
+
+  // Form Submit Handler (triggers search)
+  const handleSearchSubmit: SubmitHandler<FieldValues> = (data) => {
+    debouncedSearch(data.searchQuery);
   };
 
   const handleClearSearch = () => {
-    setSearchQuery('');
+    setValue('searchQuery', '');
+    setLastVisible(null);
+    setCurrentPage(1);
+    setSearchQuery("");
+    fetchCourses();
   };
 
-  const handlePageChange = (event, value) => {
+  // Pagination
+  const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
     setCurrentPage(value);
+    if (value > currentPage) {
+      fetchCourses();
+    }
   };
 
-  const filteredCourses = courses.filter(course =>
-    course.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Initial Data Fetch
+  useEffect(() => {
+    fetchCourses();
+  }, [fetchCourses]);
 
-  const indexOfLastCourse = currentPage * coursesPerPage;
-  const indexOfFirstCourse = indexOfLastCourse - coursesPerPage;
-  const currentCourses = filteredCourses.slice(indexOfFirstCourse, indexOfLastCourse);
+  if (loading) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <Alert severity="error">{error}</Alert>
+      </Box>
+    );
+  }
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
-        Courses
+      <Typography variant="h4" align="center" gutterBottom>
+        Discover Our Courses
       </Typography>
-      <TextField
-        value={searchQuery}
-        onChange={handleSearchChange}
-        placeholder="Search courses"
-        fullWidth
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              {searchQuery && (
-                <IconButton onClick={handleClearSearch}>
-                  <ClearIcon />
-                </IconButton>
-              )}
-              <IconButton>
+
+      {/* Search Bar */}
+      <form onSubmit={handleSubmit(handleSearchSubmit)}>
+        <TextField
+          {...register('searchQuery')}
+          placeholder="Search for Courses"
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
                 <SearchIcon />
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
-      />
-      {loading ? (
-        <Box display="flex" justifyContent="center" mt={4}>
-          <CircularProgress />
+              </InputAdornment>
+            ),
+            endAdornment: (
+              <InputAdornment position="end">
+                {searchQuery && (
+                  <IconButton onClick={handleClearSearch} edge="end">
+                    <ClearIcon />
+                  </IconButton>
+                )}
+              </InputAdornment>
+            ),
+          }}
+          fullWidth
+          sx={{ mb: 2 }}
+        />
+      </form>
+
+      {/* Course Grid */}
+      <Grid container spacing={2} justifyContent="center">
+        {courses.map((course: Course) => (
+          <Grid item key={course.id} xs={12} sm={6} md={4}>
+            <CourseCard course={course} />
+          </Grid>
+        ))}
+      </Grid>
+
+      {/* Pagination */}
+      {courses.length >= coursesPerPage && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+          <Pagination
+            count={Math.ceil(courses.length / coursesPerPage)}
+            page={currentPage}
+            onChange={handlePageChange}
+          />
         </Box>
-      ) : error ? (
-        <Alert severity="error">{error}</Alert>
-      ) : (
-        <>
-          {currentCourses.map(course => (
-            <Card key={course.id} variant="outlined" sx={{ mt: 2 }}>
-              <CardContent>
-                <Typography variant="h6">{course.title}</Typography>
-                <Typography variant="body2">{course.description}</Typography>
-              </CardContent>
-              <CardActions>
-                <Button component={Link} to={`/courses/${course.id}`} size="small">
-                  View Details
-                </Button>
-              </CardActions>
-            </Card>
-          ))}
-          <Box display="flex" justifyContent="center" mt={4}>
-            <Pagination
-              count={Math.ceil(filteredCourses.length / coursesPerPage)}
-              page={currentPage}
-              onChange={handlePageChange}
-            />
-          </Box>
-        </>
       )}
     </Box>
   );
-}
+};
 
-export async function getServerSideProps() {
-  try {
-    const response = await axios.get('http://localhost:8000/api/courses'); // Replace with your Django API endpoint
-    const courses = response.data;
-
-    return {
-      props: { initialCourses: courses },
-    };
-  } catch (error) {
-    return {
-      props: { initialCourses: [], error: 'Failed to fetch courses.' },
-    };
-  }
-}
-
-export default CourseList;
+export default CoursesPage;
