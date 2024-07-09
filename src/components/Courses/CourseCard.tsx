@@ -1,63 +1,63 @@
 import React from 'react';
-import Link from 'next/link';
-import { useSelector } from 'react-redux';
-import styles from './CourseCard.module.css';
-import Image from 'next/image';
-import { RootState } from '@/types/store';
-import EnrollmentReducer from '@/types/store';
+import PropTypes from 'prop-types';
+import styled from 'styled-components';
+import CustomCard from '../UI/Card';
+import { CourseCardProps } from '../../interfaces/props';
 
-const CourseCard = ({ course }) => {
-  const enrollments = useSelector((state: RootState & { enrollment: typeof EnrollmentReducer }) => state.enrollment.enrollments);
-  const { isAuthenticated, loading } = useSelector((state: RootState) => state.auth);
-  const isEnrolled = enrollments.some((enrollment: { course: { id: string | number }; }) => enrollment.course.id === course.id);
 
-  if (loading) {
-    return <div className={styles.loading}>Loading...</div>;
+const StyledCourseCard = styled(CustomCard)`
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease-in-out;
+
+  &:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   }
 
-  if (!course) {
-    return (
-      <div className={styles.alert}>
-        Course data could not be loaded.
-      </div>
-    );
+  .course-title {
+    font-size: 1.5rem;
+    font-weight: bold;
   }
+
+  .course-description {
+    font-size: 1rem;
+    color: #666;
+  }
+
+  .course-image {
+    width: 100%;
+    height: auto;
+  }
+`;
+
+const CourseCard: React.FC<CourseCardProps> = ({ course, variant = 'elevation', sx, ...props }) => {
+  const { courseTitle, courseDescription, courseImage } = course;
 
   return (
-    <div className={styles.gridItem}>
-      <div className={styles.card}>
-        <Image
-          className={styles.cardMedia}
-          alt={course.name}
-          src={course.imageUrl || '/path/to/placeholder.jpg'}
-        />
-        <div className={styles.cardContent}>
-          <h5 className={styles.title}>{course.name}</h5>
-          <p className={styles.description}>{course.description}</p>
-          <div className={styles.actions}>
-            {!loading && isAuthenticated ? (
-              isEnrolled ? (
-                <Link href={`/courses/${course.id}`}>
-                  <a className={styles.button}>View Course</a>
-                </Link>
-              ) : (
-                <Link href={`/enroll/${course.id}`}>
-                  <a className={styles.button}>Enroll</a>
-                </Link>
-              )
-            ) : (
-              <Link href="/login">
-                <a className={styles.button}>Login to Enroll</a>
-              </Link>
-            )}
-            <Link href={`/courses/${course.id}`}>
-              <a className={`${styles.button} ${styles.outlinedButton}`}>Learn More</a>
-            </Link>
-          </div>
-        </div>
-      </div>
-    </div>
+    <StyledCourseCard
+      title={courseTitle}
+      content={courseDescription}
+      image={courseImage}
+      variant={variant}
+      sx={sx}
+      {...props}
+    />
   );
+};
+
+CourseCard.propTypes = {
+  course: PropTypes.shape({
+    courseTitle: PropTypes.string.isRequired,
+    courseDescription: PropTypes.string.isRequired,
+    courseImage: PropTypes.string, // Make image prop optional
+  }).isRequired as PropTypes.Validator<{
+    courseTitle: string;
+    courseDescription: string;
+    courseImage?: string;
+  }>,
+  variant: PropTypes.oneOf(['outlined', 'elevation']), // Allow different variants
+  sx: PropTypes.object,
 };
 
 export default CourseCard;
