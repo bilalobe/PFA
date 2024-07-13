@@ -71,7 +71,7 @@ const ForumThreadPage = () => {
 
       const querySnapshot = await getDocs(postsQuery);
       const fetchedPosts = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setPosts((prevPosts) => [...prevPosts, ...fetchedPosts]);
+      setPosts((prevPosts) => [...prevPosts, ...fetchedPosts] as ForumPost[]);
       setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
     } catch (error) {
       console.error("Error fetching posts:", error);
@@ -96,7 +96,7 @@ const ForumThreadPage = () => {
       await addDoc(commentsRef, {
         postId: postId,
         content: newComment,
-        author: user.uid,
+        author: user?.uid,
         createdAt: serverTimestamp()
       });
 
@@ -116,7 +116,7 @@ const ForumThreadPage = () => {
   };
 
   // Moderation Features
-  const [showModerationOptions, setShowModerationOptions] = useState(false);
+  const [, setShowModerationOptions] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
@@ -164,7 +164,7 @@ const ForumThreadPage = () => {
     );
   }
 
-  if (threadError || postsError) {
+  if (threadError) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <Alert severity="error">An error occurred while fetching forum data. Please try again later.</Alert>
@@ -188,10 +188,11 @@ const ForumThreadPage = () => {
 
       {/* List of Posts in the Thread */}
       <List>
-        {(posts as ForumPost[]).map((post: ForumPost, index) => (
+        {(posts as ForumPost[]).map((post: ForumPost) => (
           <ListItem key={post.id} sx={{ mb: 3 }}>
-            <ForumPostDisplay post={post} forumId={forumId} threadId={threadId} courseId={courseId} />
-
+            <ForumPostDisplay post={post} forumId={''} threadId={''} courseId={''} onCommentSubmit={function (postId: string): void {
+              throw new Error('Function not implemented.');
+            } } />
             {/* Moderation Options (for authorized users) */}
             {user && user.userType === 'teacher' && (
               <Tooltip title="Moderation Options">

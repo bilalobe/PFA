@@ -1,8 +1,8 @@
 // pages/forums/[forumId]/index.tsx
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
-import { useFirestoreDocument, useFirestoreCollectionData } from '../../../hooks/useFirestore';
-import { useAuth } from '../../../hooks/useAuth';
+import { useFirestoreDocument } from '../../hooks/useFirestore';
+import { useAuth } from '../../hooks/useAuth';
 import {
   Box,
   Typography,
@@ -10,21 +10,18 @@ import {
   Alert,
   List,
   ListItem,
-  ListItemText,
   TextField,
   Button,
   Pagination,
-  Divider,
   IconButton,
   Tooltip,
   Modal,
 } from '@mui/material';
-import { Thread, ForumPost, Comment, User } from '../../../interfaces/types';
+import { ForumPost, User } from '../../interfaces/types';
 import {
   collection,
   orderBy,
   query,
-  where,
   addDoc,
   serverTimestamp,
   doc,
@@ -32,7 +29,11 @@ import {
   getDocs,
   limit,
   startAfter,
+  collectionGroup,
+  where,
 } from 'firebase/firestore';
+import { moderationApi } from '../../utils/api';
+import { db } from '../../firebaseConfig';
 
 
 const style = {
@@ -64,7 +65,8 @@ const ForumThreadPage = () => {
   const fetchPosts = useCallback(async () => {
     try {
       let postsQuery = query(
-        collection(db, `courses/${courseId}/forums/${forumId}/threads/${threadId}/posts`),
+        collectionGroup(db, 'posts'),
+        where('threadId', '==', threadId),
         orderBy('createdAt', 'asc'),
         limit(postsPerPage)
       );
@@ -74,7 +76,13 @@ const ForumThreadPage = () => {
       }
 
       const querySnapshot = await getDocs(postsQuery);
-      const fetchedPosts = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      const fetchedPosts = querySnapshot.docs.map((doc) => {
+        const data = doc.data() as ForumPost;
+        return {
+          ...data,
+          id: doc.id,
+        };
+      });
       setPosts((prevPosts) => [...prevPosts, ...fetchedPosts]);
       setLastVisible(querySnapshot.docs[querySnapshot.docs.length - 1]);
     } catch (error) {

@@ -2,8 +2,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import '@testing-library/jest-dom/extend-expect';
-import Register from './Register';
-import { auth } from '../firebaseConfig';
+import Register from '../register';
+import { auth } from '../../firebaseConfig';
 import firebaseui from 'firebaseui';
 
 // Mock FirebaseUI

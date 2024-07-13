@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Box,
   Typography,
   Button,
   Grid,
@@ -23,11 +22,10 @@ import { useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { useAuth } from '../../hooks/useAuth';
-import { useFirestore, FirestoreHook } from '../../hooks/useFirestore';
-import { useFirestoreCollectionData } from '../../hooks/useFirestoreCollectionData';
-import { useRouter } from 'next/router';
+import { useFirestore } from '../../hooks/useFirestore';
+import { useFirestoreCollectionData } from '../../hooks/useFirestore';
 import { Course } from '../../interfaces/types';
-import { DocumentData, DocumentReference, where } from '@firebase/firestore';
+import { DocumentData, DocumentReference, Query, where } from '@firebase/firestore';
 
 const courseValidationSchema = yup.object({
   title: yup.string().required('Course Title is required'),
@@ -107,9 +105,7 @@ const CourseItem = ({ course, onEdit, onDelete }: {
 
 // The Main Dashboard Courses Page Component
 const DashboardCourses = () => {
-  const router = useRouter(); 
   const { user } = useAuth();
-  const userId = user?.uid ?? '';
   const [courses, setCourses] = useState<Course[]>([]);
 
   // State for creating a new course
@@ -122,7 +118,7 @@ const DashboardCourses = () => {
   const { data: coursesData, loading: coursesLoading, error: coursesError } =
     useFirestoreCollectionData<Course>(
       'courses',
-      user?.uid ? where('createdBy', '==', user.uid) : undefined
+      user?.uid ? () => where('createdBy', '==', user.uid) as unknown as Query<DocumentData, DocumentData> : undefined
     );
 
   interface FirestoreHook<T> {

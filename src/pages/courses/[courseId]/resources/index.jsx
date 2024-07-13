@@ -6,7 +6,7 @@ import { useAuth } from '../../../../hooks/useAuth';
 import Link from 'next/link';
 import { Box, Typography, CircularProgress, Alert, List, ListItem, ListItemText, ListItemIcon, Button } from '@mui/material'; 
 import { Download } from '@mui/icons-material';
-import { Resource } from '../../../../types'; 
+import { Resource } from '../../../interfaces/types'; 
 import { collection, orderBy, query, where } from 'firebase/firestore'; 
 import { db } from '../../../../firebaseConfig';
 import { resourceApi } from '../../../../utils/api';
@@ -15,8 +15,7 @@ const CourseResourcesPage = () => {
   const router = useRouter(); 
   const { courseId } = router.query; 
   const { user } = useAuth();
-  const [resources, setResources] = useState<Resource[]>([]); 
-
+  
   const { data, loading, error } = useFirestoreCollectionData<Resource>(`courses/${courseId}/resources`, orderBy('uploadDate', 'desc')); 
 
   useEffect(() => {

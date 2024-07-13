@@ -1,14 +1,13 @@
 import React from 'react';
 import { useRouter } from 'next/router';
 import { useFirestoreDocument } from '../../../../hooks/useFirestore';
-import { useAuth } from '../../../../hooks/useAuth';
 import { Box, Typography, CircularProgress, Alert, Button } from '@mui/material';
 import { resourceApi } from '../../../../utils/api';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 
 const ResourceDetailsPage = () => {
   const router = useRouter();
-  const { courseId, moduleId, resourceId } = router.query;
-  const { user } = useAuth();
+  const { courseId, moduleId, resourceId } = router.query as { courseId: string, moduleId: string, resourceId: string };
 
   // Fetch Resource Data
   const { docData: resource, loading, error } = useFirestoreDocument(`courses/${courseId}/modules/${moduleId}/resources/${resourceId}`);
@@ -39,7 +38,7 @@ const ResourceDetailsPage = () => {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <Alert severity="error">
-          {error.message}
+          {String(error)}
         </Alert>
       </Box>
     );
@@ -84,12 +83,14 @@ const ResourceDetailsPage = () => {
 };
 
 // You'll need to use getServerSideProps to fetch the initial resource data and handle authorization
-export async function getServerSideProps(context) {
+export async function getServerSideProps(context: { params: { courseId: any; moduleId: any; resourceId: any; }; }) {
   try {
     const { courseId, moduleId, resourceId } = context.params;
 
     // Fetch the resource document from Firestore
-    const resourceDoc = await db.doc(`courses/${courseId}/modules/${moduleId}/resources/${resourceId}`).get();
+    const firestore = getFirestore();
+    const resourceDocRef = doc(firestore, `courses/${courseId}/modules/${moduleId}/resources/${resourceId}`);
+    const resourceDoc = await getDoc(resourceDocRef);
     if (!resourceDoc.exists) {
       return {
         notFound: true, // Or redirect to an error page

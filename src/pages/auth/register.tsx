@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import 'firebase/auth';
 import StyledFirebaseAuth from 'react-firebaseui/StyledFirebaseAuth';
-import { auth, uiConfig } from '../firebaseConfig';
+import { auth, uiConfig } from '../../firebaseConfig';
 import firebaseui from 'firebaseui';
 import 'firebaseui/dist/firebaseui.css'; // Import default CSS
 

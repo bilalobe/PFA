@@ -18,19 +18,18 @@ import {
   InputLabel,
   List,
   ListItem,
-  ListItemText,
   IconButton,
   Chip,
   Alert,
   ListItemSecondaryAction,
   FormControlLabel,
-  FormHelperText,
 } from '@mui/material';
 import { Delete } from '@mui/icons-material';
 import { serverTimestamp } from 'firebase/firestore';
 import { useForm, Controller } from 'react-hook-form';
 import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { QuizQuestion } from '../../interfaces/types';
 
 const steps = ['Quiz Details', 'Add Questions', 'Review and Submit'];
 
@@ -39,22 +38,11 @@ const quizSchema = yup.object().shape({
   description: yup.string().required('Quiz description is required'),
 });
 
-const questionSchema = yup.object().shape({
-  text: yup.string().required('Question text is required'),
-  type: yup.string().required('Question type is required'),
-  choices: yup.array().of(
-    yup.object().shape({
-      text: yup.string().required('Answer choice text is required'),
-      isCorrect: yup.boolean().required('Please select a correct answer'),
-    })
-  ).min(2, 'At least two answer choices are required'),
-});
-
 const QuizCreationForm: React.FC = () => {
   const router = useRouter();
   const { courseId } = router.query;
   const { user } = useAuth();
-  const { addDocument, createSubcollectionDocument } = useFirestore();
+  const { addDocument, createSubcollectionDocument } = useFirestore('quizzes');
 
   const [activeStep, setActiveStep] = useState(0);
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
@@ -65,7 +53,6 @@ const QuizCreationForm: React.FC = () => {
     control,
     handleSubmit: handleFormSubmit,
     formState: { errors },
-    reset,
     setValue,
   } = useForm({
     resolver: yupResolver(quizSchema),
@@ -76,18 +63,18 @@ const QuizCreationForm: React.FC = () => {
   });
 
   // --- Form Input Handlers ---
-  const handleQuizDataChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setValue(event.target.name, event.target.value);
-  };
 
   // --- Question Handlers ---
   const handleAddQuestion = () => {
     const newQuestionId = `temp-${Date.now()}`;
-
-    setQuestions((prevQuestions) => [
+  
+    setQuestions((prevQuestions: QuizQuestion[]) => [
       ...prevQuestions,
       {
         id: newQuestionId,
+        question: '', // Add the missing 'question' property
+        options: [], // Add the missing 'options' property
+        correctAnswer: '', // Add the missing 'correctAnswer' property
         text: '',
         type: 'multiple_choice',
         choices: [{ text: '', isCorrect: false }, { text: '', isCorrect: false }],
@@ -143,7 +130,7 @@ const QuizCreationForm: React.FC = () => {
     setQuestions((prevQuestions) =>
       prevQuestions.map((question) => {
         if (question.id === questionId) {
-          const updatedChoices = question.choices.map((choice, i) => ({
+          const updatedChoices = question.choices.map((choice: any, i: number) => ({
             ...choice,
             isCorrect: i === choiceIndex,
           }));
@@ -190,7 +177,7 @@ const QuizCreationForm: React.FC = () => {
       // 1. Create the Quiz document in Firestore
       const newQuiz = {
         ...data,
-        courseId: courseId,
+        courseId: courseId as string,
         createdBy: user.uid,
         createdAt: serverTimestamp(),
       };
@@ -225,186 +212,205 @@ const QuizCreationForm: React.FC = () => {
             <StepContent>
               {index === 0 && (
                 <form onSubmit={handleFormSubmit(handleSubmit)}>
-                  <Box>
-                    <Typography variant="h6" gutterBottom>
-                      Quiz Details
-                    </Typography>
-                    <Controller
-                      name="title"
-                      control={control}
-                      render={({ field }) => (
-                        <TextField
-                          {...field}
-                          label="Quiz Title"
-                          fullWidth
-                          margin="normal"
-                          error={!!errors.title}
-                          helperText={errors.title?.message}
-                        />
-                      )}
-                    />
-                    <Controller
-                      name="description"
-                      control={control}
-                      render={({ field }) => (
-                        <TextField
-                          {...field}
-                          label="Quiz Description"
-                          fullWidth
-                          multiline
-                          rows={4}
-                          margin="normal"
-                          error={!!errors.description}
-                          helperText={errors.description?.message}
-                        />
-                      )}
-                    />
-                    <Button variant="contained" onClick={handleNext} disabled={loading}>
-                      Next
-                    </Button>
+                  <Controller
+                    name="title"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Quiz Title"
+                        variant="outlined"
+                        fullWidth
+                        margin="normal"
+                        error={!!errors.title}
+                        helperText={errors.title?.message}
+                      />
+                    )}
+                  />
+                  <Controller
+                    name="description"
+                    control={control}
+                    render={({ field }) => (
+                      <TextField
+                        {...field}
+                        label="Quiz Description"
+                        variant="outlined"
+                        fullWidth
+                        margin="normal"
+                        error={!!errors.description}
+                        helperText={errors.description?.message}
+                      />
+                    )}
+                  />
+                  <Box sx={{ mb: 2 }}>
+                    <div>
+                      <Button type="submit" variant="contained" sx={{ mt: 1, mr: 1 }}>
+                        Next
+                      </Button>
+                      <Button disabled={activeStep === 0} onClick={handleBack} sx={{ mt: 1, mr: 1 }}>
+                        Back
+                      </Button>
+                    </div>
                   </Box>
                 </form>
               )}
+
               {index === 1 && (
-                <Box>
-                  <Typography variant="h6" gutterBottom>
-                    Add Questions
-                  </Typography>
-                  <List>
-                    {questions.map((question, questionIndex) => (
-                      <ListItem key={question.id}>
-                        <ListItemText
-                          primary={
-                            <TextField
-                              label="Question Text"
-                              value={question.text}
-                              onChange={(e) => handleQuestionTextChange(question.id, e.target.value)}
-                              fullWidth
-                              margin="normal"
-                              error={!!errors.text}
-                              helperText={errors.text?.message}
-                            />
-                          }
-                        />
-                        <ListItemSecondaryAction>
-                          <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteQuestion(question.id)}>
-                            <Delete />
-                          </IconButton>
-                        </ListItemSecondaryAction>
-                        <FormControl fullWidth>
-                          <InputLabel id="question-type-label">Question Type</InputLabel>
-                          <Select
-                            labelId="question-type-label"
-                            id="question-type"
-                            value={question.type}
-                            onChange={(e) => handleQuestionTypeChange(question.id, e.target.value)}
-                            error={!!errors.type}
-                            helperText={errors.type?.message}
-                          >
-                            <MenuItem value="multiple_choice">Multiple Choice</MenuItem>
-                            <MenuItem value="true_false">True/False</MenuItem>
-                          </Select>
-                        </FormControl>
-                        <List>
-                          {question.choices.map((choice, choiceIndex) => (
-                            <ListItem key={choiceIndex}>
-                              <ListItemText
-                                primary={
-                                  <TextField
-                                    label="Answer Choice"
-                                    value={choice.text}
-                                    onChange={(e) => handleAnswerChoiceChange(question.id, choiceIndex, e.target.value)}
-                                    fullWidth
-                                    margin="normal"
-                                    error={!!errors.choices?.[choiceIndex]?.text}
-                                    helperText={errors.choices?.[choiceIndex]?.text?.message}
-                                  />
-                                }
-                              />
-                              <ListItemSecondaryAction>
-                                <IconButton edge="end" aria-label="delete" onClick={() => handleDeleteAnswerChoice(question.id, choiceIndex)}>
-                                  <Delete />
-                                </IconButton>
-                                <FormControlLabel
-                                  control={
-                                    <input
-                                      type="checkbox"
-                                      checked={choice.isCorrect}
-                                      onChange={() => handleCorrectAnswerChange(question.id, choiceIndex)}
-                                    />
-                                  }
-                                  label="Correct Answer"
-                                />
-                              </ListItemSecondaryAction>
-                            </ListItem>
-                          ))}
-                        </List>
-                        <Button variant="contained" onClick={() => handleAddAnswerChoice(question.id)}>
-                          Add Answer Choice
-                        </Button>
-                        <FormHelperText error={!!errors.choices?.[questionIndex]?.message}>
-                          {errors.choices?.[questionIndex]?.message}
-                        </FormHelperText>
-                      </ListItem>
-                    ))}
-                  </List>
-                  <Button variant="contained" onClick={handleAddQuestion}>
+                <>
+                  <Button onClick={handleAddQuestion} variant="contained" sx={{ mt: 1, mb: 2 }}>
                     Add Question
                   </Button>
-                </Box>
-              )}
-              {index === 2 && (
-                <Box>
-                  <Typography variant="h6" gutterBottom>
-                    Review and Submit
-                  </Typography>
-                  <Typography variant="body1" gutterBottom>
-                    Please review your quiz details and questions before submitting.
-                  </Typography>
                   <List>
-                    {questions.map((question, questionIndex) => (
+                    {questions.map((question, qIndex) => (
                       <ListItem key={question.id}>
-                        <ListItemText
-                          primary={
-                            <Typography variant="body1" gutterBottom>
-                              {question.text}
-                            </Typography>
-                          }
-                        />
-                        <ListItemSecondaryAction>
-                          <Chip
-                            label={question.type === 'multiple_choice' ? 'Multiple Choice' : 'True/False'}
-                            color="primary"
+                        <Box sx={{ width: '100%' }}>
+                          <TextField
+                            label={`Question ${qIndex + 1}`}
+                            variant="outlined"
+                            fullWidth
+                            margin="normal"
+                            value={question.text}
+                            onChange={(e) => handleQuestionTextChange(question.id, e.target.value)}
                           />
-                        </ListItemSecondaryAction>
+                          <FormControl fullWidth margin="normal">
+                            <InputLabel>Question Type</InputLabel>
+                            <Select
+                              value={question.type}
+                              onChange={(e) => handleQuestionTypeChange(question.id, e.target.value)}
+                            >
+                              <MenuItem value="multiple_choice">Multiple Choice</MenuItem>
+                              <MenuItem value="true_false">True/False</MenuItem>
+                              <MenuItem value="short_answer">Short Answer</MenuItem>
+                            </Select>
+                          </FormControl>
+                          {question.type === 'multiple_choice' && (
+                            <List>
+                              {question.choices.map((choice: { text: unknown; isCorrect: any; }, cIndex: number) => (
+                                <ListItem key={`${question.id}-choice-${cIndex}`}>
+                                  <TextField
+                                    label={`Choice ${cIndex + 1}`}
+                                    variant="outlined"
+                                    fullWidth
+                                    margin="normal"
+                                    value={choice.text}
+                                    onChange={(e) =>
+                                      handleAnswerChoiceChange(question.id, cIndex, e.target.value)
+                                    }
+                                  />
+                                  <FormControlLabel
+                                    control={
+                                      <Chip
+                                        label="Correct"
+                                        color={choice.isCorrect ? 'primary' : 'default'}
+                                        onClick={() => handleCorrectAnswerChange(question.id, cIndex)}
+                                      />
+                                    }
+                                    label="Mark as Correct"
+                                    labelPlacement="start"
+                                  />
+                                  <ListItemSecondaryAction>
+                                    <IconButton
+                                      edge="end"
+                                      aria-label="delete"
+                                      onClick={() => handleDeleteAnswerChoice(question.id, cIndex)}
+                                    >
+                                      <Delete />
+                                    </IconButton>
+                                  </ListItemSecondaryAction>
+                                </ListItem>
+                              ))}
+                              <Button
+                                onClick={() => handleAddAnswerChoice(question.id)}
+                                variant="outlined"
+                                sx={{ mt: 2 }}
+                              >
+                                Add Choice
+                              </Button>
+                            </List>
+                          )}
+                          <Button
+                            onClick={() => handleDeleteQuestion(question.id)}
+                            variant="contained"
+                            color="secondary"
+                            sx={{ mt: 2 }}
+                          >
+                            Delete Question
+                          </Button>
+                        </Box>
                       </ListItem>
                     ))}
                   </List>
-                </Box>
+                  <Box sx={{ mb: 2 }}>
+                    <div>
+                      <Button variant="contained" onClick={handleNext} sx={{ mt: 1, mr: 1 }}>
+                        Next
+                      </Button>
+                      <Button onClick={handleBack} sx={{ mt: 1, mr: 1 }}>
+                        Back
+                      </Button>
+                    </div>
+                  </Box>
+                </>
               )}
-              <Box sx={{ mt: 2 }}>
-                <Button disabled={activeStep === 0} onClick={handleBack} sx={{ mr: 1 }}>
-                  Back
-                </Button>
-                <Button
-                  variant="contained"
-                  onClick={handleNext}
-                  disabled={loading}
-                >
-                  {activeStep === steps.length - 1 ? 'Submit' : 'Next'}
-                </Button>
-              </Box>
+
+              {index === 2 && (
+                <>
+                  <Typography variant="h6" gutterBottom>
+                    Review your Quiz
+                  </Typography>
+                  <Typography variant="subtitle1" gutterBottom>
+                    Title: {control.getValues('title')}
+                  </Typography>
+                  <Typography variant="subtitle1" gutterBottom>
+                    Description: {control.getValues('description')}
+                  </Typography>
+                  <List>
+                    {questions.map((question, qIndex) => (
+                      <ListItem key={question.id}>
+                        <Box sx={{ width: '100%' }}>
+                          <Typography variant="subtitle1">{`Q${qIndex + 1}: ${
+                            question.text
+                          }`}</Typography>
+                          {question.choices.map((choice: { isCorrect: any; text: any; }, cIndex: number) => (
+                            <Typography
+                              key={`${question.id}-choice-${cIndex}`}
+                              variant="body2"
+                              color={choice.isCorrect ? 'primary' : 'textSecondary'}
+                            >
+                              {`Choice ${cIndex + 1}: ${choice.text}`}
+                            </Typography>
+                          ))}
+                        </Box>
+                      </ListItem>
+                    ))}
+                  </List>
+                  {error && (
+                    <Alert severity="error" sx={{ mt: 2 }}>
+                      {error}
+                    </Alert>
+                  )}
+                  <Box sx={{ mb: 2 }}>
+                    <div>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        onClick={handleFormSubmit(handleSubmit)}
+                        sx={{ mt: 1, mr: 1 }}
+                        disabled={loading}
+                      >
+                        {loading ? <CircularProgress size={24} /> : 'Submit'}
+                      </Button>
+                      <Button onClick={handleBack} sx={{ mt: 1, mr: 1 }}>
+                        Back
+                      </Button>
+                    </div>
+                  </Box>
+                </>
+              )}
             </StepContent>
           </Step>
         ))}
       </Stepper>
-      {activeStep === steps.length && (
-        <Typography variant="h6" gutterBottom>
-          All steps completed - you are finished!
-        </Typography>
-      )}
-      {loading && <CircularProgress />}
-      {error && <Alert severity="error">{error}</Alert>}
     </Box>
   );
 };
