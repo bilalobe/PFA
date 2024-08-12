@@ -208,10 +208,14 @@ export interface Post {
 
 // Chat Message Interface AI
 export interface ChatMessage {
+    createdAt: any;
     uid?: string;
     sender: 'user' | 'bot';
     message: string;
+    roomId: string;
+    [key: string]: any;
 }
+  
 // Error Interface
 export interface Error {
     code: string;
