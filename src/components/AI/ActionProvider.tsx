@@ -1,9 +1,13 @@
-
 class ActionProvider {
-  createChatBotMessage: any;
-  setState: any;
-  createClientMessage: any;
-  constructor(createChatBotMessage, setStateFunc, createClientMessage) {
+  createChatBotMessage: (message: string) => any;
+  setState: (stateFunc: (prevState: any) => any) => void;
+  createClientMessage: (message: string) => any;
+
+  constructor(
+    createChatBotMessage: (message: string) => any,
+    setStateFunc: (stateFunc: (prevState: any) => any) => void,
+    createClientMessage: (message: string) => any
+  ) {
     this.createChatBotMessage = createChatBotMessage;
     this.setState = setStateFunc;
     this.createClientMessage = createClientMessage;
@@ -22,7 +26,7 @@ class ActionProvider {
   }
 
   // Function to update the state of the chatbot conversation
-  updateChatbotState(message) {
+  updateChatbotState(message: any) {
     this.setState(prevState => ({
       ...prevState,
       messages: [...prevState.messages, message]
