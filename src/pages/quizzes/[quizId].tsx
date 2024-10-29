@@ -105,11 +105,13 @@ const QuizPage: React.FC = () => {
 
         try {
             let calculatedScore = 0;
-            questions.forEach((question) => {
-                if (selectedAnswers[question.id] === question.correctAnswer) {
-                    calculatedScore++;
-                }
-            });
+            if (questions) {
+                questions.forEach((question) => {
+                    if (selectedAnswers[question.id] === question.correctAnswer) {
+                        calculatedScore++;
+                    }
+                });
+            }
             setScore(calculatedScore);
 
             if (typeof quizId === 'string') {
@@ -135,7 +137,7 @@ const QuizPage: React.FC = () => {
     };
 
     const handleNextQuestion = () => {
-        if (currentQuestionIndex < questions.length - 1) {
+        if (questions && currentQuestionIndex < questions.length - 1) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
         } else {
             handleSubmitQuiz();
