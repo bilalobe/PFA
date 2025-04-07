@@ -1,5 +1,6 @@
 import { SxProps, Theme } from '@mui/material/styles';
 import { User, ChatMessage, Course } from './types';
+import { ReactNode } from 'react';
 
 export interface ChatbotProps {
   chatRoomId: any;
@@ -23,13 +24,14 @@ export interface CustomCardProps {
   title: string;
   content: string;
   image?: string;
+  footer?: ReactNode;
   variant?: 'outlined' | 'elevation';
   sx?: SxProps<Theme>;
 }
 
-
 export interface CourseCardProps {
   course: {
+    id?: string;
     courseTitle: string;
     courseDescription: string;
     courseImage?: string;
@@ -37,8 +39,6 @@ export interface CourseCardProps {
   variant?: 'outlined' | 'elevation';
   sx?: object;
 }
-
-
 
 export interface CourseListProps {
   courses: Course[];
