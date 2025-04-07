@@ -1,48 +1,46 @@
-import {generate} from "@genkit-ai/ai";
-import {configureGenkit} from "@genkit-ai/core";
-import {firebaseAuth} from "@genkit-ai/firebase/auth";
-import {onFlow} from "@genkit-ai/firebase/functions";
-import {geminiPro} from "@genkit-ai/googleai";
-import * as z from "zod";
-import {firebase} from "@genkit-ai/firebase";
-import {googleAI} from "@genkit-ai/googleai";
+import * as functions from 'firebase-functions';
+import * as admin from 'firebase-admin';
+import { aiRouter, courseRecommendationFlow, studyTopicFlow } from './ai';
+import { enableFirebaseTelemetry } from '@genkit-ai/firebase';
 
-configureGenkit({
-  plugins: [
-    firebase(),
-    googleAI(),
-  ],
-  logLevel: "debug",
-  enableTracingAndMetrics: true,
-});
+// Initialize Firebase
+admin.initializeApp();
 
-export const menuSuggestionFlow = onFlow(
-  {
-    name: "menuSuggestionFlow",
-    inputSchema: z.string(),
-    outputSchema: z.string(),
-    authPolicy: firebaseAuth((user) => {
-      // Firebase Auth is required to call this flow using the Firebase Functions SDK.
-      // TODO: Write additional logic tailored to the needs of your app.
-      // For example:
-      // if (!user.email_verified) {
-      //   throw new Error("Verified email required to run flow");
-      // }
-    }),
-  },
-  async (subject) => {
-    const prompt =
-      `Suggest an item for the menu of a ${subject} themed restaurant`;
+// Export the AI functions
+export const ai = functions.https.onRequest(aiRouter);
 
-    const llmResponse = await generate({
-      model: geminiPro,
-      prompt: prompt,
-      config: {
-        temperature: 1,
-      },
-    });
+// Initialize telemetry with proper error handling
+try {
+  enableFirebaseTelemetry({
+    projectId: process.env.FIREBASE_PROJECT_ID || "your-project-id",
+  }).catch((error) => {
+    console.error("[TELEMETRY] Initialization error:", error);
+  });
+} catch (err) {
+  console.warn("[TELEMETRY] Setup error:", err);
+}
 
-    return llmResponse.text();
-  }
-);
-
+// Export all functions from their respective modules
+export * from './auth/handlers';
+export * from './auth/auth';
+export * from './ai/sentiment';
+export * from './courses/contentGeneration';
+export * from './courses/triggers';
+export * from './integrity/plagiarismDetection';
+export * from './integrity/contentModeration';
+export * from './liveSession/sessionManagement';
+export * from './liveSession/webSocketHandler'; // Added WebSocket handler
+export * from './notifications/callable';
+export * from './notifications/scheduled';
+export * from './notifications/triggers';
+export * from './notifications/handlers';
+export * from './notifications/emailTemplates';
+export * from './recommendations/contentRecommendation';
+export * from './recommendations/learningPath';
+export * from './recommendations/studyTopics';
+export * from './recommendations/compute';
+export * from './recommendations/feedback';
+export * from './recommendations/handlers';
+export * from './search/exports';
+export * from './search/vectorSearch';
+export * from './utils/helpers';
