@@ -8,6 +8,8 @@ import LoginPage from './auth/login';
 import HomeGuard from '../components/Homeguard';
 import { useAuth } from '../hooks/useAuth';
 import ReCAPTCHA from 'react-google-recaptcha';
+import EmulatorIndicator from '../components/UI/EmulatorIndicator';
+import { startAuthMonitor } from '../services/authMonitor';
 
 const queryClient = new QueryClient();
 const theme = createTheme();
@@ -23,6 +25,14 @@ function App() {
     }
   }, []);
 
+  useEffect(() => {
+    const cleanupAuthMonitor = startAuthMonitor();
+    
+    return () => {
+      cleanupAuthMonitor();
+    };
+  }, []);
+
   const handleRecaptchaChange = (value: string | null) => {
     console.log('Captcha value:', value);
   };
@@ -36,6 +46,7 @@ function App() {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
         <CircularProgress />
+        <EmulatorIndicator />
       </Box>
     );
   }
@@ -48,6 +59,7 @@ function App() {
           sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
           onChange={handleRecaptchaChange}
         />
+        <EmulatorIndicator />
       </div>
     );
   }
@@ -61,6 +73,7 @@ function App() {
           user={user}
           onLogout={handleLogout}
         />
+        <EmulatorIndicator />
       </ThemeProvider>
     </QueryClientProvider>
   );
