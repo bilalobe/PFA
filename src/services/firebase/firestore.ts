@@ -84,7 +84,11 @@ export const firestoreService = {
     constraints: QueryConstraint[] = [],
     lastVisible: any = null,
     itemsPerPage = 10
-  ): Promise<{ items: (T & { id: string })[], lastVisible: any }> => {
+  ): Promise<{ items: (T & {
+      title: string;
+      description: string;
+      resources: never[]; id: string 
+})[], lastVisible: any }> => {
     try {
       let q = query(collection(db, collectionPath), ...constraints);
       
