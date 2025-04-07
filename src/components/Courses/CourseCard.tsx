@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import CustomCard from '../UI/Card';
 import { CourseCardProps } from '../../interfaces/props';
-
+import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { db } from '../../firebaseConfig';
+import Rating from '../UI/Rating';
+import { Box, Typography } from '@mui/material';
 
 const StyledCourseCard = styled(CustomCard)`
   border: 1px solid #e0e0e0;
@@ -29,10 +32,55 @@ const StyledCourseCard = styled(CustomCard)`
     width: 100%;
     height: auto;
   }
+
+  .course-rating {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+  }
 `;
 
 const CourseCard: React.FC<CourseCardProps> = ({ course, variant = 'elevation', sx, ...props }) => {
-  const { courseTitle, courseDescription, courseImage } = course;
+  const { id, courseTitle, courseDescription, courseImage } = course;
+  const [averageRating, setAverageRating] = useState<number>(0);
+  const [totalReviews, setTotalReviews] = useState<number>(0);
+
+  // Fetch course ratings from reviews collection
+  useEffect(() => {
+    const fetchCourseRatings = async () => {
+      if (!id) return;
+      
+      try {
+        const reviewsQuery = query(
+          collection(db, 'reviews'),
+          where('courseId', '==', id),
+          where('approved', '==', true)
+        );
+        
+        const querySnapshot = await getDocs(reviewsQuery);
+        
+        if (!querySnapshot.empty) {
+          const reviews = querySnapshot.docs.map(doc => doc.data());
+          const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+          setAverageRating(totalRating / reviews.length);
+          setTotalReviews(reviews.length);
+        }
+      } catch (error) {
+        console.error('Error fetching course ratings:', error);
+      }
+    };
+    
+    fetchCourseRatings();
+  }, [id]);
+
+  const ratingDisplay = (
+    <Box className="course-rating">
+      <Rating value={averageRating} readOnly precision={0.5} size="small" />
+      <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+        ({totalReviews})
+      </Typography>
+    </Box>
+  );
 
   return (
     <StyledCourseCard
@@ -40,6 +88,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, variant = 'elevation', 
       content={courseDescription}
       image={courseImage}
       variant={variant}
+      footer={ratingDisplay}
       sx={sx}
       {...props}
     />
@@ -48,10 +97,12 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, variant = 'elevation', 
 
 CourseCard.propTypes = {
   course: PropTypes.shape({
+    id: PropTypes.string,
     courseTitle: PropTypes.string.isRequired,
     courseDescription: PropTypes.string.isRequired,
     courseImage: PropTypes.string, // Make image prop optional
   }).isRequired as PropTypes.Validator<{
+    id?: string;
     courseTitle: string;
     courseDescription: string;
     courseImage?: string;
