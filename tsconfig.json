@@ -2,8 +2,9 @@
   "compileOnSave": true,
   "include": [
     "src",
-    ".next/types/**/*.ts"
-, "index.ts"  ],
+    ".next/types/**/*.ts",
+    "index.ts"
+  ],
   "compilerOptions": {
     "jsx": "preserve",
     "module": "commonjs",
@@ -11,7 +12,7 @@
     "outDir": "lib",
     "sourceMap": true,
     "strict": true,
-    "target": "es2017",
+    "target": "ES2024",
     "skipLibCheck": true,
     "esModuleInterop": true,
     "noUnusedLocals": true,
@@ -26,11 +27,22 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
+    "types": [],
     "plugins": [
       {
         "name": "next"
       }
-    ]
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@/components/*": ["src/components/*"],
+      "@/features/*": ["src/features/*"],
+      "@/hooks/*": ["src/hooks/*"],
+      "@/services/*": ["src/services/*"],
+      "@/utils/*": ["src/utils/*"],
+      "@/types/*": ["src/types/*"],
+      "@/store/*": ["src/store/*"]
+    }
   },
   "exclude": [
     "node_modules"
