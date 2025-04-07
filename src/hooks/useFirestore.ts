@@ -158,18 +158,17 @@ export const useFirestore = <T extends DocumentData>(
   ) => {
     try {
       const subCollectionRef = collection(
-        db,
-        parentCollectionPath,
-        parentDocumentId,
-        subcollectionPath
+      db,
+      parentCollectionPath,
+      parentDocumentId,
+      subcollectionPath
       );
       const docRef = await addDoc(subCollectionRef, data);
       return docRef;
     } catch (error) {
       // Handle the error
       console.error(
-        `Error creating subcollection document in ${parentCollectionPath}/${parentDocumentId}/${subcollectionPath}`,
-        error
+      `Error creating subcollection document in ${parentCollectionPath}/${parentDocumentId}/${subcollectionPath}. CodeQL error: ${error}`
       );
       throw error;
     }
@@ -248,3 +247,30 @@ const getSchemaForCollection = (collectionName: string) => {
       throw new Error(`No schema defined for collection: ${collectionName}`);
   }
 };
+
+const useFirestoreCollectionWithLimit = (path: string, initialLimit = 10) => {
+  const [limit, setLimit] = useState(initialLimit);
+  const [data, setData] = useState<DocumentData[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const querySnapshot = await getDocs(query(collection(db, path), limit(limit)));
+        const fetchedData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setData(fetchedData);
+      } catch (error) {
+        console.error("Error fetching data: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [path, limit]);
+
+  return { data, loading, setLimit };
+};
+
+export { useFirestoreCollectionWithLimit };
