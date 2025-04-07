@@ -8,7 +8,10 @@
     "shell": "npm run build && firebase functions:shell",
     "start": "node lib/index.js",
     "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "deploy:functions": "cd functions && npm run build && cd .. && firebase deploy --only functions",
+    "deploy:hosting": "npm run build && firebase deploy --only hosting",
+    "deploy:rules": "firebase deploy --only firestore:rules,storage:rules"
   },
   "engines": {
     "node": "18"
@@ -24,7 +27,8 @@
     "express": "^4.21.2",
     "firebase-admin": "^12.1.0",
     "firebase-functions": "^5.0.0",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "firebase": "^11.6.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.12.0",
