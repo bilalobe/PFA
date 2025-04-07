@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
 import { List, ListItem, ListItemText, TextField, Button, Box } from '@mui/material';
-import { useFirestore, FirestoreHook } from '../../hooks/useFirestore';
+import { useFirestore } from '../../hooks/useFirestore';
 import { useAuth } from '../../hooks/useAuth'; 
 import { collection, addDoc, serverTimestamp, query, orderBy, DocumentData } from 'firebase/firestore'; 
 import { db } from '../../firebaseConfig';
 import { aiApi } from '../../utils/api'; 
 import { ChatbotProps } from '../../interfaces/props';
+
+// Define the type for useFirestore hook return value
+interface FirestoreQueryResult<T> {
+  data: T | null;
+  loading: boolean;
+  error: Error | null;
+}
 
 const Chatbot: React.FC<ChatbotProps> = ({ }) => {
   const { user } = useAuth();
@@ -13,7 +20,8 @@ const Chatbot: React.FC<ChatbotProps> = ({ }) => {
   const chatMessagesRef = collection(db, 'chatMessages');
   const chatMessagesQuery = query<DocumentData, DocumentData>(chatMessagesRef, orderBy('timestamp', 'asc'));
   
-  const { data: messages, loading, error } = useFirestore(chatMessagesQuery.toString()) as FirestoreHook<DocumentData[]>;
+  // Use the proper type definition
+  const { data: messages, loading, error } = useFirestore(chatMessagesQuery.toString()) as FirestoreQueryResult<DocumentData[]>;
 
   const [userInput, setUserInput] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -51,7 +59,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ }) => {
     <Box>
       {/* Display Chat Messages */}
       <List>
-        {messages?.map((message: DocumentData, index: number) => ( // Use 'any' for message type
+        {messages?.map((message: DocumentData, index: number) => (
           <ListItem key={index}>
             <ListItemText
               primary={message.message}
@@ -68,7 +76,7 @@ const Chatbot: React.FC<ChatbotProps> = ({ }) => {
 
       {/* Handle Error State */}
       {error && (
-        <Box>Error: {(error as any).message}</Box>
+        <Box>Error: {error.message}</Box>
       )}
 
       {/* Input Area and Button */}
