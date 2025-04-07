@@ -1,6 +1,5 @@
-// src/store/hooks.ts
 import { authStore } from './features/auth/authStore';
-import { courseStore } from './features/courses/courseStore';
+import { courseStore } from './features/courses/courseStore.ts';
 import { liveSessionStore } from './features/liveSessions/liveSessionStore';
 import { quizStore } from './features/quizzes/quizStore';
 import { forumStore } from './features/forums/forumStore';
