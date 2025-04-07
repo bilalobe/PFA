@@ -47,6 +47,36 @@ export interface ModuleData {
     [key: string]: any;
 }
 
+// CourseFilter for API queries
+export interface CourseFilter {
+    category?: string;
+    level?: string;
+    duration?: string;
+    price?: string;
+    sortBy: string;
+    instructor?: string;
+    language?: string;
+    format?: string;
+    featured?: boolean;
+}
+
+// Search interfaces
+export interface SearchResult<T> {
+    hits: T[];
+    page: number;
+    hitsPerPage: number;
+    nbHits: number;
+    nbPages: number;
+    processingTimeMS: number;
+    query: string;
+}
+
+export interface VectorSearchResult<T> {
+    result: T;
+    score: number;
+    vector?: number[];
+}
+
 // Quiz Data Interfaces
 export interface Quiz {
     id: string;
@@ -161,11 +191,12 @@ export interface Comment {
 // Enrollment Data Interface
 export interface Enrollment {
     id: string;
+    enrolledAt: Date | null;
     course: string;
     student: string;
-    enrolledAt: Timestamp;
     completedModules: string[];
-    [key: string]: any;
+    progress?: number;
+    lastActivity?: Date;
 }
 
 export interface EnrollmentData {
@@ -313,6 +344,53 @@ export interface NotificationPreferences {
     token?: string; // FCM token for push notifications
 }
 
+// Gamification interfaces
+export interface UserAchievement {
+    id: string;
+    userId: string;
+    achievementId: string;
+    unlockedAt: Timestamp;
+    displayed: boolean;
+}
+
+export interface UserBadge {
+    id: string;
+    userId: string;
+    badgeId: string;
+    earnedAt: Timestamp;
+}
+
+export interface Badge {
+    id: string;
+    name: string;
+    description: string;
+    imageUrl: string;
+    category: string;
+    requirements: string[];
+    points: number;
+}
+
+export interface Achievement {
+    id: string;
+    name: string;
+    description: string;
+    imageUrl: string;
+    category: string;
+    requirements: string[];
+    points: number;
+    tier: 'bronze' | 'silver' | 'gold' | 'platinum';
+}
+
+export interface LeaderboardEntry {
+    userId: string;
+    displayName: string;
+    photoURL?: string;
+    points: number;
+    rank: number;
+    badges?: number;
+    lastActive?: Timestamp;
+}
+
 // Live Session Data Interfaces
 export interface LiveSessionPollOption {
     id: string;
@@ -377,4 +455,54 @@ export interface SessionFeedback {
     comment: string;
     shareWithInstructor: boolean;
     createdAt: Timestamp;
+}
+
+// AI recommendation interfaces
+export interface RecommendationSettings {
+    userId: string;
+    preferredTopics: string[];
+    difficultyLevel: 'beginner' | 'intermediate' | 'advanced';
+    learningStyle: 'visual' | 'auditory' | 'reading' | 'kinesthetic';
+    timeAvailability: number; // minutes per week
+    enablePersonalization: boolean;
+}
+
+export interface CourseRecommendation {
+    courseId: string;
+    score: number;
+    reason: string;
+    matchFactors: {
+        contentMatch: number;
+        skillLevel: number;
+        popularity: number;
+        completionRate: number;
+    };
+}
+
+export interface AIStudyPlan {
+    id: string;
+    userId: string;
+    courseId: string;
+    generatedAt: Timestamp;
+    timeline: AIStudySession[];
+    estimatedCompletionTime: number; // in minutes
+    difficulty: 'easy' | 'moderate' | 'challenging';
+}
+
+export interface AIStudySession {
+    title: string;
+    description: string;
+    moduleIds: string[];
+    duration: number; // minutes
+    priority: number;
+    suggestedDate?: Timestamp;
+}
+
+// Search context for the search API
+export interface SearchContext {
+    userId: string;
+    searchHistory: string[];
+    filters?: CourseFilter;
+    page?: number;
+    hitsPerPage?: number;
 }
