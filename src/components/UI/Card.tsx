@@ -25,7 +25,15 @@ const StyledCard = styled(Card)<{ variant: 'outlined' | 'elevation' }>(({ theme,
   }),
 }));
 
-const CustomCard: React.FC<CustomCardProps> = ({ title, content, image, variant = 'elevation', sx, ...props }) => {
+const CustomCard: React.FC<CustomCardProps> = ({ 
+  title, 
+  content, 
+  image, 
+  footer, 
+  variant = 'elevation', 
+  sx, 
+  ...props 
+}) => {
   const theme = useTheme();
 
   return (
@@ -46,6 +54,12 @@ const CustomCard: React.FC<CustomCardProps> = ({ title, content, image, variant 
           <Typography variant="body2" color="text.secondary">
             {content}
           </Typography>
+          {footer && (
+            <>
+              <div style={{ height: '8px' }} /> {/* Spacer */}
+              {footer}
+            </>
+          )}
         </CardContent>
       </CardActionArea>
     </StyledCard>
@@ -56,6 +70,7 @@ CustomCard.propTypes = {
   title: PropTypes.string.isRequired,
   content: PropTypes.string.isRequired,
   image: PropTypes.string, // Make image prop optional
+  footer: PropTypes.node, // Add footer content (like ratings)
   variant: PropTypes.oneOf(['outlined', 'elevation']), // Allow different variants
   sx: PropTypes.object,
 };
