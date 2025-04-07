@@ -17,6 +17,7 @@ import { collection, getDocs, orderBy, query, where, limit, startAfter, Document
 import { db } from '../../firebaseConfig';
 import CourseCard from '../../components/Courses/CourseCard';
 import { Course } from '../../interfaces/types';
+import MetaTags from '../../components/SEO/MetaTags';
 
 const CoursesPage: React.FC = () => {
   const [courses, setCourses] = useState<Course[]>([]);
@@ -117,57 +118,66 @@ const fetchCourses = useCallback(async () => {
   }
 
   return (
-    <Box>
-      <Typography variant="h4" align="center" gutterBottom>
-        Discover Our Courses
-      </Typography>
+    <>
+      <MetaTags 
+        title="Discover Online Courses | PFA E-Learning Platform"
+        description="Browse our extensive catalog of online courses. Find the perfect learning path for your goals with personalized recommendations."
+        keywords="online courses, e-learning, education, professional development, online education"
+      />
+      
+      <Box sx={{ maxWidth: 1200, mx: 'auto', px: 2, py: 4 }}>
+        <Typography variant="h4" align="center" gutterBottom>
+          {/* Title optimized for SEO and user discovery */}
+          Discover Our Courses
+        </Typography>
 
-      {/* Search Bar */}
-      <form onSubmit={handleSubmit(handleSearchSubmit)}>
-        <TextField
-          {...register('searchQuery')}
-          placeholder="Search for Courses"
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
-            endAdornment: (
-              <InputAdornment position="end">
-                {searchQuery && (
-                  <IconButton onClick={handleClearSearch} edge="end">
-                    <ClearIcon />
-                  </IconButton>
-                )}
-              </InputAdornment>
-            ),
-          }}
-          fullWidth
-          sx={{ mb: 2 }}
-        />
-      </form>
-
-      {/* Course Grid */}
-      <Grid container spacing={2} justifyContent="center">
-        {courses.map((course: Course) => (
-          <Grid item key={course.id} xs={12} sm={6} md={4}>
-            <CourseCard course={course} />
-          </Grid>
-        ))}
-      </Grid>
-
-      {/* Pagination */}
-      {courses.length >= coursesPerPage && (
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-          <Pagination
-            count={Math.ceil(courses.length / coursesPerPage)}
-            page={currentPage}
-            onChange={handlePageChange}
+        {/* Search Bar: Allows users to refine discovery within the platform */}
+        <form onSubmit={handleSubmit(handleSearchSubmit)}>
+          <TextField
+            {...register('searchQuery')}
+            placeholder="Search for Courses"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  {searchQuery && (
+                    <IconButton onClick={handleClearSearch} edge="end">
+                      <ClearIcon />
+                    </IconButton>
+                  )}
+                </InputAdornment>
+              ),
+            }}
+            fullWidth
+            sx={{ mb: 2 }}
           />
-        </Box>
-      )}
-    </Box>
+        </form>
+
+        {/* Course Grid: Displays courses found via search or direct navigation */}
+        <Grid container spacing={2} justifyContent="center">
+          {courses.map((course: Course) => (
+            <Grid item key={course.id} xs={12} sm={6} md={4}>
+              <CourseCard course={course} />
+            </Grid>
+          ))}
+        </Grid>
+
+        {/* Pagination */}
+        {courses.length >= coursesPerPage && (
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+            <Pagination
+              count={Math.ceil(courses.length / coursesPerPage)}
+              page={currentPage}
+              onChange={handlePageChange}
+            />
+          </Box>
+        )}
+      </Box>
+    </>
   );
 };
 

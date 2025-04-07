@@ -8,8 +8,6 @@ import { Box, TextField, Button, Typography, List, ListItem, ListItemText, Circu
 import { ChatMessage } from '../../../types'; // Make sure you have this in your types
 import { useMemo, useCallback } from 'react';
 
-// ... (Other imports for styling)
-
 const CourseChatPage = () => {
   const router = useRouter();
   const { courseId } = router.query;

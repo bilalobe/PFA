@@ -15,6 +15,8 @@ import { enrollmentApi } from '../../utils/api';
 import CourseInfo from '../../components/Courses/CourseInfo';
 import ModuleList from '../../components/Courses/ModuleList';
 import ResourceList from '../../components/Resources/ResourceList';
+import ReviewsSection from '../../components/Courses/ReviewsSection';
+import StudentSessionViewer from '../../components/LiveSession/StudentSessionViewer'; // Import the component
 import { useEffect, useState, useMemo } from 'react';
 
 const CourseDetailsPage: React.FC = () => {
@@ -151,57 +153,79 @@ const CourseDetailsPage: React.FC = () => {
   const showUnenrollmentButton = user && isEnrolled;
 
   return (
-    <Box>
+    <Box sx={{ maxWidth: 1200, mx: 'auto', px: 2, py: 4 }}>
       <Typography variant="h4" align="center" gutterBottom>
         {course.title}
       </Typography>
 
       <CourseInfo courses={course} />
 
-      <Divider sx={{ my: 2 }} />
+      <Divider sx={{ my: 3 }} />
+      
+      <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+        {showEnrollmentButton && (
+          <Button variant="contained" onClick={handleEnroll} size="large">
+            Enroll in Course
+          </Button>
+        )}
+
+        {showUnenrollmentButton && (
+          <Button variant="outlined" onClick={handleUnenroll} size="large" sx={{ mr: 2 }}>
+            Unenroll from Course
+          </Button>
+        )}
+      </Box>
+
+      {enrollmentError && (
+        <Alert severity="error" sx={{ my: 2 }}>{enrollmentError}</Alert>
+      )}
 
       {isEnrolled && modules && (
-        <ModuleList modules={modules as Module[]} completedModules={enrollment?.completedModules || []} onModuleComplete={function (moduleId: string): void {
-                  throw new Error('Function not implemented.');
-              } } />
+        <Box sx={{ my: 4 }}>
+          <Typography variant="h5" gutterBottom>Course Content</Typography>
+          <ModuleList modules={modules as Module[]} completedModules={enrollment?.completedModules || []} onModuleComplete={function (moduleId: string): void {
+                    throw new Error('Function not implemented.');
+                } } />
+        </Box>
       )}
 
       {isEnrolled && resources && typeof courseId === 'string' && (
-        <ResourceList moduleId={courseId} />
+        <Box sx={{ my: 4 }}>
+          <Typography variant="h5" gutterBottom>Resources</Typography>
+          <ResourceList moduleId={courseId} />
+        </Box>
+      )}
+
+      {/* Live Sessions Section (for enrolled students) */}
+      {isEnrolled && typeof courseId === 'string' && (
+        <StudentSessionViewer courseId={courseId} />
       )}
 
       {/* Show the Mark Course Complete button only to enrolled students */}
       {user && user.userType === 'student' && isEnrolled && !isCourseComplete && (
-        <Button variant="contained" onClick={handleMarkCourseComplete}>
-          Mark Course as Complete
-        </Button>
+        <Box sx={{ display: 'flex', justifyContent: 'center', my: 3 }}>
+          <Button variant="contained" color="success" onClick={handleMarkCourseComplete}>
+            Mark Course as Complete
+          </Button>
+        </Box>
       )}
 
       {/* Display a completion message or a certificate download button (or both!) 
          if the course is complete. */}
       {isCourseComplete && (
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="h6" align="center" gutterBottom>
+        <Box sx={{ mt: 3, p: 3, bgcolor: 'success.light', borderRadius: 2, textAlign: 'center' }}>
+          <Typography variant="h6" gutterBottom>
             Congratulations! You've Completed {course.title}.
           </Typography>
-          {/* ... Optional: Certificate download button or other rewards ...  */}
+          <Button variant="contained">Download Certificate</Button>
         </Box>
       )}
-
-      {showEnrollmentButton && (
-        <Button variant="contained" onClick={handleEnroll}>
-          Enroll in Course
-        </Button>
-      )}
-
-      {showUnenrollmentButton && (
-        <Button variant="contained" onClick={handleUnenroll}>
-          Unenroll from Course
-        </Button>
-      )}
-
-      {enrollmentError && (
-        <Alert severity="error">{enrollmentError}</Alert>
+      
+      <Divider sx={{ my: 4 }} />
+      
+      {/* Reviews Section */}
+      {typeof courseId === 'string' && (
+        <ReviewsSection courseId={courseId} />
       )}
     </Box>
   );
