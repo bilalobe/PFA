@@ -1,229 +1,256 @@
 # PFA - Your Personalized E-Learning Adventure 🚀
 
-**PFA** is an open-source e-learning platform designed to empower learners and educators.  Discover a universe of knowledge through personalized learning paths, interactive modules, and engaging AI-powered features. Soon, you'll experience seamless real-time collaboration with Firebase's powerful technology! 
+**PFA** is an open-source e-learning platform designed to empower learners and educators through personalized learning paths, interactive modules, and Firebase-powered real-time features.
 
-### Badges 👇 
-[![Version](https://img.shields.io/badge/version-v1.0.0-green)](https://img.shields.io/badge/version-v1.0.0-green) 
-[![Repo Size Octocat](https://img.shields.io/github/repo-size/bilalobe/PFA)](https://img.shields.io/github/repo-size/bilalobe/PFA)
-[![License: Unlicense](https://img.shields.io/badge/license-Unlicense-blue.svg)](https://unlicense.org/)
-[![Last Commit](https://img.shields.io/github/last-commit/bilalobe/PFA)](https://img.shields.io/github/last-commit/bilalobe/PFA) 
+### Badges
+[![Version](https://img.shields.io/badge/version-v1.0.0-green)](https://img.shields.io/badge/version-v1.0.0-green)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Firebase](https://img.shields.io/badge/powered%20by-Firebase-FFCA28?logo=firebase)](https://firebase.google.com/)
+[![Next.js](https://img.shields.io/badge/built%20with-Next.js-000000?logo=next.js)](https://nextjs.org/)
 
-## ✨ Features That Spark _Curiosity_
+## 🏛️ System Context (C4 Model)
 
-- **Tailored Learning:** Discover a universe of knowledge with courses tailored to your unique interests and skills.
-- **Interactive Modules:** Dive deep into captivating content with engaging videos, challenging quizzes, and rich resources.
-- **Expertly Crafted Courses:** Explore a growing galaxy of courses created by passionate educators, each a journey of discovery.
-- **Connect and Collaborate:** Spark conversations and share insights with fellow learners in our vibrant forum, a constellation of knowledge-seekers. 
-- **Track Your Progress:**  Chart your course through the educational cosmos, monitoring your progress and celebrating milestones along the way. 
-- **AI-Powered Enhancements:**  Experience a smarter learning journey guided by the wisdom of the algorithmic stars:
-  
-    - **Sentiment Analysis:**  Our AI deciphers the emotions behind forum posts and quizzes, helping to foster positive interactions.
-    - **Language Detection:**  Language barriers dissolve as our AI automatically identifies and bridges linguistic differences. 
-    - **Chatbot:**  Seek guidance from our friendly AI chatbot, a beacon of knowledge available 24/7.
-    - **Personalized Recommendations:**  Uncover hidden gems of learning with personalized course suggestions, curated just for you.
-    - **Translator:**  Unlock a universe of knowledge with our live translation facility, expanding your horizons beyond language boundaries. 
+This diagram shows the high-level context of the PFA platform, its users, and key external system dependencies.
 
-## 🔥 Now with Firebase: Elevating the Learning Experience 
+```mermaid
+C4Context
+  title System Context diagram for PFA E-Learning Platform
 
-PFA now harnesses the power of Firebase to deliver an even more seamless, engaging, and scalable learning platform. Here's how Firebase elevates the PFA experience:
+  Person(student, "Student", "Learns using the platform")
+  Person(teacher, "Teacher/Mentor", "Creates courses and manages students")
+  Person(admin, "Administrator", "Manages users and platform content")
 
-**Effortless User Management with Firebase Authentication**
+  System_Ext(firebase, "Firebase", "Backend services (Auth, DB, Storage, Functions, Hosting, FCM)")
+  System_Ext(google_ai, "Google AI (Gemini)", "Provides AI features (recommendations, analysis)")
 
-* **Simplified Login and Registration:**  Users can effortlessly create accounts and log in using their preferred social media or email credentials.
-* **Secure Authentication:** Firebase handles the complexities of user authentication, ensuring your platform remains secure.
+  System(pfa_platform, "PFA E-Learning Platform", "Provides personalized learning experiences")
 
-**Real-time Collaboration with Firebase Firestore** soon =)
+  Rel(student, pfa_platform, "Uses", "HTTPS/WebSockets")
+  Rel(teacher, pfa_platform, "Uses", "HTTPS/WebSockets")
+  Rel(admin, pfa_platform, "Uses", "HTTPS")
 
-* **Instant Updates:**  Experience real-time updates in forums, chat, and progress tracking, fostering a dynamic and connected learning environment.
-* **Scalable Database:** Firebase Firestore effortlessly scales to accommodate your growing community of learners.
+  Rel(pfa_platform, firebase, "Uses", "Firebase SDK/API")
+  Rel(pfa_platform, google_ai, "Uses", "API")
 
-**Rich Media Storage with Firebase Storage**
+  UpdateRelStyle(student, pfa_platform, $textColor="white", $lineColor="grey", $offsetX="-40")
+  UpdateRelStyle(teacher, pfa_platform, $textColor="white", $lineColor="grey", $offsetY="-60")
+  UpdateRelStyle(admin, pfa_platform, $textColor="white", $lineColor="grey", $offsetX="40")
+  UpdateRelStyle(pfa_platform, firebase, $textColor="white", $lineColor="grey", $offsetY="40")
+  UpdateRelStyle(pfa_platform, google_ai, $textColor="white", $lineColor="grey", $offsetY="60")
 
-* **Secure File Uploads:**  Users can easily share images, videos, and other content, enriching the learning experience.
-* **Optimized Storage:** Firebase Storage handles file management and delivery, ensuring optimal performance.
+```
 
-**Personalized Engagement with Firebase Cloud Messaging**
+## ✨ Platform Features
 
-* **Targeted Notifications:**  Keep learners informed and engaged with personalized push notifications about course updates, announcements, and more.
-* **Enhanced Communication:**  Foster a sense of community and encourage participation through timely and relevant notifications.
+### For Students
+- **Sign up & Sign in** - Secure authentication with multiple provider options
+- **Search** - Find relevant courses based on interests and skill level
+- **Notifications** - Stay updated with course changes and announcements
+- **Interactive Dashboard** - Track progress and manage enrolled courses
+- **Course Management** - Enroll in or drop courses with ease
+- **Assessment System** - Schedule/reschedule tests to fit your learning pace
+- **Performance Analytics** - Review your learning journey with detailed metrics
+- **Rating and Reviews** - Share feedback with the community
 
-**Blazing-Fast Deployment with Firebase Hosting**
+### For Teachers/Mentors
+- **Course Management** - Create and update courses with modular content
+- **Resource Uploads** - Share learning materials in various formats
+- **Assessment Tools** - Create quizzes and grade student work
+- **Interactive Forums** - Engage with students through discussions
+- **Live Sessions** - Host real-time teaching sessions
+- **Certification** - Approve course completion for students
 
-* **Effortless Deployment:**  Deploy your frontend with a single command, simplifying the deployment process and reducing time to market.
-* **Global Content Delivery:**  Firebase Hosting leverages a global CDN to deliver your platform with lightning speed to learners worldwide.
+### For Administrators
+- **User Management** - Oversee student and teacher accounts
+- **Course Oversight** - Monitor and manage platform content
+- **Push Notifications** - Send targeted announcements
+- **Analytics Dashboard** - Generate reports on platform usage and performance
+- **Moderation Tools** - Maintain community standards
 
-**And More!**
+### AI-Powered Features
+- **Sentiment Analysis** - Analyze forum posts to maintain positive community interactions
+- **Study Topic Suggestions** - Get AI-generated learning recommendations (via Genkit Flows)
+- **Language Detection** - Automatically identify content language
+- **Chatbot Assistant** - 24/7 help for common questions
+- **Personalized Recommendations** - AI-curated course suggestions
+- **Vector Search** - Enhanced course discovery using embeddings
 
-Firebase seamlessly integrates with PFA, unlocking a universe of possibilities for future enhancements and features.
+## 🔥 Firebase Integration
 
-## 🚀 Launch Your Learning Journey
-  
-### Prerequisites  
-  
-- Python 3.9 or higher  
-- Node.js and npm  
-- PostgreSQL (highly recommended)  
-- A virtual environment (recommended)  
+PFA leverages Firebase's powerful features to create a seamless learning experience:
+
+- **Authentication** - Multi-provider login with secure role management
+- **Firestore Database** - Real-time data synchronization for instant updates
+- **Storage** - Secure file management for course resources
+- **Cloud Functions** - Serverless backend for AI features (Genkit Flows), notifications, and background tasks
+- **Cloud Messaging (FCM)** - Push notifications across devices
+- **Security Rules** - Granular access control for Firestore and Storage
+- **Hosting** - Global content delivery for the Next.js frontend
+- **Offline Mode** - Continue learning even without internet connection (via Firestore persistence and local caching)
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js v18 or higher (required by some dependencies like Genkit)
+- npm or yarn
+- Firebase CLI (logged in: `firebase login`)
+- Firebase project (Blaze plan recommended for Cloud Functions beyond free tier)
 
 ### Installation
 
-1. Clone the repository:
+1.  Clone the repository:
     ```bash
-    git clone https://github.com/bilalobe/PFA.git  
+    git clone https://github.com/yourusername/PFA.git
     cd PFA
     ```
 
-2. Create and activate a virtual environment:
-    - **Windows:**
-        ```bash
-        python -m venv env  
-        env\Scripts\activate  
-        ```  
-    - **Linux/macOS:**
-        ```bash
-        python3 -m venv env  
-        source env/bin/activate  
-        ```  
-
-3. Install dependencies:
+2.  Install frontend dependencies:
     ```bash
-    pip install -r requirements.txt  
-    cd frontend  
-    npm install  
-    cd ..  
-    ```  
+    npm install
+    ```
 
-4. Set up your database:
-    - Create a PostgreSQL database (e.g., use the `createdb` command or a GUI tool like pgAdmin):
-        ```bash
-        createdb eplatform
+3.  Install backend dependencies (Firebase Functions):
+    ```bash
+    cd functions
+    npm install
+    cd ..
+    ```
+
+4.  Configure Firebase:
+    *   Create a Firebase project at [firebase.google.com](https://firebase.google.com/)
+    *   Enable Authentication (Email/Password, Google, GitHub), Firestore, Storage, and Functions.
+    *   Set up Firestore in Native mode.
+    *   Add a Web App to your Firebase project.
+    *   Copy your Firebase config details into `.env.local` in the project root:
+        ```dotenv
+        # Firebase Client SDK Config
+        NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+        NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
+        NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+        NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+        NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+        NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
+
+        # Optional: Add Google AI API Key if needed directly by client
+        # NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
         ```
-    - Update database settings in `backend/django/settings.py`:
-        ```python
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': 'eplatform',
-                'USER': 'your_database_user',
-                'PASSWORD': 'your_database_password',
-                'HOST': 'localhost',
-                'PORT': '5432',
-            }
-        }
-        ```  
+    *   **Important:** Ensure your Firebase Functions have access to Google AI services. This might involve enabling necessary APIs (like Vertex AI or AI Platform) in your Google Cloud project associated with Firebase and potentially setting environment variables for the functions if using API keys directly (though service account permissions are generally preferred).
 
-5. Apply migrations:
-    ```bash
-    python manage.py makemigrations  
-    python manage.py migrate  
-    ```  
+5.  Set up Firebase Emulators (Recommended for Local Development):
+    *   Run `firebase init emulators` and select Auth, Firestore, Functions, Storage, and Pub/Sub. Choose default ports or configure as needed.
+    *   Download emulators if prompted.
 
-6. Create a superuser account:
-    ```bash
-    python manage.py createsuperuser  
-    ```  
+6.  Start the development server and emulators:
+    *   For a clean start: `npm run emulators`
+    *   For development with seeded data (if you've run `npm run emulators:export` before): `npm run emulators:seeded`
+    *   In a separate terminal, start the Next.js app: `npm run dev`
 
-7. Start the development servers:
-    - **Backend:**
-        ```bash
-        python manage.py runserver  
-        ```
-    - **Frontend:**  
-        Open a new terminal window and run:
-        ```bash
-        cd frontend  
-        npm start  
-        ```  
+7.  Visit [http://localhost:3000](http://localhost:3000) to see your app. Emulator UI is usually at [http://localhost:4000](http://localhost:4000).
 
-8. Access your platform:  
-    Open your web browser and visit [http://localhost:8000/](http://localhost:8000/).
+## 🛠️ Technology Stack
 
+### Frontend
+- **Next.js 15** - React framework with server-side rendering & App Router
+- **React 19** - UI component library
+- **Material UI 7** - Component design system
+- **Firebase SDK (v11+)** - Firebase web client
+- **React Query (Tanstack Query v5)** - Data fetching and caching
+- **Zustand** - Lightweight state management
+- **React Hook Form** - Form handling and validation (with Zod resolver)
+- **TipTap** - Rich text editor
 
-  
-## 🛠️ Technologies Powering PFA
+### Backend (Firebase Services)
+- **Firebase Authentication** - User management & Role-based access control (RBAC via Custom Claims)
+- **Firestore** - NoSQL database with real-time sync & offline persistence
+- **Firebase Storage** - File management for course resources
+- **Firebase Functions (Node.js)** - Serverless computing for backend logic, notifications, scheduled tasks
+- **Firebase Hosting** - Website hosting with CDN
+- **Firebase Cloud Messaging (FCM)** - Push notifications
 
-### Backend:
+### AI Integration
+- **Genkit (Firebase SDK)** - Framework for building AI flows within Firebase Functions
+- **Google AI (Gemini Models)** - Large language model integration via Genkit/Firebase Vertex AI
+- **Firebase Extensions** - Potential use for pre-built AI solutions (e.g., image resizing, translation)
+- **Vector Embeddings** - Advanced search capabilities (potentially via Firestore Vector Search or external service)
 
-- **Django:** A high-level Python web framework known for its speed, security, and scalability.
-  - Features:
-    - Object-Relational Mapper (ORM): Easy database interactions.
-    - Admin Interface:  A powerful command center for data management.
-    - Templating Engine: Dynamic HTML rendering made easy.
-    - Security: Built-in protection against common vulnerabilities.
-    - Channels: Real-time communication using WebSockets.
-    
-- **Django REST Framework (DRF):** A powerful toolkit for building REST APIs with Django.
-  - Features:
-    - Serializers: Data conversion between Python and JSON.
-    - ViewSets: Simplified API view creation.
-    - Authentication & Permissions: Control API access.
-    - API Documentation: Generate beautiful and browsable API documentation using `drf_spectacular`.
+## ☁️ Deployment Tips
 
-- **PostgreSQL:** A robust, open-source relational database, the bedrock of your data universe.
-  - Features:
-    - ACID Compliant: Ensures your data remains valid and consistent, even amidst cosmic storms.
-    - Advanced Data Types: Handles JSON, arrays, and more with galactic ease.
-    - Scalability & Performance: Effortlessly manage expanding datasets as your learning universe grows.
+Deploying the PFA platform involves deploying the Next.js frontend and the Firebase backend components.
 
-- **Celery:** A distributed task queue, the silent workhorse behind the scenes.
-  - Features:
-    - Asynchronous Processing: Offloads time-consuming tasks to background workers, keeping your platform responsive and nimble.
-    - Scheduling:  Use Celery Beat to schedule tasks with the precision of a cosmic clock.
+### 1. Firebase Backend Deployment
+   - **Firestore Security Rules**: Deploy your rules using `firebase deploy --only firestore:rules`. **Crucially, test these thoroughly using the emulator or Firestore simulators before deploying to production.** Ensure rules correctly enforce authentication and role-based access.
+   - **Storage Security Rules**: Deploy using `firebase deploy --only storage:rules`. Test rules to ensure users can only upload/download appropriate files.
+   - **Cloud Functions**:
+     - Ensure your functions code (`functions/src/index.ts`) is built (`cd functions && npm run build`).
+     - Deploy using `firebase deploy --only functions`.
+     - **Environment Variables**: Configure any necessary environment variables for functions (e.g., API keys, service configurations) using `firebase functions:config:set service.key="VALUE"`. Access them in your code via `functions.config().service.key`. **Do not commit secrets directly into code.**
+     - **IAM Permissions**: Ensure the service account used by your functions has the necessary permissions (e.g., to access Firestore, Storage, Google AI APIs like Vertex AI).
+     - **Regions**: Specify function regions for better performance and cost management (`.runWith({ regions: ['your-region'] })`).
+     - **Genkit Flows**: Ensure Genkit flows are correctly defined and exported. They deploy as standard HTTPS callable functions.
 
-- **Redis:** An in-memory data store, like a comet streaking through your system, providing blazing-fast caching and message brokering.
+### 2. Next.js Frontend Deployment
+   - **Build**: Create a production build of your Next.js app: `npm run build`.
+   - **Firebase Hosting**:
+     - Configure firebase.json to point to your Next.js build output (typically .next directory if using standard SSR/ISR, or `out` if using static export). For App Router and SSR/ISR with Firebase Hosting, you might need specific rewrite rules to direct requests to a Cloud Function or Cloud Run instance serving the Next.js app.
+     - Example firebase.json snippet for hosting a static export:
+       ```json
+       {
+         "hosting": {
+           "public": "out", // Or your build output directory
+           "ignore": [
+             "firebase.json",
+             "**/.*",
+             "**/node_modules/**"
+           ],
+           "rewrites": [
+             {
+               "source": "**",
+               "destination": "/index.html"
+             }
+           ]
+         }
+         // ... other firebase configs
+       }
+       ```
+     - Example firebase.json for SSR with Cloud Functions (requires setting up a function to handle Next.js rendering):
+       ```json
+       {
+         "hosting": {
+           "public": "public", // Static assets folder
+           "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+           "rewrites": [
+             {
+               "source": "**",
+               "function": "nextServer" // Name of the function serving Next.js
+             }
+           ]
+         },
+         "functions": [
+           {
+             "source": "functions", // Or wherever your Next.js server function code is
+             "codebase": "default",
+             "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log"],
+             "runtime": "nodejs18" // Or your desired runtime
+           }
+         ]
+         // ... other firebase configs
+       }
+       ```
+     - Deploy using `firebase deploy --only hosting`.
+   - **Environment Variables**: Ensure your production frontend has access to the necessary `NEXT_PUBLIC_` environment variables (like Firebase config). Firebase Hosting doesn't directly support setting runtime environment variables for the frontend build itself. These need to be baked in at build time or handled if using SSR via Cloud Functions/Run.
 
-- **Sentry:** Your watchful sentinel, a real-time error tracking system that helps you identify and resolve issues before they become black holes.
+### 3. General Considerations
+   - **Firebase Project Plan**: Ensure your Firebase project is on the Blaze (pay-as-you-go) plan to use Cloud Functions beyond the free tier limits.
+   - **Monitoring**: Set up monitoring and alerting for your Firebase services (Functions logs/errors, Firestore usage, Hosting traffic) using Google Cloud Monitoring.
+   - **Cost Management**: Be mindful of Firestore reads/writes, Function invocations, and Storage bandwidth. Set budgets and alerts in Google Cloud Billing.
+   - **Indexes**: Create necessary composite indexes in Firestore based on your query patterns. The Firebase CLI might prompt you during deployment or testing if indexes are missing.
 
-- **TextBlob:** A Python library for natural language processing (NLP), the decoder of human emotions and languages.
+## 🤝 Contributing
 
-### Frontend:
-
-- **Next.js:** A powerful React framework, the rocket fuel for your dynamic frontend experience.
-  - Features:
-    - Server-Side Rendering: Improved SEO and performance, bringing your content to the forefront of the digital cosmos.
-    - Static Site Generation: Faster load times and better scalability, ensuring your platform can handle a supernova of users.
-    - API Routes: Built-in API endpoint handling, the bridge between your frontend and backend galaxies.
-    - File-Based Routing: Simple and intuitive routing, as elegant as the orbits of planets.
-
-- **React:** A popular JavaScript library, the architect of your user interfaces.
-  - Features:
-    - Virtual DOM:  Efficient updates for stellar performance.
-    - JSX: Write HTML-like syntax in JavaScript, blurring the lines between code and design.
-    - Component-Based: Build reusable UI elements, like the building blocks of a spacecraft.
-
-- **Material-UI:** A sophisticated React UI component library based on Google's Material Design.
-  - Features:
-    - Ready-to-use and Customizable Components: A vast library of buttons, cards, dialogs, and more, ready to be styled to match your cosmic vision.
-    - Accessibility: Components designed with accessibility in mind, ensuring everyone can navigate your learning universe.
-
-- **Tailwind CSS:**  A utility-first CSS framework, your toolkit for crafting beautiful and responsive designs.
-
-- **Redux Toolkit:**  A state management library that streamlines Redux development, keeping your data in perfect harmony.
-  - Features:
-    - createSlice:  Simplifies reducer creation, making state management as smooth as a lunar landing.
-    - createAsyncThunk:  Makes handling asynchronous actions a breeze, like navigating through hyperspace.
-
-- **Axios:**  A JavaScript library for making HTTP requests, the communicator between your frontend and backend.
-
-- **Socket.IO:** A library for real-time, bidirectional communication, the language of your chat feature.
-
-### Development Tools:
-
-- **Postman:** Your trusty spacecraft for exploring and testing your APIs.
-- **VS Code:** A popular and versatile code editor, your command center for shaping code.
-- **Git:** The time machine of development, tracking your project's evolution through every commit.
-- **Docker:** A containerization platform, ensuring consistency in your deployments across different galaxies.
-- **Jest:** Your test pilot, ensuring the quality of your code through comprehensive unit tests.
-- **DRF Spectacular:**  A tool for generating exhaustive and stunning API documentation.
-
-## 🤝 Contribute to the Future of Learning
-
-We welcome contributions from passionate developers, designers, and educators! Join our mission to create a universe of knowledge where everyone can explore, learn, and grow.
-
-Fork the repository, create a branch, make your changes, and submit a pull request. Let's make PFA an even more extraordinary learning experience together!
+We welcome contributions from developers, designers, and educators! See CONTRIBUTING.md for guidelines.
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+This project is licensed under the MIT License - see the LICENSE file for details.
 
 Made with ❤️
