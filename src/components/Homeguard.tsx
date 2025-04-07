@@ -15,6 +15,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ChatIcon from '@mui/icons-material/Chat';
 import dynamic from 'next/dynamic';
+import NotificationCenter from './Layout/NotificationCenter';
 
 import 'react-chatbot-kit/build/main.css';
 
@@ -127,9 +128,13 @@ const HomeGuard: React.FC<HomeGuardProps> = ({ isAuthenticated, user }) => {
             >
               <MenuIcon />
             </IconButton>
-            <Typography variant="h6" noWrap component="div">
+            <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
               HomeGuard
             </Typography>
+            
+            {/* Add NotificationCenter component here */}
+            {isAuthenticated && <NotificationCenter />}
+            
           </Toolbar>
         </AppBar>
 
