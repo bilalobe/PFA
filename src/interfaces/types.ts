@@ -227,7 +227,27 @@ export interface Testimonial {
     name: string;
     text: string;
     avatarUrl: string;
-  }
+    rating?: number; // Optional rating from 1-5
+    date?: Timestamp; // When the testimonial was given
+    userId?: string; // Optional reference to the user who gave the testimonial
+}
+
+export interface Review {
+    id: string;
+    userId: string;
+    courseId: string;
+    rating: number; // 1-5 stars
+    title?: string;
+    content: string; // Rich text content
+    dateCreated: Timestamp;
+    dateUpdated?: Timestamp;
+    likes?: number;
+    helpful?: number;
+    approved?: boolean; // For moderation
+    reported?: boolean; // For flagging inappropriate content
+    userDisplayName?: string; // Display name of the reviewer
+    userPhotoURL?: string; // Photo URL of the reviewer
+}
 
 export interface ModerationReport {
     id: string;
@@ -237,4 +257,124 @@ export interface ModerationReport {
     actionTaken?: string;
     moderator?: string;
     [key: string]: any;
+}
+
+// Schedule Data Interfaces
+export interface Schedule {
+    id: string;
+    title: string;
+    description?: string;
+    startTime: Timestamp;
+    endTime: Timestamp;
+    courseId?: string;
+    moduleId?: string;
+    createdBy: string;
+    attendees?: string[]; 
+    type: 'lecture' | 'test' | 'assignment' | 'office-hours' | 'other';
+    location?: string; // Could be physical location or virtual meeting link
+    recurrence?: 'once' | 'daily' | 'weekly' | 'bi-weekly' | 'monthly';
+    reminderSent?: boolean;
+    color?: string; // For calendar display
+    isPublic?: boolean; // Whether this schedule is visible to all course participants
+    metadata?: Record<string, any>; // For additional custom fields
+}
+
+export interface ScheduleResponse {
+    id: string;
+    details: Schedule;
+}
+
+// Notification Data Interfaces
+export interface Notification {
+    id: string;
+    userId: string;
+    title: string;
+    body: string;
+    type: 'course' | 'chat' | 'forum' | 'schedule' | 'announcement' | 'system';
+    relatedId?: string;  // ID of related item (e.g., courseId, chatId)
+    isRead: boolean;
+    requiresAction: boolean;
+    createdAt: Timestamp;
+    image?: string;
+    link?: string;
+    data?: Record<string, any>;
+}
+
+export interface NotificationPreferences {
+    userId: string;
+    email: boolean;
+    push: boolean;
+    courseUpdates: boolean;
+    newMessages: boolean;
+    forumReplies: boolean;
+    reminders: boolean;
+    announcements: boolean;
+    marketing: boolean;
+    token?: string; // FCM token for push notifications
+}
+
+// Live Session Data Interfaces
+export interface LiveSessionPollOption {
+    id: string;
+    text: string;
+    votes: number;
+}
+
+export interface LiveSessionPoll {
+    id: string;
+    question: string;
+    options: LiveSessionPollOption[];
+    isOpen: boolean;
+    createdAt: Timestamp;
+}
+
+export interface LiveSessionParticipant {
+    userId: string;
+    displayName: string; // Denormalized for easier display
+    joinedAt: Timestamp;
+}
+
+export interface SessionRecording {
+    url: string;
+    createdAt: Timestamp;
+    title: string;
+}
+
+export interface LiveSession {
+    id: string;
+    title: string;
+    description?: string;
+    courseId: string;
+    hostId: string; // User ID of the teacher/mentor hosting
+    status: 'scheduled' | 'live' | 'ended';
+    scheduledStartTime: Timestamp;
+    actualStartTime?: Timestamp;
+    endTime?: Timestamp;
+    meetingLink?: string; // Link to external meeting service if used
+    participants?: LiveSessionParticipant[]; // Array of participants
+    activePollId?: string | null; // ID of the currently active poll
+    recordings?: SessionRecording[];
+    createdAt: Timestamp;
+    updatedAt: Timestamp;
+}
+
+export interface CourseSubscription {
+    userId: string;
+    courseId: string;
+    calendarSync: boolean;
+    emailNotifications: boolean;
+    pushNotifications: boolean;
+    createdAt: Timestamp;
+}
+
+export interface SessionFeedback {
+    id?: string;
+    sessionId: string;
+    courseId: string;
+    userId: string;
+    displayName: string;
+    rating: number | null;
+    comment: string;
+    shareWithInstructor: boolean;
+    createdAt: Timestamp;
 }
