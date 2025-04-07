@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import {
-    AppBar, Box, CircularProgress, Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography
+    AppBar, Box, CircularProgress, Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Toolbar, Typography, Card, CardHeader, CardContent, CardActions, Button
 } from '@mui/material';
 import {
     AccountCircle as AccountCircleIcon, Chat as ChatIcon, Forum as ForumIcon, Home as HomeIcon,
-    Logout as LogoutIcon, Menu as MenuIcon, School as SchoolIcon
+    Logout as LogoutIcon, Menu as MenuIcon, School as SchoolIcon, RateReview as RateReviewIcon
 } from '@mui/icons-material';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
@@ -55,6 +55,10 @@ const DrawerContent = ({ navigate, toggleChatbotVisibility }: { navigate: (path:
         text: 'Profile', icon: <AccountCircleIcon />, href: '/profile',
         action: undefined
     },
+    {
+        text: 'Reviews', icon: <RateReviewIcon />, href: '/reviews', roles: ['student', 'teacher'],
+        action: undefined
+    },
     { text: 'Logout', icon: <LogoutIcon />, href: '#', action: handleLogout },
     { text: 'Chatbot', icon: <ChatIcon />, href: '#', action: toggleChatbotVisibility },
   ];
@@ -83,6 +87,46 @@ const DrawerContent = ({ navigate, toggleChatbotVisibility }: { navigate: (path:
         );
       })}
     </List>
+  );
+};
+
+const UpcomingSessionsCard = () => {
+  const [upcomingSessions, setUpcomingSessions] = useState([]);
+  
+  useEffect(() => {
+    // Fetch upcoming sessions for this student
+    const fetchUpcomingSessions = async () => {
+      // Your Firestore query logic here
+    };
+    
+    fetchUpcomingSessions();
+  }, []);
+  
+  return (
+    <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <CardHeader title="Upcoming Live Sessions" />
+      <CardContent sx={{ flexGrow: 1 }}>
+        {upcomingSessions.length === 0 ? (
+          <Typography variant="body2" color="text.secondary">
+            No upcoming sessions scheduled
+          </Typography>
+        ) : (
+          <List>
+            {upcomingSessions.slice(0, 3).map(session => (
+              <ListItem key={session.id}>
+                <ListItemText 
+                  primary={session.title}
+                  secondary={session.scheduledStartTime.toDate().toLocaleString()}
+                />
+              </ListItem>
+            ))}
+          </List>
+        )}
+      </CardContent>
+      <CardActions>
+        <Button size="small" component={Link} href="/sessions">View All Sessions</Button>
+      </CardActions>
+    </Card>
   );
 };
 
@@ -167,6 +211,7 @@ const Dashboard: React.FC = () => {
         <AutoCorrect />
         <TextSummarization />
         <QuestionGeneration />
+        <UpcomingSessionsCard />
         {chatbotVisible && <div>Chatbot Component</div>}
       </Box>
     </Box>
